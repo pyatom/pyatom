@@ -1,9 +1,9 @@
-=======================================
-PyATOM - Automated Testing on Macintosh
-=======================================
+=================================
+PyATOM - Automated Testing on Mac
+=================================
 Introduction
 ============
-We are pleased to introduce the first Python library to fully enable GUI testing of Macintosh applications via the Apple Accessibility API. This library was created out of desperation. Existing tools such as using appscript to send messages to accessibility objects are painful to write and slow to use. PyATOM has direct access to the API. It's fast and easy to use to write tests.
+We are pleased to introduce the first Python library to fully enable GUI testing of Mac applications via the Apple Accessibility API. This library was created out of desperation. Existing tools such as using appscript to send messages to accessibility objects are painful to write and slow to use. PyATOM has direct access to the API. It's fast and easy to use to write tests.
 
 Getting started
 ===============

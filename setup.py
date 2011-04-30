@@ -45,7 +45,7 @@ setup (
    author = 'The PyATOM Team',
    author_email = 'pyatom-dev@lists.pyatom.com',
    url = 'http://pyatom.com',
-   description = ("Automated Testing on Macintosh - test GUI applications "
+   description = ("Automated Testing on Mac - test GUI applications "
                   "written in Cocoa by using Apple's Accessibility API"),
    license = 'GPLv2',
    long_description = read('README.rst'),
