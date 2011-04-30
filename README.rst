@@ -62,7 +62,7 @@ Objects are fairly versatile. You can get a list of supported attributes and act
  >>> close.getActions()
  [u'Press']
 
-Performing an action is as natural as:
+Performing an action is as natural as::
 
  >>> close.Press()
 
