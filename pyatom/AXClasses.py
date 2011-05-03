@@ -154,11 +154,13 @@ class BaseAXUIElement(_a11y.AXUIElement):
          return
       self.eventList.append((event, args))
 
-   def _addKeyToQueue(self, keychr, modFlags=0):
+   def _addKeyToQueue(self, keychr, modFlags=0, globally=False):
       ''' Add keypress to queue
 
           Parameters: key character or constant referring to a non-alpha-numeric
                       key (e.g. RETURN or TAB)
+                      modifiers
+                      global or app specific
           Returns: None or raise ValueError exception
       '''
       # Awkward, but makes modifier-key-only combinations possible
@@ -181,8 +183,8 @@ class BaseAXUIElement(_a11y.AXUIElement):
       appPsn = self._getPsnForPid(self._getPid())
 
       if (keychr not in self.keyboard):
-         self._clearEventQueue()
-         raise ValueError('Key %s not found in keyboard layout' % keychr)
+          self._clearEventQueue()
+          raise ValueError('Key %s not found in keyboard layout' % keychr)
 
       # Press the key
       keyDown = Quartz.CGEventCreateKeyboardEvent(None,
@@ -198,17 +200,23 @@ class BaseAXUIElement(_a11y.AXUIElement):
       Quartz.CGEventSetFlags(keyUp, modFlags)
 
       # Post the event to the given app
-      self._queueEvent(Quartz.CGEventPostToPSN, (appPsn, keyDown))
-      self._queueEvent(Quartz.CGEventPostToPSN, (appPsn, keyUp))
+      if not globally:
+          self._queueEvent(Quartz.CGEventPostToPSN, (appPsn, keyDown))
+          self._queueEvent(Quartz.CGEventPostToPSN, (appPsn, keyUp))
+      else:
+          self._queueEvent(Quartz.CGEventPost, (0, keyDown))
+          self._queueEvent(Quartz.CGEventPost, (0, keyUp))
 
-   def _sendKey(self, keychr, modFlags=0):
+   def _sendKey(self, keychr, modFlags=0, globally=False):
       ''' Send one character with no modifiers
 
           Parameters: key character or constant referring to a non-alpha-numeric
                       key (e.g. RETURN or TAB)
+                      modifier flags, 
+                      global or app specific
           Returns: None or raise ValueError exception
       '''
-      self._addKeyToQueue(keychr, modFlags)
+      self._addKeyToQueue(keychr, modFlags, globally=globally)
       self._postQueuedEvents()
 
    def _sendKeys(self, keystr):
@@ -220,10 +228,10 @@ class BaseAXUIElement(_a11y.AXUIElement):
       for nextChr in keystr:
          self._sendKey(nextChr)
 
-   def _pressModifiers(self, modifiers, pressed=True):
+   def _pressModifiers(self, modifiers, pressed=True, globally=False):
       ''' Press given modifiers (provided in list form)
 
-          Parameters: modifiers list
+          Parameters: modifiers list, global or app specific
           Optional:  keypressed state (default is True (down))
           Returns: Unsigned int representing flags to set
       '''
@@ -244,20 +252,23 @@ class BaseAXUIElement(_a11y.AXUIElement):
             errStr = 'Key %s not found in keyboard layout'
             self._clearEventQueue()
             raise ValueError(errStr % self.keyboar[nextMod])
-         modEvent = Quartz.CGEventCreateKeyboardEvent(None,
+         modEvent = Quartz.CGEventCreateKeyboardEvent(Quartz.CGEventSourceCreate(0), ##None,
                                                       self.keyboard[nextMod],
                                                       pressed)
          if (not pressed):
             # Clear the modflags:
             Quartz.CGEventSetFlags(modEvent, 0)
-         self._queueEvent(Quartz.CGEventPostToPSN, (appPsn, modEvent))
+         if globally:
+             self._queueEvent(Quartz.CGEventPost, (0, modEvent))
+         else:
+             self._queueEvent(Quartz.CGEventPostToPSN, (appPsn, modEvent))
          # Add the modifier flags only if pressing not releasing
          if (pressed):
             modFlags += AXKeyboard.modKeyFlagConstants[nextMod]
 
       return modFlags
 
-   def _releaseModifiers(self, modifiers):
+   def _releaseModifiers(self, modifiers, globally=False):
       ''' Release given modifiers (provided in list form)
 
           Parameters: modifiers list
@@ -265,12 +276,12 @@ class BaseAXUIElement(_a11y.AXUIElement):
       '''
       # Release them in reverse order from pressing them:
       modifiers.reverse()
-      self._pressModifiers(modifiers, pressed=False)
+      self._pressModifiers(modifiers, pressed=False, globally=globally)
 
-   def _sendKeyWithModifiers(self, keychr, modifiers):
+   def _sendKeyWithModifiers(self, keychr, modifiers, globally=False):
       ''' Send one character with the given modifiers pressed
 
-          Parameters: key character, list of modifiers
+          Parameters: key character, list of modifiers, global or app specific
           Returns: None or raise ValueError exception
       '''
       if (len(keychr) > 1):
@@ -279,13 +290,13 @@ class BaseAXUIElement(_a11y.AXUIElement):
       if (not hasattr(self, 'keyboardLayout')):
          self.keyboard = AXKeyboard.loadKeyboard()
 
-      modFlags = self._pressModifiers(modifiers)
+      modFlags = self._pressModifiers(modifiers, globally=globally)
 
       # Press the non-modifier key
-      self._sendKey(keychr, modFlags)
+      self._sendKey(keychr, modFlags, globally=globally)
 
       # Release the modifiers
-      self._releaseModifiers(modifiers)
+      self._releaseModifiers(modifiers, globally=globally)
 
       # Post the queued keypresses:
       self._postQueuedEvents()
@@ -746,7 +757,13 @@ class NativeUIElement(BaseAXUIElement):
                      [COMMAND, SHIFT] (assuming you've first used
                      from pyatom.AXKeyCodeConstants import *))
       '''
-      return self._sendKeyWithModifiers(keychr, modifiers)
+      return self._sendKeyWithModifiers(keychr, modifiers, False)
+
+   def sendGlobalKeyWithModifiers(self, keychr, modifiers):
+      '''sendGlobalKeyWithModifiers - global send one character with modifiers pressed
+         See sendKeyWithModifiers
+      '''
+      return self._sendKeyWithModifiers(keychr, modifiers, True)
 
    def clickMouseButtonLeft(self, coord):
       ''' Click the left mouse button without modifiers pressed
