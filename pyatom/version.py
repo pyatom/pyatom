@@ -15,15 +15,5 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # St, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from _a11y import Error, ErrorAPIDisabled, ErrorInvalidUIElement
-from _a11y import ErrorCannotComplete
-from AXClasses import NativeUIElement
-from Clipboard import Clipboard
-from version import __version__
 
-
-getAppRefByLocalizedName = NativeUIElement.getAppRefByLocalizedName
-setSystemWideTimeout = NativeUIElement.setSystemWideTimeout
-getAppRefByBundleId = NativeUIElement.getAppRefByBundleId
-launchAppByBundleId = NativeUIElement.launchAppByBundleId
-getAppRefByPid = NativeUIElement.getAppRefByPid
+__version__ = '1.0'

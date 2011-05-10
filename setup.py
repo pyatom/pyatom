@@ -15,8 +15,9 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # St, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 import os
+execfile('pyatom/version.py') # set __version__ variable
 
 def read(fname):
    '''Returns the contents of the specified file located in the same dir as
@@ -41,7 +42,7 @@ _a11y = Extension(
 
 setup (
    name = 'atom',
-   version = '0.9',
+   version = __version__,
    author = 'The PyATOM Team',
    author_email = 'pyatom-dev@lists.pyatom.com',
    url = 'http://pyatom.com',
