@@ -99,7 +99,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
       return cls.getSystemObject().setTimeout(timeout)
 
    @staticmethod
-   def launchAppByBundleId(bundle):
+   def launchAppByBundleId(bundleID):
       '''launchByBundleId - launch the application with the specified bundle
          ID
       '''
@@ -110,7 +110,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
       ws = AppKit.NSWorkspace.sharedWorkspace()
       # Sorry about the length of the following line
       r=ws.launchAppWithBundleIdentifier_options_additionalEventParamDescriptor_launchIdentifier_(
-         bundle,
+         bundleID,
          NSWorkspaceLaunchAllowingClassicStartup,
          AppKit.NSAppleEventDescriptor.nullDescriptor(),
          None)
@@ -118,6 +118,28 @@ class BaseAXUIElement(_a11y.AXUIElement):
       # a number. Let's use the bool result.
       if r[0] == False:
          raise RuntimeError('Error launching specified application.')
+
+   @staticmethod
+   def launchAppByBundlePath(bundlePath):
+        ''' launchAppByBundlePath - Launch app with a given bundle path
+            Return True if succeed
+        '''
+        ws = AppKit.NSWorkspace.sharedWorkspace()
+        return ws.launchApplication_(bundlePath)
+
+   @staticmethod
+   def terminateAppByBundleId(bundleID):
+       ''' terminateAppByBundleId - Terminate app with a given bundle ID
+           Requires 10.6
+           Return True if succeed
+       '''
+       ra = AppKit.NSRunningApplication
+       if getattr(ra, "runningApplicationsWithBundleIdentifier_"):
+           appList = ra.runningApplicationsWithBundleIdentifier_(bundleID)
+           if appList and len(appList) > 0:
+               app = appList[0]
+               return app and app.terminate() and True or False
+       return False
 
    def setTimeout(self, timeout=0.0):
       '''Set the accessibiltiy API timeout on the given reference
