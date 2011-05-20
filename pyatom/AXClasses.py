@@ -252,7 +252,6 @@ class BaseAXUIElement(_a11y.AXUIElement):
             # Clear the modflags:
             Quartz.CGEventSetFlags(modEvent, 0)
          self._queueEvent(Quartz.CGEventPostToPSN, (appPsn, modEvent))
-
          # Add the modifier flags only if pressing not releasing
          if (pressed):
             modFlags += AXKeyboard.modKeyFlagConstants[nextMod]
@@ -260,7 +259,6 @@ class BaseAXUIElement(_a11y.AXUIElement):
          # No combination, do it now
          if (not combination):
             self._postQueuedEvents()
-
 
       return modFlags
 
