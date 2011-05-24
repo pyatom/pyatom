@@ -276,7 +276,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
       if (len(keychr) > 1):
          raise ValueError('Please provide only one character to send')
 
-      if (not hasattr(self, 'keyboardLayout')):
+      if (not hasattr(self, 'keyboard')):
          self.keyboard = AXKeyboard.loadKeyboard()
 
       modFlags = self._pressModifiers(modifiers)
