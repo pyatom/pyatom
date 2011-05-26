@@ -220,12 +220,11 @@ class BaseAXUIElement(_a11y.AXUIElement):
       for nextChr in keystr:
          self._sendKey(nextChr)
 
-   def _pressModifiers(self, modifiers, pressed=True, combination=True):
+   def _pressModifiers(self, modifiers, pressed=True):
       ''' Press given modifiers (provided in list form)
 
           Parameters: modifiers list
-          Optional:  keypressed state for a modifier key (default is True (down))
-          Optional:  combination with other keys (default is True)
+          Optional:  keypressed state for (default is True (down))
           Returns: Unsigned int representing flags to set
       '''
       if (not isinstance(modifiers, list)):
@@ -252,26 +251,43 @@ class BaseAXUIElement(_a11y.AXUIElement):
             # Clear the modflags:
             Quartz.CGEventSetFlags(modEvent, 0)
          self._queueEvent(Quartz.CGEventPostToPSN, (appPsn, modEvent))
-         # Add the modifier flags only if pressing not releasing
-         if (pressed):
-            modFlags += AXKeyboard.modKeyFlagConstants[nextMod]
-
-         # No combination, do it now
-         if (not combination):
-            self._postQueuedEvents()
+         # Add the modifier flags
+         modFlags += AXKeyboard.modKeyFlagConstants[nextMod]
 
       return modFlags
 
-   def _releaseModifiers(self, modifiers, combination=True):
+   def _holdModifierKeys(self, modifiers):
+      ''' Hold given modifier keys (provided in list form)
+
+          Parameters: modifiers list
+          Returns: Unsigned int representing flags to set
+      '''
+      modFlags = self._pressModifiers(modifiers)
+      # Post the queued keypresses:
+      self._postQueuedEvents()
+      return modFlags
+
+   def _releaseModifiers(self, modifiers):
       ''' Release given modifiers (provided in list form)
 
           Parameters: modifiers list
-          Optional:  combination with other keys (default is True)
           Returns: None
       '''
       # Release them in reverse order from pressing them:
       modifiers.reverse()
-      self._pressModifiers(modifiers, pressed=False, combination=combination)
+      modFlags = self._pressModifiers(modifiers, pressed=False)
+      return modFlags
+
+   def _releaseModifierKeys(self, modifiers):
+      ''' Release given modifier keys (provided in list form)
+
+          Parameters: modifiers list
+          Returns: Unsigned int representing flags to set
+      '''
+      modFlags = self._releaseModifiers(modifiers)
+      # Post the queued keypresses:
+      self._postQueuedEvents()
+      return modFlags
 
    def _sendKeyWithModifiers(self, keychr, modifiers):
       ''' Send one character with the given modifiers pressed
@@ -746,12 +762,12 @@ class NativeUIElement(BaseAXUIElement):
       return self._sendKeys(keystr)
 
    def pressModifiers(self, modifiers):
-      '''Press a modifier key down (e.g. [Option])'''
-      return self._pressModifiers(self, modifiers, combination=False)
+      '''Hold modifier keys (e.g. [Option])'''
+      return self._holdModifierKeys(modifiers)
 
    def releaseModifiers(self, modifiers):
-      '''Release a modifier key up (e.g. [Option])'''
-      return self._releaseModifiers(self, modifiers, combination=False)
+      '''Release modifier keys (e.g. [Option])'''
+      return self._releaseModifierKeys(modifiers)
 
    def sendKeyWithModifiers(self, keychr, modifiers):
       '''sendKeyWithModifiers - send one character with modifiers pressed
