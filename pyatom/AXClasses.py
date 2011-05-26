@@ -224,7 +224,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
       ''' Press given modifiers (provided in list form)
 
           Parameters: modifiers list
-          Optional:  keypressed state (default is True (down))
+          Optional:  keypressed state for (default is True (down))
           Returns: Unsigned int representing flags to set
       '''
       if (not isinstance(modifiers, list)):
@@ -251,10 +251,20 @@ class BaseAXUIElement(_a11y.AXUIElement):
             # Clear the modflags:
             Quartz.CGEventSetFlags(modEvent, 0)
          self._queueEvent(Quartz.CGEventPostToPSN, (appPsn, modEvent))
-         # Add the modifier flags only if pressing not releasing
-         if (pressed):
-            modFlags += AXKeyboard.modKeyFlagConstants[nextMod]
+         # Add the modifier flags
+         modFlags += AXKeyboard.modKeyFlagConstants[nextMod]
 
+      return modFlags
+
+   def _holdModifierKeys(self, modifiers):
+      ''' Hold given modifier keys (provided in list form)
+
+          Parameters: modifiers list
+          Returns: Unsigned int representing flags to set
+      '''
+      modFlags = self._pressModifiers(modifiers)
+      # Post the queued keypresses:
+      self._postQueuedEvents()
       return modFlags
 
    def _releaseModifiers(self, modifiers):
@@ -265,7 +275,19 @@ class BaseAXUIElement(_a11y.AXUIElement):
       '''
       # Release them in reverse order from pressing them:
       modifiers.reverse()
-      self._pressModifiers(modifiers, pressed=False)
+      modFlags = self._pressModifiers(modifiers, pressed=False)
+      return modFlags
+
+   def _releaseModifierKeys(self, modifiers):
+      ''' Release given modifier keys (provided in list form)
+
+          Parameters: modifiers list
+          Returns: Unsigned int representing flags to set
+      '''
+      modFlags = self._releaseModifiers(modifiers)
+      # Post the queued keypresses:
+      self._postQueuedEvents()
+      return modFlags
 
    def _sendKeyWithModifiers(self, keychr, modifiers):
       ''' Send one character with the given modifiers pressed
@@ -276,7 +298,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
       if (len(keychr) > 1):
          raise ValueError('Please provide only one character to send')
 
-      if (not hasattr(self, 'keyboard')):
+      if (not hasattr(self, 'keyboardLayout')):
          self.keyboard = AXKeyboard.loadKeyboard()
 
       modFlags = self._pressModifiers(modifiers)
@@ -738,6 +760,14 @@ class NativeUIElement(BaseAXUIElement):
    def sendKeys(self, keystr):
       '''sendKeys - send a series of characters with no modifiers'''
       return self._sendKeys(keystr)
+
+   def pressModifiers(self, modifiers):
+      '''Hold modifier keys (e.g. [Option])'''
+      return self._holdModifierKeys(modifiers)
+
+   def releaseModifiers(self, modifiers):
+      '''Release modifier keys (e.g. [Option])'''
+      return self._releaseModifierKeys(modifiers)
 
    def sendKeyWithModifiers(self, keychr, modifiers):
       '''sendKeyWithModifiers - send one character with modifiers pressed
