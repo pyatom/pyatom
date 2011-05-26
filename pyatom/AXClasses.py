@@ -224,7 +224,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
       ''' Press given modifiers (provided in list form)
 
           Parameters: modifiers list
-          Optional:  keypressed state for (default is True (down))
+          Optional:  keypressed state (default is True (down))
           Returns: Unsigned int representing flags to set
       '''
       if (not isinstance(modifiers, list)):
