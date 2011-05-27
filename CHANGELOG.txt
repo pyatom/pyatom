@@ -1,0 +1,21 @@
+Version 0.9.1
+27-May-2011
+
+NativeUIElement:
+* added sendGlobalKeyWithModifiers - used to press system wide shortcut keys
+* added terminateAppByBundleId
+* pressModifiers and ReleaseModifiers - hold modifier keys down rather than 
+  pressing them in concert with another key or mouse click
+* Small bug fixes
+
+Prefs:
+* New proxy class for manipulating application preferences before tests
+
+Thanks to:
+Andrew Wu, Ken Song, Julián Romero
+
+Version 0.9
+29-Apr-2011
+
+* Initial release
+
