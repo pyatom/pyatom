@@ -20,9 +20,12 @@ from _a11y import ErrorCannotComplete
 from AXClasses import NativeUIElement
 from Clipboard import Clipboard
 from version import __version__
+from Prefs import Prefs
 
 
 getAppRefByLocalizedName = NativeUIElement.getAppRefByLocalizedName
+terminateAppByBundleId = NativeUIElement.terminateAppByBundleId
+launchAppByBundlePath = NativeUIElement.launchAppByBundlePath
 setSystemWideTimeout = NativeUIElement.setSystemWideTimeout
 getAppRefByBundleId = NativeUIElement.getAppRefByBundleId
 launchAppByBundleId = NativeUIElement.launchAppByBundleId
