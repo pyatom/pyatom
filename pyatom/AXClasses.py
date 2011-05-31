@@ -577,7 +577,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
       while True:
          try:
             app = app.AXParent
-         except:
+         except _a11y.ErrorUnsupported:
             break
       return app
 
@@ -653,7 +653,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
       actions = []
       try:
          actions = self._getActions()
-      except:
+      except Exception:
          pass
 
       if (name.startswith('AX') and (name[2:] in actions)):
@@ -683,17 +683,17 @@ class BaseAXUIElement(_a11y.AXUIElement):
       c=repr(self.__class__).partition('<class \'')[-1].rpartition('\'>')[0]
       try:
          title=repr(self.AXTitle)
-      except:
+      except Exception:
          try:
             title=repr(self.AXValue)
-         except:
+         except Exception:
             try:
                title=repr(self.AXRoleDescription)
-            except:
+            except Exception:
                pass
       try:
          role=self.AXRole
-      except:
+      except Exception:
          pass
       if len(title) > 20:
         title = title[:20] + '...\''
