@@ -212,6 +212,7 @@ _PyAttributeValueToCFTypeRef(PyObject *value,    // IN: The value to set
    CGPoint point;
    CGSize size;
    int x,y;
+   double doubleVal;
 
    if (CFBooleanGetTypeID() == CFGetTypeID(attrValue)) {
       val = kCFBooleanFalse;
@@ -230,7 +231,9 @@ _PyAttributeValueToCFTypeRef(PyObject *value,    // IN: The value to set
    }
 
    if (kAXValueCGPointType == AXValueGetType(attrValue)){
-      PyArg_ParseTuple(value, "ii", &x, &y);
+      if (!PyArg_ParseTuple(value, "ii", &x, &y)) {
+         return NULL;
+      }
       point.x = x;
       point.y = y;
       val = (CFTypeRef)(AXValueCreate(kAXValueCGPointType,
@@ -239,13 +242,34 @@ _PyAttributeValueToCFTypeRef(PyObject *value,    // IN: The value to set
 
    }
    if (kAXValueCGSizeType == AXValueGetType(attrValue)) {
-      PyArg_ParseTuple(value, "ii", &x, &y);
+       if (!PyArg_ParseTuple(value, "ii", &x, &y)) {
+          return NULL;
+       }
       size.width = x;
       size.height = y;
       val = (CFTypeRef)(AXValueCreate(kAXValueCGSizeType,
                                       (const void *)&size));
       return val;
    }
+
+   if (CFNumberGetTypeID() == CFGetTypeID(attrValue)) {
+      // Maybe this will need to change if we find any writable ints. Right
+      // now we pretty much treat all numbers as floats in terms of setting
+      // things.
+      if (TRUE == CFNumberIsFloatType(attrValue)) {
+         if (!PyNumber_Check(value)) {
+            PyErr_SetString(pyatomErrorUnsupported,
+                            "Error writing supplied value to number type");
+            return NULL;
+         }
+         doubleVal = PyFloat_AsDouble(value);
+         val = (CFTypeRef)CFNumberCreate(NULL, kCFNumberDoubleType,
+                                         &doubleVal);
+         return val;
+      }
+   }
+
+   // Give up
    PyErr_SetString(pyatomErrorUnsupported,
                    "Setting this attribute is not supported yet.");
    return NULL;
@@ -337,11 +361,23 @@ _CFAttributeToPyObject(PyObject *self,      // IN: Python self object
    }
 
    if (CFNumberGetTypeID() == CFGetTypeID(attrValue)) {
-      int numValue;
-      if (FALSE == CFNumberGetValue(attrValue, kCFNumberIntType,&numValue)) {
-		 return NULL;
+      int intValue;
+      double doubleValue;
+
+      if (TRUE == CFNumberGetValue(attrValue, kCFNumberIntType, &intValue)) {
+         return Py_BuildValue("i", intValue);
       }
-      return Py_BuildValue("i", numValue);
+      if (TRUE == CFNumberGetValue(attrValue, kCFNumberDoubleType,
+          &doubleValue)) {
+          // It's possible that we may just need to default to float after
+          // trying int - this is because there may be a precision loss (and
+          // thus CFNumberGetValue might return False) if the float is just
+          // too precise for a C double.
+          return Py_BuildValue("d", doubleValue);
+      }
+      PyErr_SetString(pyatomErrorUnsupported,
+                      "Error converting numeric attribute");
+      return NULL;
    }
 
    if (AXUIElementGetTypeID() == CFGetTypeID(attrValue)) {
