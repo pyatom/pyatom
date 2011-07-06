@@ -69,11 +69,7 @@ class Prefs(UserDict):
         return self.__getitem__(key)
 
     def __getitem__(self, key):
-        result = None
-        try:
-            result = self.data.get(key, None)
-        except Exception:
-            pass
+        result = self.data.get(key, None)
         if result is None or result == '':
             if self.defaults:
                 result = self.defaults.get(key, None)
