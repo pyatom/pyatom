@@ -3,13 +3,13 @@
  * **********************************************************/
 
 /* **************************************************************************
- * This file is part of PyATOM.
+ * This file is part of ATOMac.
  *
- * PyATOM is free software; you can redistribute it and/or modify it under
+ * ATOMac is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
  * Software Foundation version 2 and no later version.
  *
- * PyATOM is distributed in the hope that it will be useful, but WITHOUT ANY
+ * ATOMac is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License version 2
  * for more details.
@@ -22,7 +22,7 @@
 /*
  * a11ymodule.c --
  *
- *      Main module file for Python PyATOM a11y module
+ *      Main module file for Python ATOMac a11y module
  */
 
 #include <Python.h>
@@ -1060,7 +1060,7 @@ PyDoc_STRVAR(setnotification_doc,
  *      or NULL and an exception on failure.
  *
  * Side effects:
- *      Sets an attribute on the PyATOM object.
+ *      Sets an attribute on the ATOMac object.
  *
  *-----------------------------------------------------------------------------
  */
