@@ -1086,3 +1086,12 @@ class NativeUIElement(BaseAXUIElement):
    def rowsR(self, match=None):
       '''Return a list of rows with an optional match parameter'''
       return self._convenienceMatchR('AXRow', 'AXTitle', match)
+
+   def sliders(self, match=None):
+      '''Return a list of sliders with an optional match parameter'''
+      return self._convenienceMatch('AXSlider', 'AXValue', match)
+
+   def slidersR(self, match=None):
+      '''Return a list of sliders with an optional match parameter'''
+      return self._convenienceMatchR('AXSlider', 'AXValue', match)
+
