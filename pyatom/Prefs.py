@@ -26,7 +26,7 @@ __all__ = ["Prefs"]
 class Prefs(UserDict):
     ''' NSUserDefaults proxy to read/write application preferences.
         It has been conceived to prepare the preferences before a test launch the app.
-        Once a Prefs instance is created, it doesn't detect prefs changed elsewhere, 
+        Once a Prefs instance is created, it doesn't detect prefs changed elsewhere,
         so for now you need to create the instance right before reading/writing a pref.
         Defaults.plist with default values is expected to exist on the app bundle.
 
@@ -40,7 +40,7 @@ class Prefs(UserDict):
             bundlePath: the full bundle path (useful to test a Debug build)
             defaultsPlistName: the name of the plist that contains default values
         '''
-        self.__bundleID = bundleID        
+        self.__bundleID = bundleID
         self.__bundlePath = bundlePath
         UserDict.__init__(self)
         self.__setup(defaultsPlistName)
@@ -69,11 +69,7 @@ class Prefs(UserDict):
         return self.__getitem__(key)
 
     def __getitem__(self, key):
-        result = None
-        try:
-            result = self.data.get(key, None)
-        except:
-            pass
+        result = self.data.get(key, None)
         if result is None or result == '':
             if self.defaults:
                 result = self.defaults.get(key, None)
