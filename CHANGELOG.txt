@@ -1,5 +1,12 @@
+Version 0.9.3
+09-Jul-2011
+* New NativeUIElement convenience methods sliders() and slidersR()
+* Small update to Prefs to remove a seemingly unneeded exception handler
+* Project renamed from PyATOM to ATOMac - now listed in PyPI as atomac and
+  module import matches - import atomac. Apologies for that.
+
 Version 0.9.2
-06-July-2011
+06-Jul-2011
 NativeUIElement:
 * floating point values can now be read and written (such as AXValue on a
   slider control)
