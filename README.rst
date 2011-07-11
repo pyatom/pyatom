@@ -82,11 +82,13 @@ Feel free to submit pull requests against the project on Github. If you're inter
 See also
 ========
 * The ATOMac `home page`_
+* `Changelog`_
 * `Mailing lists`_
 * `Source code`_ on Github
 * `Issue tracker`_
 
 .. _`home page`: http://pyatom.com
+.. _`changelog` : https://raw.github.com/pyatom/pyatom/master/CHANGELOG.txt
 .. _`mailing lists`: http://lists.pyatom.com
 .. _`source code`: https://github.com/pyatom/pyatom
 .. _`issue tracker`: https://github.com/pyatom/pyatom/issues
