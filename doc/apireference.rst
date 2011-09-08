@@ -1,7 +1,7 @@
 ATOMac API Reference
 ==================================
 
-.. automodule:: pyatom
+.. automodule:: atomac
    :members:
 
 .. autoexception:: Error

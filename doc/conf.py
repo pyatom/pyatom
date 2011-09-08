@@ -174,7 +174,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'PyATOMdoc'
+htmlhelp_basename = 'ATOMacdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -188,7 +188,7 @@ htmlhelp_basename = 'PyATOMdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'PyATOM.tex', u'PyATOM Documentation',
+  ('index', 'ATOMac.tex', u'ATOMac Documentation',
    u'Jesse Mendonca, Ken Song, James Tatum, Andrew Wu', 'manual'),
 ]
 
@@ -221,6 +221,6 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pyatom', u'PyATOM Documentation',
+    ('index', 'atomac', u'ATOMac Documentation',
      [u'Jesse Mendonca, Ken Song, James Tatum, Andrew Wu'], 1)
 ]
