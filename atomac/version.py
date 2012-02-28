@@ -16,4 +16,4 @@
 # St, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-__version__ = '0.9.3'
+__version__ = '0.9.4'
