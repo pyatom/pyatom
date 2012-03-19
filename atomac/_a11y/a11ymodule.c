@@ -3,13 +3,13 @@
  * **********************************************************/
 
 /* **************************************************************************
- * This file is part of PyATOM.
+ * This file is part of ATOMac.
  *
- * PyATOM is free software; you can redistribute it and/or modify it under
+ * ATOMac is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
  * Software Foundation version 2 and no later version.
  *
- * PyATOM is distributed in the hope that it will be useful, but WITHOUT ANY
+ * ATOMac is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License version 2
  * for more details.
@@ -22,7 +22,7 @@
 /*
  * a11ymodule.c --
  *
- *      Main module file for Python PyATOM a11y module
+ *      Main module file for ATOMac a11y module
  */
 
 #include <Python.h>
@@ -42,7 +42,7 @@
  * AXUIElement typedef
  * This encapsulates an apple AXUIElementRef in a Python object.
  */
-typedef struct pyatom_AXUIElement{
+typedef struct atomac_AXUIElement{
    PyObject_HEAD       // Python boilerplate macro
    AXUIElementRef ref; // Apple AXUIElementRef encapsulated by the Python obj
    /* For notifications */
@@ -50,19 +50,19 @@ typedef struct pyatom_AXUIElement{
    PyObject *callbackFn;   // A python callback function if set
    PyObject *callbackArgs;    // Args to the python callback
    PyObject *callbackKwargs;  // Kwargs to the python callback
-} pyatom_AXUIElement;
+} atomac_AXUIElement;
 
 /*
  * Python exception objects
  *
- * See initpyatoma11y() for initialization
+ * See initatomaca11y() for initialization
  */
 
-PyObject * pyatomError;
-PyObject * pyatomErrorAPIDisabled;
-PyObject * pyatomErrorInvalidUIElement;
-PyObject * pyatomErrorUnsupported;
-PyObject * pyatomErrorCannotComplete;
+PyObject * atomacError;
+PyObject * atomacErrorAPIDisabled;
+PyObject * atomacErrorInvalidUIElement;
+PyObject * atomacErrorUnsupported;
+PyObject * atomacErrorCannotComplete;
 
 /*
  * Local functions
@@ -75,42 +75,42 @@ static CFTypeRef _PyAttributeValueToCFTypeRef(PyObject *value,
 static PyObject *_newAXUIElementWithRef(AXUIElementRef element,
                                          PyTypeObject *type);
 static PyObject *_CFAttributeToPyObject(PyObject *self, CFTypeRef attr);
-static void AXUIElement_dealloc(pyatom_AXUIElement *self);
+static void AXUIElement_dealloc(atomac_AXUIElement *self);
 static PyObject *AXUIElement_new(PyTypeObject *type,
                                  PyObject *args,
                                  PyObject *kwds);
 static PyObject *AXUIElement_richcmp(PyObject *a, PyObject *b, int op);
-static PyObject *AXUIElement_getPid(pyatom_AXUIElement *self);
-static PyObject *AXUIElement_getPsnForPid(pyatom_AXUIElement *self,
+static PyObject *AXUIElement_getPid(atomac_AXUIElement *self);
+static PyObject *AXUIElement_getPsnForPid(atomac_AXUIElement *self,
                                               PyObject *args);
-static PyObject *AXUIElement_getAttributes(pyatom_AXUIElement *self);
-static PyObject *AXUIElement_getActions(pyatom_AXUIElement *self);
-static PyObject *AXUIElement_performAction(pyatom_AXUIElement *self,
+static PyObject *AXUIElement_getAttributes(atomac_AXUIElement *self);
+static PyObject *AXUIElement_getActions(atomac_AXUIElement *self);
+static PyObject *AXUIElement_performAction(atomac_AXUIElement *self,
                                            PyObject *args);
-static PyObject *AXUIElement_getAttribute(pyatom_AXUIElement *self,
+static PyObject *AXUIElement_getAttribute(atomac_AXUIElement *self,
                                           PyObject *args);
-static PyObject *AXUIElement_setAttribute(pyatom_AXUIElement *self,
+static PyObject *AXUIElement_setAttribute(atomac_AXUIElement *self,
                                           PyObject *args);
-static PyObject *AXUIElement_setString(pyatom_AXUIElement *self,
+static PyObject *AXUIElement_setString(atomac_AXUIElement *self,
                                        PyObject *args);
-static PyObject *AXUIElement_setNotification(pyatom_AXUIElement *self,
+static PyObject *AXUIElement_setNotification(atomac_AXUIElement *self,
                                              PyObject *args,
                                              PyObject *kwargs);
-static PyObject *AXUIElement_setTimeout(pyatom_AXUIElement *self,
+static PyObject *AXUIElement_setTimeout(atomac_AXUIElement *self,
                                         PyObject *args);
 static PyMethodDef AXUIElement_methods[];
-static PyTypeObject pyatom_AXUIElementType;
-static PyObject *pyatom_axenabled(PyObject *self, PyObject *args);
-static PyObject *pyatom_getfrontmostpid(PyObject *self, PyObject *args);
-static PyObject *pyatom_getAppRefByPid(PyObject *self, PyObject *args);
-static PyObject *pyatom_getSystemObject(PyObject *self, PyObject *args);
-static PyObject *pyatom_getfrontwindowtitle(PyObject *self, PyObject *args);
+static PyTypeObject atomac_AXUIElementType;
+static PyObject *atomac_axenabled(PyObject *self, PyObject *args);
+static PyObject *atomac_getfrontmostpid(PyObject *self, PyObject *args);
+static PyObject *atomac_getAppRefByPid(PyObject *self, PyObject *args);
+static PyObject *atomac_getSystemObject(PyObject *self, PyObject *args);
+static PyObject *atomac_getfrontwindowtitle(PyObject *self, PyObject *args);
 static PyMethodDef a11ylibMethods[];
 void observerCallback(AXObserverRef observer,
                       AXUIElementRef element,
                       CFStringRef notification,
                       void *contextData);
-// PyMODINIT_FUNC initpyatoma11y(void)
+// PyMODINIT_FUNC initatomaca11y(void)
 
 /*
  *-----------------------------------------------------------------------------
@@ -171,22 +171,22 @@ _setError(AXError e,    // IN: Apple AXError
    if (kAXErrorAttributeUnsupported == e
        || kAXErrorActionUnsupported == e
        || kAXErrorNotificationUnsupported == e) {
-      PyErr_SetString(pyatomErrorUnsupported, err_str);
+      PyErr_SetString(atomacErrorUnsupported, err_str);
       return;
    }
    if (kAXErrorAPIDisabled == e) {
-      PyErr_SetString(pyatomErrorAPIDisabled, err_str);
+      PyErr_SetString(atomacErrorAPIDisabled, err_str);
       return;
    }
    if (kAXErrorInvalidUIElement == e) {
-      PyErr_SetString(pyatomErrorInvalidUIElement, err_str);
+      PyErr_SetString(atomacErrorInvalidUIElement, err_str);
       return;
    }
    if (kAXErrorCannotComplete == e) {
-      PyErr_SetString(pyatomErrorCannotComplete, err_str);
+      PyErr_SetString(atomacErrorCannotComplete, err_str);
       return;
    }
-   PyErr_SetString(pyatomError, err_str);
+   PyErr_SetString(atomacError, err_str);
    return;
 }
 
@@ -212,6 +212,7 @@ _PyAttributeValueToCFTypeRef(PyObject *value,    // IN: The value to set
    CGPoint point;
    CGSize size;
    int x,y;
+   double doubleVal;
 
    if (CFBooleanGetTypeID() == CFGetTypeID(attrValue)) {
       val = kCFBooleanFalse;
@@ -230,7 +231,9 @@ _PyAttributeValueToCFTypeRef(PyObject *value,    // IN: The value to set
    }
 
    if (kAXValueCGPointType == AXValueGetType(attrValue)){
-      PyArg_ParseTuple(value, "ii", &x, &y);
+      if (!PyArg_ParseTuple(value, "ii", &x, &y)) {
+         return NULL;
+      }
       point.x = x;
       point.y = y;
       val = (CFTypeRef)(AXValueCreate(kAXValueCGPointType,
@@ -239,14 +242,35 @@ _PyAttributeValueToCFTypeRef(PyObject *value,    // IN: The value to set
 
    }
    if (kAXValueCGSizeType == AXValueGetType(attrValue)) {
-      PyArg_ParseTuple(value, "ii", &x, &y);
+       if (!PyArg_ParseTuple(value, "ii", &x, &y)) {
+          return NULL;
+       }
       size.width = x;
       size.height = y;
       val = (CFTypeRef)(AXValueCreate(kAXValueCGSizeType,
                                       (const void *)&size));
       return val;
    }
-   PyErr_SetString(pyatomErrorUnsupported,
+
+   if (CFNumberGetTypeID() == CFGetTypeID(attrValue)) {
+      // Maybe this will need to change if we find any writable ints. Right
+      // now we pretty much treat all numbers as floats in terms of setting
+      // things.
+      if (TRUE == CFNumberIsFloatType(attrValue)) {
+         if (!PyNumber_Check(value)) {
+            PyErr_SetString(atomacErrorUnsupported,
+                            "Error writing supplied value to number type");
+            return NULL;
+         }
+         doubleVal = PyFloat_AsDouble(value);
+         val = (CFTypeRef)CFNumberCreate(NULL, kCFNumberDoubleType,
+                                         &doubleVal);
+         return val;
+      }
+   }
+
+   // Give up
+   PyErr_SetString(atomacErrorUnsupported,
                    "Setting this attribute is not supported yet.");
    return NULL;
 }
@@ -275,7 +299,7 @@ static PyObject *
 _newAXUIElementWithRef(AXUIElementRef element, // IN: The Apple AXUIElement
                        PyTypeObject *type)     // IN: Requested type of obj
 {
-   pyatom_AXUIElement *item = (pyatom_AXUIElement*)type->tp_alloc(type, 0);
+   atomac_AXUIElement *item = (atomac_AXUIElement*)type->tp_alloc(type, 0);
    if (NULL == item) {
       return NULL;
    }
@@ -337,11 +361,23 @@ _CFAttributeToPyObject(PyObject *self,      // IN: Python self object
    }
 
    if (CFNumberGetTypeID() == CFGetTypeID(attrValue)) {
-      int numValue;
-      if (FALSE == CFNumberGetValue(attrValue, kCFNumberIntType,&numValue)) {
-		 return NULL;
+      int intValue;
+      double doubleValue;
+
+      if (TRUE == CFNumberGetValue(attrValue, kCFNumberIntType, &intValue)) {
+         return Py_BuildValue("i", intValue);
       }
-      return Py_BuildValue("i", numValue);
+      if (TRUE == CFNumberGetValue(attrValue, kCFNumberDoubleType,
+          &doubleValue)) {
+          // It's possible that we may just need to default to float after
+          // trying int - this is because there may be a precision loss (and
+          // thus CFNumberGetValue might return False) if the float is just
+          // too precise for a C double.
+          return Py_BuildValue("d", doubleValue);
+      }
+      PyErr_SetString(atomacErrorUnsupported,
+                      "Error converting numeric attribute");
+      return NULL;
    }
 
    if (AXUIElementGetTypeID() == CFGetTypeID(attrValue)) {
@@ -388,7 +424,7 @@ _CFAttributeToPyObject(PyObject *self,      // IN: Python self object
       return res;
    } // if CFArrayGetTypeID() == CFGetTypeID(attrValue)
 
-   PyErr_SetString(pyatomErrorUnsupported, "Return value not supported yet.");
+   PyErr_SetString(atomacErrorUnsupported, "Return value not supported yet.");
    return NULL;
 }
 
@@ -409,7 +445,7 @@ _CFAttributeToPyObject(PyObject *self,      // IN: Python self object
  */
 
 static void
-AXUIElement_dealloc(pyatom_AXUIElement *self) // IN: Python self object
+AXUIElement_dealloc(atomac_AXUIElement *self) // IN: Python self object
 {
    if (NULL != self->ref) {
       CFRelease(self->ref);
@@ -452,9 +488,9 @@ AXUIElement_new(PyTypeObject *type, // IN: Python type object
                 PyObject *args,     // IN: Arguments
                 PyObject *kwargs)   // IN: Keyword arguments
 {
-   pyatom_AXUIElement *self;
+   atomac_AXUIElement *self;
 
-   self = (pyatom_AXUIElement *)type->tp_alloc(type, 0);
+   self = (atomac_AXUIElement *)type->tp_alloc(type, 0);
    if (self != NULL) {
       self->ref = NULL;
    }
@@ -489,15 +525,15 @@ AXUIElement_richcmp(PyObject *a, PyObject *b, int op)
       return NULL;
    }
 
-   if (!PyObject_TypeCheck(b, &pyatom_AXUIElementType)) {
+   if (!PyObject_TypeCheck(b, &atomac_AXUIElementType)) {
       // The right hand side of the comparison isn't even one of us.
       Py_RETURN_FALSE;
    }
 
    // This typecast is safe because we know both sides are AXUIElements
-   pyatom_AXUIElement *obj1, *obj2;
-   obj1 = (pyatom_AXUIElement *) a;
-   obj2 = (pyatom_AXUIElement *) b;
+   atomac_AXUIElement *obj1, *obj2;
+   obj1 = (atomac_AXUIElement *) a;
+   obj2 = (atomac_AXUIElement *) b;
 
    if ((NULL == obj1->ref) && (NULL == obj2->ref)) {
       Py_RETURN_TRUE;
@@ -547,7 +583,7 @@ PyDoc_STRVAR(getpid_doc,
  *
  *-----------------------------------------------------------------------------
  */
-static PyObject *AXUIElement_getPid(pyatom_AXUIElement *self)
+static PyObject *AXUIElement_getPid(atomac_AXUIElement *self)
 {
    AXError err = kAXErrorSuccess;
    pid_t pid = 0;
@@ -587,7 +623,7 @@ PyDoc_STRVAR(getpsnforpid_doc,
  *-----------------------------------------------------------------------------
  */
 static PyObject *
-AXUIElement_getPsnForPid(pyatom_AXUIElement *self, // IN: Python self object
+AXUIElement_getPsnForPid(atomac_AXUIElement *self, // IN: Python self object
                          PyObject *args)         // IN: Python args tuple
 {
    OSStatus err = noErr;
@@ -633,7 +669,7 @@ PyDoc_STRVAR(getattributes_doc,
  */
 
 static PyObject *
-AXUIElement_getAttributes(pyatom_AXUIElement *self)  // IN: Python self object
+AXUIElement_getAttributes(atomac_AXUIElement *self)  // IN: Python self object
 {
    AXError err = kAXErrorSuccess;
    CFArrayRef attrs;
@@ -673,14 +709,14 @@ PyDoc_STRVAR(getactions_doc,
  */
 
 static PyObject *
-AXUIElement_getActions(pyatom_AXUIElement *self)  // IN: Python self object
+AXUIElement_getActions(atomac_AXUIElement *self)  // IN: Python self object
 {
    AXError err = kAXErrorSuccess;
    CFArrayRef actions;
    PyObject *res;
 
    if (NULL == self->ref) {
-      PyErr_SetString(pyatomError, "Not a valid accessibility object");
+      PyErr_SetString(atomacError, "Not a valid accessibility object");
       return NULL;
    }
 
@@ -720,7 +756,7 @@ PyDoc_STRVAR(performaction_doc,
  */
 
 static PyObject *
-AXUIElement_performAction(pyatom_AXUIElement *self,  // IN: Python self object
+AXUIElement_performAction(atomac_AXUIElement *self,  // IN: Python self object
                           PyObject *args)          // IN: Python argument tuple
 {
    AXError err = kAXErrorSuccess;
@@ -772,7 +808,7 @@ PyDoc_STRVAR(getattribute_doc,
  */
 
 static PyObject *
-AXUIElement_getAttribute(pyatom_AXUIElement *self,  // IN: Python self object
+AXUIElement_getAttribute(atomac_AXUIElement *self,  // IN: Python self object
                          PyObject *args)          // IN: Python argument tuple
 {
    AXError err = kAXErrorSuccess;
@@ -831,7 +867,7 @@ PyDoc_STRVAR(setattribute_doc,
  */
 
 static PyObject *
-AXUIElement_setAttribute(pyatom_AXUIElement *self,  // IN: Python self object
+AXUIElement_setAttribute(atomac_AXUIElement *self,  // IN: Python self object
                          PyObject *args)          // IN: Python argument tuple
 {
    AXError err = kAXErrorSuccess;
@@ -872,7 +908,7 @@ AXUIElement_setAttribute(pyatom_AXUIElement *self,  // IN: Python self object
       goto end;
    }
    if (!settable) {
-      PyErr_SetString(pyatomErrorUnsupported, "Attribute is not settable");
+      PyErr_SetString(atomacErrorUnsupported, "Attribute is not settable");
       goto end;
    }
 
@@ -936,7 +972,7 @@ PyDoc_STRVAR(setstring_doc,
  */
 
 static PyObject *
-AXUIElement_setString(pyatom_AXUIElement *self,  // IN: Python self object
+AXUIElement_setString(atomac_AXUIElement *self,  // IN: Python self object
                       PyObject *args)          // IN: Python argument tuple
 {
    AXError err = kAXErrorSuccess;
@@ -1024,13 +1060,13 @@ PyDoc_STRVAR(setnotification_doc,
  *      or NULL and an exception on failure.
  *
  * Side effects:
- *      Sets an attribute on the PyATOM object.
+ *      Sets an attribute on the ATOMac object.
  *
  *-----------------------------------------------------------------------------
  */
 
 static PyObject *
-AXUIElement_setNotification(pyatom_AXUIElement *self, // IN: Python self object
+AXUIElement_setNotification(atomac_AXUIElement *self, // IN: Python self object
                             PyObject *args,     // IN: Python arguments tuple
                             PyObject *kwargs)   // IN: Python keyword args dict
 {
@@ -1373,7 +1409,7 @@ PyDoc_STRVAR(settimeout_doc,
  *-----------------------------------------------------------------------------
  */
 
-static PyObject *AXUIElement_setTimeout(pyatom_AXUIElement *self, // IN: Python
+static PyObject *AXUIElement_setTimeout(atomac_AXUIElement *self, // IN: Python
                                                                 // self object
                                         PyObject *args)         // IN: Python
                                                                 // arguments
@@ -1394,7 +1430,7 @@ static PyObject *AXUIElement_setTimeout(pyatom_AXUIElement *self, // IN: Python
    element = self->ref;
 
    if (NULL == element) {
-      PyErr_SetString(pyatomErrorUnsupported,
+      PyErr_SetString(atomacErrorUnsupported,
                       "Operation not supported on null element references");
       return NULL;
    }
@@ -1453,7 +1489,7 @@ AXUIElement_methods[] = {
 /*
  *-----------------------------------------------------------------------------
  *
- * pyatom_AXUIElementType --
+ * atomac_AXUIElementType --
  *
  *      Constant defining the configuration of the AXUIElement type
  *
@@ -1461,11 +1497,11 @@ AXUIElement_methods[] = {
  */
 
 static PyTypeObject
-pyatom_AXUIElementType = {
+atomac_AXUIElementType = {
    PyObject_HEAD_INIT(NULL)
    0,                                     // ob_size
-   "pyatom._a11y.AXUIElement",           // tp_name
-   sizeof(pyatom_AXUIElement),              // tp_basicsize
+   "atomac._a11y.AXUIElement",           // tp_name
+   sizeof(atomac_AXUIElement),              // tp_basicsize
    0,                                     // tp_itemsize
    (destructor)AXUIElement_dealloc,       // tp_dealloc
    0,                                     // tp_print
@@ -1505,7 +1541,7 @@ pyatom_AXUIElementType = {
 
 /*
  * Python module functions
- * These functions are available in pyatom._a11y itself, rather than methods
+ * These functions are available in atomac._a11y itself, rather than methods
  * of objects.
  */
 
@@ -1516,7 +1552,7 @@ PyDoc_STRVAR(axenabled_doc,
 /*
  *-----------------------------------------------------------------------------
  *
- * pyatom_axenabled --
+ * atomac_axenabled --
  *
  *      Function to determine whether A11y is enabled in system preferences or
  *      not.
@@ -1531,7 +1567,7 @@ PyDoc_STRVAR(axenabled_doc,
  */
 
 static PyObject *
-pyatom_axenabled(PyObject *self, // IN: Python self object
+atomac_axenabled(PyObject *self, // IN: Python self object
                PyObject *args) // IN: Python arguments tuple
 {
    Boolean result = FALSE;
@@ -1550,7 +1586,7 @@ PyDoc_STRVAR(getfrontmostpid_doc,
 /*
  *-----------------------------------------------------------------------------
  *
- * pyatom_getfrontmostpid --
+ * atomac_getfrontmostpid --
  *
  *      Function to get the PID of the frontmost application.
  *
@@ -1564,7 +1600,7 @@ PyDoc_STRVAR(getfrontmostpid_doc,
  */
 
 static PyObject *
-pyatom_getfrontmostpid(PyObject *self, // IN: Python self object
+atomac_getfrontmostpid(PyObject *self, // IN: Python self object
                      PyObject *args) // IN: Python arguments tuple
 {
    pid_t pid;
@@ -1581,7 +1617,7 @@ PyDoc_STRVAR(getapprefbypid_doc,
 /*
  *-----------------------------------------------------------------------------
  *
- * pyatom_getAppRefByPid --
+ * atomac_getAppRefByPid --
  *
  *      Get a Python AXUIElement object for the application with the given PID.
  *
@@ -1595,7 +1631,7 @@ PyDoc_STRVAR(getapprefbypid_doc,
  */
 
 static PyObject *
-pyatom_getAppRefByPid(PyObject *self, // IN: Python self object
+atomac_getAppRefByPid(PyObject *self, // IN: Python self object
                     PyObject *args) // IN: Python arguments tuple
 {
    pid_t pid;
@@ -1608,14 +1644,14 @@ pyatom_getAppRefByPid(PyObject *self, // IN: Python self object
    }
 
    if (!(PyType_CheckExact(type) &&
-         PyType_IsSubtype((PyTypeObject *)type, &pyatom_AXUIElementType))) {
+         PyType_IsSubtype((PyTypeObject *)type, &atomac_AXUIElementType))) {
       PyErr_SetString(PyExc_AttributeError, "Unsupported type supplied");
       return NULL;
    }
 
    app = AXUIElementCreateApplication(pid);
    if (NULL == app) {
-      PyErr_SetString(pyatomErrorUnsupported, "Error getting app ref");
+      PyErr_SetString(atomacErrorUnsupported, "Error getting app ref");
       return NULL;
    }
    Py_INCREF(type);
@@ -1631,7 +1667,7 @@ PyDoc_STRVAR(getsystemobject_doc,
 /*
  *-----------------------------------------------------------------------------
  *
- * pyatom_getSystemObject --
+ * atomac_getSystemObject --
  *
  *      Get a Python AXUIElement for the system accessibility object.
  *      The system accessbility object lets you see the focused application and
@@ -1647,7 +1683,7 @@ PyDoc_STRVAR(getsystemobject_doc,
  */
 
 static PyObject *
-pyatom_getSystemObject(PyObject *self, // IN: Python self object
+atomac_getSystemObject(PyObject *self, // IN: Python self object
                      PyObject *args) // IN: Python arguments tuple
 {
    AXUIElementRef app;
@@ -1659,14 +1695,14 @@ pyatom_getSystemObject(PyObject *self, // IN: Python self object
    }
 
    if (!(PyType_CheckExact(type) &&
-         PyType_IsSubtype((PyTypeObject *)type, &pyatom_AXUIElementType))) {
+         PyType_IsSubtype((PyTypeObject *)type, &atomac_AXUIElementType))) {
       PyErr_SetString(PyExc_AttributeError, "Unsupported type supplied");
       return NULL;
    }
 
    app = AXUIElementCreateSystemWide();
    if (NULL == app) {
-      PyErr_SetString(pyatomErrorUnsupported, "Error getting a11y object");
+      PyErr_SetString(atomacErrorUnsupported, "Error getting a11y object");
       return NULL;
    }
    Py_INCREF(type);
@@ -1681,7 +1717,7 @@ PyDoc_STRVAR(getfrontwindowtitle_doc,
 /*
  *-----------------------------------------------------------------------------
  *
- * pyatom_getfrontwindowtitle --
+ * atomac_getfrontwindowtitle --
  *
  *      Get the title of the frontmost window from A11y.
  *      This function was a demo and should be removed when the module is
@@ -1697,7 +1733,7 @@ PyDoc_STRVAR(getfrontwindowtitle_doc,
  */
 
 static PyObject *
-pyatom_getfrontwindowtitle(PyObject *self, // IN: Python self object
+atomac_getfrontwindowtitle(PyObject *self, // IN: Python self object
                          PyObject *args) // IN: Python arguments tuple
 {
    pid_t pid;
@@ -1727,13 +1763,13 @@ pyatom_getfrontwindowtitle(PyObject *self, // IN: Python self object
 
 static PyMethodDef
 a11ylibMethods[] = {
-   {"axenabled", pyatom_axenabled, METH_VARARGS, axenabled_doc},
-   {"getfrontmostpid", pyatom_getfrontmostpid, METH_VARARGS, getfrontmostpid_doc},
-   {"getfrontwindowtitle", pyatom_getfrontwindowtitle, METH_VARARGS,
+   {"axenabled", atomac_axenabled, METH_VARARGS, axenabled_doc},
+   {"getfrontmostpid", atomac_getfrontmostpid, METH_VARARGS, getfrontmostpid_doc},
+   {"getfrontwindowtitle", atomac_getfrontwindowtitle, METH_VARARGS,
       getfrontwindowtitle_doc},
-   {"getAppRefByPid", pyatom_getAppRefByPid, METH_VARARGS,
+   {"getAppRefByPid", atomac_getAppRefByPid, METH_VARARGS,
       getapprefbypid_doc},
-   {"getSystemObject", pyatom_getSystemObject, METH_VARARGS, getsystemobject_doc},
+   {"getSystemObject", atomac_getSystemObject, METH_VARARGS, getsystemobject_doc},
    {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
@@ -1787,11 +1823,11 @@ observerCallback(AXObserverRef observer,     // IN: Observer
                            // value
    Py_ssize_t argSize;     // Store the size of the incoming callbackArgs tuple
 
-   /* Need to cast the contextData to the pyatom_AXUIElement type to access
+   /* Need to cast the contextData to the atomac_AXUIElement type to access
     relevant members (callbacks, etc.)
     */
-   pyatom_AXUIElement *axObj;
-   axObj = (pyatom_AXUIElement *)contextData;
+   atomac_AXUIElement *axObj;
+   axObj = (atomac_AXUIElement *)contextData;
 
    buf_size = CFStringGetMaximumSizeForEncoding(CFStringGetLength(notification),
                                                 CFENCODING) + 1;
@@ -1908,7 +1944,7 @@ observerCallback(AXObserverRef observer,     // IN: Observer
          PyErr_SetString(PyExc_RuntimeError,
                          "Python callback failed.");
       } else {
-         /* Pass the return value of the python callback to the pyatom object */
+         /* Pass the return value of the python callback to the atomac object */
          PyObject *temp;
          temp = axObj->observerRes;
          Py_INCREF(callbackRes);
@@ -1934,7 +1970,7 @@ observerCallback(AXObserverRef observer,     // IN: Observer
       /* No need to Py_CLEAR callbackRes as it will be returned to caller */
    } else {
       /* Default: Set the return value in the contextData object cast as
-         pyatom_AXUIElement */
+         atomac_AXUIElement */
       /* If no python callback is provided then simply set the return val to
          True and stop the run loop */
       CFRunLoopStop(CFRunLoopGetCurrent());
@@ -1954,7 +1990,7 @@ observerCallback(AXObserverRef observer,     // IN: Observer
  *
  * init_a11y --
  *
- *      Module initialization for pyatom._a11y module.
+ *      Module initialization for atomac._a11y module.
  *
  * Results:
  *      N/A
@@ -1970,47 +2006,47 @@ init_a11y(void)
 {
    PyObject * m;
 
-   if (PyType_Ready(&pyatom_AXUIElementType) < 0) {
+   if (PyType_Ready(&atomac_AXUIElementType) < 0) {
       return;
    }
 
-   m = Py_InitModule3("pyatom._a11y", a11ylibMethods,
+   m = Py_InitModule3("atomac._a11y", a11ylibMethods,
                       "Library of Apple A11y functions");
 
-   Py_INCREF(&pyatom_AXUIElementType);
-   PyModule_AddObject(m, "AXUIElement", (PyObject *)&pyatom_AXUIElementType);
+   Py_INCREF(&atomac_AXUIElementType);
+   PyModule_AddObject(m, "AXUIElement", (PyObject *)&atomac_AXUIElementType);
 
    /*
-    * Exceptions are initialized here. pyatomError subclasses Python's "error"
+    * Exceptions are initialized here. atomacError subclasses Python's "error"
     * exception. Eventually, these will likely have to be defined in Python
     * and retrieved here.
     */
 
-   pyatomError = PyErr_NewException("pyatom._a11y.Error", PyExc_StandardError,
+   atomacError = PyErr_NewException("atomac._a11y.Error", PyExc_StandardError,
                                   NULL);
-   Py_INCREF(pyatomError);
-   PyModule_AddObject(m, "Error", pyatomError);
+   Py_INCREF(atomacError);
+   PyModule_AddObject(m, "Error", atomacError);
 
-   // Subclasses of pyatomError
-   pyatomErrorAPIDisabled = PyErr_NewException("pyatom._a11y.ErrorAPIDisabled",
-                                             pyatomError, NULL);
-   Py_INCREF(pyatomErrorAPIDisabled);
-   PyModule_AddObject(m, "ErrorAPIDisabled", pyatomErrorAPIDisabled);
+   // Subclasses of atomacError
+   atomacErrorAPIDisabled = PyErr_NewException("atomac._a11y.ErrorAPIDisabled",
+                                             atomacError, NULL);
+   Py_INCREF(atomacErrorAPIDisabled);
+   PyModule_AddObject(m, "ErrorAPIDisabled", atomacErrorAPIDisabled);
 
-   pyatomErrorInvalidUIElement = PyErr_NewException("pyatom._a11y."
+   atomacErrorInvalidUIElement = PyErr_NewException("atomac._a11y."
                                                   "ErrorInvalidUIElement",
-                                                  pyatomError, NULL);
-   Py_INCREF(pyatomErrorInvalidUIElement);
-   PyModule_AddObject(m, "ErrorInvalidUIElement", pyatomErrorInvalidUIElement);
+                                                  atomacError, NULL);
+   Py_INCREF(atomacErrorInvalidUIElement);
+   PyModule_AddObject(m, "ErrorInvalidUIElement", atomacErrorInvalidUIElement);
 
-   pyatomErrorUnsupported = PyErr_NewException("pyatom._a11y.ErrorUnsupported",
-                                             pyatomError, NULL);
-   Py_INCREF(pyatomErrorUnsupported);
-   PyModule_AddObject(m, "ErrorUnsupported", pyatomErrorUnsupported);
+   atomacErrorUnsupported = PyErr_NewException("atomac._a11y.ErrorUnsupported",
+                                             atomacError, NULL);
+   Py_INCREF(atomacErrorUnsupported);
+   PyModule_AddObject(m, "ErrorUnsupported", atomacErrorUnsupported);
 
-   pyatomErrorCannotComplete = PyErr_NewException("pyatom._a11y."
+   atomacErrorCannotComplete = PyErr_NewException("atomac._a11y."
                                                 "ErrorCannotComplete",
-                                                pyatomError, NULL);
-   Py_INCREF(pyatomErrorCannotComplete);
-   PyModule_AddObject(m, "ErrorCannotComplete", pyatomErrorCannotComplete);
+                                                atomacError, NULL);
+   Py_INCREF(atomacErrorCannotComplete);
+   PyModule_AddObject(m, "ErrorCannotComplete", atomacErrorCannotComplete);
 }

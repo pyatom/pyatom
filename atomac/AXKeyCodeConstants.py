@@ -1,12 +1,12 @@
 # Copyright (c) 2010 VMware, Inc. All Rights Reserved.
 
-# This file is part of PyATOM.
+# This file is part of ATOMac.
 
-# PyATOM is free software; you can redistribute it and/or modify
+# ATOMac is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
 # Software Foundation version 2 and no later version.
 
-# PyATOM is distributed in the hope that it will be useful, but
+# ATOMac is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License version 2
 # for more details.
@@ -56,18 +56,18 @@ NUM_MULTIPLY   = '<num_*>'
 NUM_DIVIDE     = '<num_/>'
 
 # Function keys
-F1             = 'F1'
-F2             = 'F2'
-F3             = 'F3'
-F4             = 'F4'
-F5             = 'F5'
-F6             = 'F6'
-F7             = 'F7'
-F8             = 'F8'
-F9             = 'F9'
-F10            = 'F10'
-F11            = 'F11'
-F12            = 'F12'
+F1             = '<f1>'
+F2             = '<f2>'
+F3             = '<f3>'
+F4             = '<f4>'
+F5             = '<f5>'
+F6             = '<f6>'
+F7             = '<f7>'
+F8             = '<f8>'
+F9             = '<f9>'
+F10            = '<f10>'
+F11            = '<f11>'
+F12            = '<f12>'
 
 # Modifier keys
 COMMAND_L      = '<command_l>'

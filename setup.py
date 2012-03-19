@@ -1,12 +1,12 @@
 # Copyright (c) 2010 VMware, Inc. All Rights Reserved.
 
-# This file is part of PyATOM.
+# This file is part of ATOMac.
 
-# PyATOM is free software; you can redistribute it and/or modify
+# ATOMac is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
 # Software Foundation version 2 and no later version.
 
-# PyATOM is distributed in the hope that it will be useful, but
+# ATOMac is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 # FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License version 2
 # for more details.
@@ -17,7 +17,7 @@
 
 from setuptools import setup, Extension
 import os
-execfile('pyatom/version.py') # set __version__ variable
+execfile('atomac/version.py') # set __version__ variable
 
 def read(fname):
    '''Returns the contents of the specified file located in the same dir as
@@ -26,13 +26,13 @@ def read(fname):
    return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 source_files = [
-   'pyatom/_a11y/a11ymodule.c',
-   'pyatom/_a11y/conversion.c',
-   'pyatom/_a11y/axlib.c',
+   'atomac/_a11y/a11ymodule.c',
+   'atomac/_a11y/conversion.c',
+   'atomac/_a11y/axlib.c',
 ]
 
 _a11y = Extension(
-   'pyatom._a11y',
+   'atomac._a11y',
    sources = source_files,
    extra_link_args = [
       '-framework', 'ApplicationServices',
@@ -41,9 +41,9 @@ _a11y = Extension(
 )
 
 setup (
-   name = 'atom',
+   name = 'atomac',
    version = __version__,
-   author = 'The PyATOM Team',
+   author = 'The ATOMac Team',
    author_email = 'pyatom-dev@lists.pyatom.com',
    url = 'http://pyatom.com',
    description = ("Automated Testing on Mac - test GUI applications "
@@ -51,7 +51,7 @@ setup (
    license = 'GPLv2',
    long_description = read('README.rst'),
    ext_modules = [_a11y],
-   packages = ['pyatom'],
+   packages = ['atomac'],
    classifiers = [
       'Development Status :: 5 - Production/Stable',
       'Environment :: MacOS X :: Cocoa',
