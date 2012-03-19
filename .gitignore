@@ -13,6 +13,8 @@ sdist
 develop-eggs
 MANIFEST
 .installed.cfg
+*.swp
+doc/_build/
 
 pip-log.txt
 

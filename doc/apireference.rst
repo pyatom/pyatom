@@ -1,8 +1,7 @@
 ATOMac API Reference
 ==================================
 
-.. automodule:: atomac
-   :members:
+.. module:: atomac
 
 .. autoexception:: Error
 

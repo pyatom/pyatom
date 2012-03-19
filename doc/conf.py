@@ -17,6 +17,8 @@ import sys, os
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
+# This should locate the parent directory for atomac
+sys.path.insert(0, os.path.join(os.path.abspath('..')))
 
 import distutils.command.build
 from distutils.dist import Distribution
@@ -25,9 +27,6 @@ b = distutils.command.build.build(Distribution())
 b.initialize_options()
 b.finalize_options()
 
-# This should locate the parent directory for atomac
-sys.path.insert(0, os.path.join(os.path.abspath('..'), b.build_platlib))
-
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -35,7 +34,11 @@ sys.path.insert(0, os.path.join(os.path.abspath('..'), b.build_platlib))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc']
+extensions = [
+              'sphinx.ext.autodoc',
+              'sphinx.ext.doctest',
+              'sphinx.ext.viewcode',
+             ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -51,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'ATOMac'
-copyright = u'2011, Jesse Mendonca, Ken Song, James Tatum, Andrew Wu'
+copyright = u'2012, Jesse Mendonca, Ken Song, James Tatum, Andrew Wu'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

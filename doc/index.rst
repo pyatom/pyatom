@@ -6,7 +6,17 @@
 Welcome to ATOMac's documentation!
 ==================================
 
-Contents:
+=====================================
+ATOMac - Automated Testing on the Mac
+=====================================
+
+Welcome to ATOMac: 
+the first Python library to enable programmatic control
+of GUI applications via the Mac OS X accessibility API.
+It is fast and easy to use to write tests 
+or otherwise control your GUI application.
+
+.. Contents:
 
 .. toctree::
    :maxdepth: 2
