@@ -22,7 +22,6 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # Get info about the _a11y extension first
 import distutils.command.build
-import distutils.core
 from distutils.dist import Distribution
 
 b = distutils.command.build.build(Distribution())
