@@ -249,6 +249,14 @@ class BaseAXUIElement(_a11y.AXUIElement):
                       global or app specific
           Returns: None or raise ValueError exception
       '''
+      escapedChrs = {
+                       '\n': AXKeyCodeConstants.RETURN,
+                       '\r': AXKeyCodeConstants.RETURN,
+                       '\t': AXKeyCodeConstants.TAB,
+                    }
+      if keychr in escapedChrs:
+         keychr = escapedChrs[keychr]
+
       self._addKeyToQueue(keychr, modFlags, globally=globally)
       self._postQueuedEvents()
 
