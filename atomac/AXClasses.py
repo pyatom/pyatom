@@ -32,7 +32,7 @@ import AXKeyCodeConstants
 class BaseAXUIElement(_a11y.AXUIElement):
    '''BaseAXUIElement - Base class for UI elements.
 
-      BaseAXUIElement implements three major things:
+      BaseAXUIElement implements four major things:
       1) Factory class methods for getAppRef and getSystemObject which
          properly instantiate the class.
       2) Generators and methods for finding objects for use in child classes.
@@ -62,6 +62,20 @@ class BaseAXUIElement(_a11y.AXUIElement):
       return cls.getAppRefByPid(pid)
 
    @classmethod
+   def _getApps(cls):
+       '''getApps - return a list of NSRunningApplication objects for all
+          applications currently running.
+       '''
+       # Refresh the runningApplications list
+       def runLoopAndExit():
+          AppHelper.stopEventLoop()
+       AppHelper.callLater(1, runLoopAndExit)
+       AppHelper.runConsoleEventLoop()
+       # Get a list of running applications
+       ws = AppKit.NSWorkspace.sharedWorkspace()
+       return ws.runningApplications()
+
+   @classmethod
    def getAppRefByLocalizedName(cls, name):
       '''getAppRefByLocalizedName - Get the top level element for the
          application with the specified localized name, such as
@@ -69,19 +83,16 @@ class BaseAXUIElement(_a11y.AXUIElement):
 
          Wildcards are also allowed.
       '''
-      # Refresh the runningApplications list
-      def runLoopAndExit():
-         AppHelper.stopEventLoop()
-      AppHelper.callLater(1, runLoopAndExit)
-      AppHelper.runConsoleEventLoop()
-      # Get a list of running applications
-      ws = AppKit.NSWorkspace.sharedWorkspace()
-      apps = ws.runningApplications()
+      apps = cls._getApps()
       for app in apps:
          if fnmatch.fnmatch(app.localizedName(), name):
             pid = app.processIdentifier()
             return cls.getAppRefByPid(pid)
       raise ValueError('Specified application not found in running apps.')
+
+   @classmethod
+   def getAppLocalizedNames(cls):
+      ''''''
 
    @classmethod
    def getSystemObject(cls):
