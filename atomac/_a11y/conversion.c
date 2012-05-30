@@ -118,8 +118,8 @@ CGValueToPyTuple(AXValueRef value) //IN: AXValueRef to convert
       if (AXValueGetValue(value,kAXValueCGSizeType,&size) == 0){
 		 return NULL;
       }
-	  val1 = size.width;
-	  val2 = size.height;
+	  val1 = (int)size.width;
+	  val2 = (int)size.height;
    }
 
    if (kAXValueCGPointType == AXValueGetType(value)){
@@ -127,8 +127,8 @@ CGValueToPyTuple(AXValueRef value) //IN: AXValueRef to convert
       if (AXValueGetValue(value,kAXValueCGPointType,&point) == 0){
 		 return NULL;
       }
-	  val1 = point.x;
-	  val2 = point.y;
+	  val1 = (int)point.x;
+	  val2 = (int)point.y;
    }
 
    PyTuple_SetItem(tuple,0,Py_BuildValue("i",val1));

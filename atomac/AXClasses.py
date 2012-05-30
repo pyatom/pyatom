@@ -70,6 +70,18 @@ class BaseAXUIElement(_a11y.AXUIElement):
          Wildcards are also allowed.
       '''
       # Refresh the runningApplications list
+      apps = cls.listGuis()
+      for app in apps:
+         if fnmatch.fnmatch(app.localizedName(), name):
+            pid = app.processIdentifier()
+            return cls.getAppRefByPid(pid)
+      raise ValueError('Specified application not found in running apps.')
+
+   @classmethod
+   def listGuis(cls):
+      '''listGuis - List all current GUI.
+      '''
+      # Refresh the runningApplications list
       def runLoopAndExit():
          AppHelper.stopEventLoop()
       AppHelper.callLater(1, runLoopAndExit)
@@ -77,11 +89,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
       # Get a list of running applications
       ws = AppKit.NSWorkspace.sharedWorkspace()
       apps = ws.runningApplications()
-      for app in apps:
-         if fnmatch.fnmatch(app.localizedName(), name):
-            pid = app.processIdentifier()
-            return cls.getAppRefByPid(pid)
-      raise ValueError('Specified application not found in running apps.')
+      return apps
 
    @classmethod
    def getSystemObject(cls):
