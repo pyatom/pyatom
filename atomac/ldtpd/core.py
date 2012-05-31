@@ -1,4 +1,4 @@
-# Copyright (c) 2010 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2012 VMware, Inc. All Rights Reserved.
 
 # This file is part of ATOMac.
 
@@ -14,6 +14,19 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # St, Fifth Floor, Boston, MA 02110-1301 USA.
+"""Core class to be exposed via XMLRPC in LDTP daemon."""
 
 
-__version__ = '0.9.4'
+import atomac
+
+
+class Ldtpd(object):
+    """Core LDTP class"""
+    def getapplist(self):
+        """
+        Get all currently running application names
+
+        @return: list of unicode application names
+        @rtype: list
+        """
+        app_list = []

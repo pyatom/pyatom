@@ -1,4 +1,4 @@
-# Copyright (c) 2010 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2012 VMware, Inc. All Rights Reserved.
 
 # This file is part of ATOMac.
 
@@ -14,6 +14,4 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # St, Fifth Floor, Boston, MA 02110-1301 USA.
-
-
-__version__ = '0.9.4'
+"""Main routines for LDTP"""
