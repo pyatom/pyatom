@@ -17,10 +17,15 @@
 """Core class to be exposed via XMLRPC in LDTP daemon."""
 
 
+import re
 import atomac
-
+import fnmatch
+import atomac.AXClasses as AXClasses
 
 class Ldtpd(object):
+    def __init__(self):
+        self.uiElement = AXClasses.NativeUIElement()
+
     """Core LDTP class"""
     def getapplist(self):
         """
@@ -30,3 +35,95 @@ class Ldtpd(object):
         @rtype: list
         """
         app_list = []
+        for gui in self.uiElement._getApps():
+            app_list.append(gui.localizedName())
+        # Return unique application list
+        return list(set(app_list))
+
+    def _getwindows(self):
+        windows = []
+        for gui in set(self.uiElement._getApps()):
+            # Get process id
+            pid = gui.processIdentifier()
+            # Get app id
+            app = atomac.getAppRefByPid(pid)
+            # Navigate all the windows
+            for window in app.windows():
+                if not window:
+                    continue
+                windows.append(window)
+        return windows
+
+    def _getvalue(self, obj):
+        value = None
+        try:
+            value=obj.AXValue
+        except Exception:
+            try:
+                value=obj.AXRoleDescription
+            except Exception:
+                pass
+        return value
+
+    def _getwindowtitle(self, window):
+        title = None
+        try:
+            title=window.AXTitle
+        except Exception:
+            try:
+                title=window.AXValue
+            except Exception:
+                try:
+                    title=window.AXRoleDescription
+                except Exception:
+                    pass
+        return title
+
+    def _getrole(self, obj):
+        role = None
+        try:
+            role=obj.AXRole
+        except Exception:
+            pass
+        return role
+
+    def _getwindowhandle(self, windowName):
+        if not windowName:
+            return None
+        windowName = fnmatch.translate(windowName)
+        for window in set(self._getwindows()):
+            currentWindowName = self._getwindowtitle(window)
+            #print currentWindowName, windowName
+            if currentWindowName and re.match(windowName, currentWindowName):
+                return window
+        return None
+
+    def getobjectlist(self, windowName):
+        if not windowName:
+            return []
+        objectList = {}
+        windowHandle = self._getwindowhandle(windowName)
+        currentWindowName = self._getwindowtitle(windowHandle)
+        for obj in windowHandle.findAllR():
+            key = self._getrole(obj) + str(self._getvalue(obj))
+            objectList[key] = obj
+        return objectList
+
+    def getwindowlist(self):
+        windowList = []
+        # Navigate all the windows
+        for window in self._getwindows():
+            if not window:
+                continue
+            title = self._getwindowtitle(window)
+            role = self._getwindowrole(window)
+            #print window.getAttributes(), title, role
+            if title:
+                windowList.append(title)
+        return windowList
+
+if __name__ == "__main__":
+    test = Ldtpd()
+    #print test.getapplist()
+    #print test.getwindowlist()
+    print test.getobjectlist("*Contacts*")
