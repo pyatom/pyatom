@@ -35,37 +35,22 @@ class Core(Utils):
         @rtype: list
         """
         app_list = []
-        for gui in self.running_apps:
+        for gui in self._running_apps:
             app_list.append(gui.localizedName())
         # Return unique application list
         return list(set(app_list))
 
-    def getobjectlist(self, windowName):
-        if not windowName:
-            return []
-        objectList = {}
-        windowHandle = self._getwindowhandle(windowName)
-        currentWindowName = self._getwindowtitle(windowHandle)
-        for obj in windowHandle.findAllR():
-            try:
-                key = u"%s%s" % (self._getrole(obj), self._getvalue(obj))
-            except UnicodeEncodeError:
-                key = u"%s%s" % (self._getrole(obj), self._getvalue(obj).decode('utf-8'))
-            objectList[key] = obj
-        return objectList
-
     def getwindowlist(self):
-        windowList = []
-        # Navigate all the windows
-        for window in self._getwindows():
-            if not window:
-                continue
-            title = self._getwindowtitle(window)
-            role = self._getrole(window)
-            #print window.getAttributes(), title, role
-            if title:
-                windowList.append(title)
-        return windowList
+        return self._get_windows().keys()
+
+    def getobjectlist(self, window_name):
+        if not window_name:
+            return {}
+        window_handle = self._get_window_handle(window_name)
+        if not window_handle:
+            return {}
+        object_list = self._populate_appmap(window_handle)
+        return object_list.keys()
 
 if __name__ == "__main__":
     test = Core()
