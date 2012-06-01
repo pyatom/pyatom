@@ -17,12 +17,25 @@
 """Constants class."""
 
 abbreviated_roles = {
-                     'AXWindow' : 'frm',
-                     'AXTextArea' : 'txt',
-                     'AXTextField' : 'txt',
-                     'AXButton' : 'btn',
-                     'AXStaticText' : 'lbl',
-                     'AXRadioButton' : 'rbtn',
-                     'AXSlider' : 'sldr',
-                     'AXRow' : 'tblc'
+                     "AXWindow" : "frm",
+                     "AXTextArea" : "txt",
+                     "AXTextField" : "txt",
+                     "AXButton" : "btn",
+                     "AXStaticText" : "lbl",
+                     "AXRadioButton" : "rbtn",
+                     "AXSlider" : "sldr",
+                     "AXCell" : "tblc",
+                     "AXImage" : "img",
+                     "AXToolbar" : "tbar",
+                     "AXScrollBar" : "scbr",
+                     "AXMenuItem" : "mnu",
+                      # Not sure what"s the following object equivalent in LDTP
+                     "AXMenuButton" : "cbo", # Maybe combo-box ?
+                     "AXRow" : "tblc",
+                     "AXColumn" : "tblc",
+                     "AXScrollArea" : "sar",
+                     "AXOutline" : "otl",
+                     "AXValueIndicator" : "val",
+                     "AXDisclosureTriangle" : "dct",
+                     "AXGroup" : "grp",
                      }

@@ -21,8 +21,10 @@ import atomac
 import fnmatch
 
 from utils import Utils
+from combo_box import ComboBox
+from server_exception import LdtpServerException
 
-class Core(Utils):
+class Core(Utils, ComboBox):
     def __init__(self):
         Utils.__init__(self)
 
@@ -46,14 +48,24 @@ class Core(Utils):
     def getobjectlist(self, window_name):
         if not window_name:
             return {}
-        window_handle = self._get_window_handle(window_name)
+        window_handle, window_name = self._get_window_handle(window_name)
         if not window_handle:
             return {}
-        object_list = self._populate_appmap(window_handle)
+        object_list = self._get_appmap(window_handle, window_name)
         return object_list.keys()
+
+    def click(self, window_name, object_name):
+        object_handle = self._get_object_handle(window_name, object_name)
+        if not object_handle:
+            raise LdtpServerException(u"Unable to find object %s" % object_name)
+        object_handle.Press()
+        return 1
 
 if __name__ == "__main__":
     test = Core()
-    print test.getapplist()
-    print test.getwindowlist()
-    print test.getobjectlist("*Contacts*")
+    #print test.getapplist()
+    #print test.getwindowlist()
+    #print test.getobjectlist("Contacts")
+    #print test.click("Open", "Cancel")
+    #print test.comboselect("frmInstruments", "cboAdd", "UiAutomation.js")
+    print test.comboselect("frmInstruments", "Choose Target", "Choose Target")
