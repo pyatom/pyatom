@@ -17,6 +17,7 @@
 """Core class to be exposed via XMLRPC in LDTP daemon."""
 
 import re
+import time
 import atomac
 import fnmatch
 
@@ -54,12 +55,104 @@ class Core(Utils, ComboBox):
         object_list = self._get_appmap(window_handle, window_name)
         return object_list.keys()
 
+    def wait(self, timeout = 5):
+        time.sleep(timeout)
+        return 1
+
     def click(self, window_name, object_name):
         object_handle = self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
+        if not object_handle.AXEnabled:
+            raise LdtpServerException(u"Object %s state disabled" % object_name)
         object_handle.Press()
         return 1
+
+    def getobjectsize(self, window_name, object_name = None):
+        if not object_name: 
+            window_handle, window_name = self._get_window_handle(window_name)
+            if not window_handle:
+                raise LdtpServerException(u"Unable to find window %s" % object_name)
+            x, y = window_handle.AXPosition
+            width, height = window_handle.AXSize
+        else:
+            object_handle = self._get_object_handle(window_name, object_name)
+            if not object_handle:
+                raise LdtpServerException(u"Unable to find object %s" % object_name)
+            x, y = object_handle.AXPosition
+            width, height = object_handle.AXSize
+        return x, y, width, height
+
+    def getwindowsize(self, window_name):
+        return self.getobjectsize(window_name)
+
+    def grabfocus(self, window_name, object_name = None):
+        if not object_name: 
+            window_handle, window_name = self._get_window_handle(window_name)
+            if not window_handle:
+                raise LdtpServerException(u"Unable to find window %s" % object_name)
+            window_handle.AXWindow.Raise()
+        else:
+            object_handle = self._get_object_handle(window_name, object_name)
+            if not object_handle:
+                raise LdtpServerException(u"Unable to find object %s" % object_name)
+            object_handle.AXWindow.Raise()
+        return 1
+
+    def check(self, window_name, object_name):
+        # FIXME: Check for object type
+        object_handle = self._get_object_handle(window_name, object_name)
+        if not object_handle:
+            raise LdtpServerException(u"Unable to find object %s" % object_name)
+        if not object_handle.AXEnabled:
+            raise LdtpServerException(u"Object %s state disabled" % object_name)
+        if object_handle.AXValue == 1:
+            # Already checked
+            return 1
+        # AXPress doesn't work with Instruments
+        # So did the following work around
+        self.grabfocus(window_name, object_name)
+        x, y, width, height = self.getobjectsize(window_name, object_name)
+        # Mouse left click on the object
+        # Note: x + width/2, y + height / 2 doesn't work
+        object_handle.clickMouseButtonLeft((x + width / 2, y + height / 2))
+        return 1
+
+    def uncheck(self, window_name, object_name):
+        object_handle = self._get_object_handle(window_name, object_name)
+        if not object_handle:
+            raise LdtpServerException(u"Unable to find object %s" % object_name)
+        if not object_handle.AXEnabled:
+            raise LdtpServerException(u"Object %s state disabled" % object_name)
+        if object_handle.AXValue == 0:
+            # Already unchecked
+            return 1
+        # AXPress doesn't work with Instruments
+        # So did the following work around
+        self.grabfocus(window_name, object_name)
+        x, y, width, height = self.getobjectsize(window_name, object_name)
+        # Mouse left click on the object
+        # Note: x + width/2, y + height / 2 doesn't work
+        object_handle.clickMouseButtonLeft((x + width / 2, y + height / 2))
+        return 1
+
+    def verifycheck(self, window_name, object_name):
+        object_handle = self._get_object_handle(window_name, object_name,
+                                                wait_for_object = False)
+        if not object_handle:
+            return 0
+        if object_handle.AXValue == 1:
+            return 1
+        return 0
+
+    def verifyuncheck(self, window_name, object_name):
+        object_handle = self._get_object_handle(window_name, object_name,
+                                                wait_for_object = False)
+        if not object_handle:
+            return 0
+        if object_handle.AXValue == 0:
+            return 1
+        return 0
 
 if __name__ == "__main__":
     test = Core()
@@ -68,4 +161,11 @@ if __name__ == "__main__":
     #print test.getobjectlist("Contacts")
     #print test.click("Open", "Cancel")
     #print test.comboselect("frmInstruments", "cboAdd", "UiAutomation.js")
-    print test.comboselect("frmInstruments", "Choose Target", "Choose Target")
+    #print test.comboselect("frmInstruments", "Choose Target", "Choose Target")
+    #print test.getobjectlist("frmInstruments")
+    #print test.check("frmInstruments", "chkRecordOnce")
+    #print test.wait(1)
+    #print test.uncheck("frmInstruments", "chkRepeatRecording")
+    #print test.uncheck("frmInstruments", "chkPause")
+    #print test.verifyuncheck("frmInstruments", "chkPause")
+    #print test.verifycheck("frmInstruments", "chkRepeatRecording")

@@ -110,7 +110,16 @@ class Utils:
     def _get_title(self, obj):
         title = ""
         try:
-            title=obj.AXTitle
+            title=None
+            checkBox = re.match("AXCheckBox", obj.AXRole, re.M | re.U | re.L)
+            if checkBox:
+                # Instruments doesn't have AXTitle, AXValue for AXCheckBox
+                try:
+                    title=obj.AXHelp
+                except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
+                    pass
+            if not title:
+                title=obj.AXTitle
         except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
             try:
                 title=obj.AXValue
@@ -173,7 +182,8 @@ class Utils:
             windows = self._get_windows(True)
         return window_obj
 
-    def _get_object_handle(self, window_name, obj_name, obj_type = None):
+    def _get_object_handle(self, window_name, obj_name, obj_type = None,
+                           wait_for_object = True):
         window_handle, ldtp_window_name = self._get_window_handle(window_name)
         if not window_handle or not window_name:
             raise LdtpServerException(u"Unable to find window %s" % window_name)
@@ -209,12 +219,19 @@ class Utils:
                     # FIXME: Check object validity before returning
                     # if object state is invalid, then remap
                     return object_list[obj]["obj"]
-        for retry in range(0, self._obj_timeout):
+        if wait_for_object:
+            obj_timeout = self._obj_timeout
+        else:
+            # don't wait for the object 
+            obj_timeout = 1
+        for retry in range(0, obj_timeout):
             obj = _internal_get_object_handle(object_list)
             if obj:
                 # If object found, return immediately
                 return obj
-            print 'retrying: ', retry
+            if obj_timeout <= 1:
+                # Don't wait for the object
+                break
             time.sleep(1)
             # Force remap
             object_list = self._get_appmap(window_handle,
