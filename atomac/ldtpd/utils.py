@@ -84,6 +84,7 @@ class Utils:
         # Get child_index, obj_index
         obj_dict[key] = {"obj" : obj, "class" : self._get_role(obj),
                          "label" : ldtpized_name[1]}
+        return key
 
     def _get_windows(self, force_remap = False):
         if not force_remap and self._windows:
@@ -102,7 +103,8 @@ class Utils:
             for window in app.windows():
                 if not window:
                     continue
-                self._insert_obj(windows, window)
+                key = self._insert_obj(windows, window)
+                windows[key]["app"] = app
         # Replace existing windows list
         self._windows = windows
         return windows
@@ -142,8 +144,21 @@ class Utils:
         # Current opened applications list will be updated
         self._running_apps = atomac.NativeUIElement._getApps()
 
-    def _get_window_handle(self, window_name):
-        window_obj = (None, None)
+    def _grabfocus(self, handle):
+        if not handle:
+            raise LdtpServerException("Invalid handle")
+        handle.AXWindow.Raise()
+        return 1
+
+    def _getobjectsize(self, handle):
+        if not handle:
+            raise LdtpServerException("Invalid handle")
+        x, y = handle.AXPosition
+        width, height = handle.AXSize
+        return x, y, width, height
+
+    def _get_window_handle(self, window_name, wait_for_window = True):
+        window_obj = (None, None, None)
         if not window_name:
             return window_obj
         strip = r"( |\n)"
@@ -171,20 +186,28 @@ class Utils:
                         re.match(stripped_window_name, label) or \
                         re.match(stripped_window_name, stripped_label):
                     # Return window handle and window name
-                    return (windows[window]["obj"], window)
-            return (None, None)
-        for retry in range(0, self._window_timeout):
+                    return (windows[window]["obj"], window, windows[window]["app"])
+            return (None, None, None)
+        if wait_for_window:
+            window_timeout = self._obj_timeout
+        else:
+            # don't wait for the window 
+            window_timeout = 1
+        for retry in range(0, window_timeout):
             window_obj = _internal_get_window_handle(windows)
             if window_obj:
                 # If window object found, return immediately
                 return window_obj
+            if window_timeout <= 1:
+                # Don't wait for the window
+                break
             time.sleep(1)
             windows = self._get_windows(True)
         return window_obj
 
     def _get_object_handle(self, window_name, obj_name, obj_type = None,
                            wait_for_object = True):
-        window_handle, ldtp_window_name = self._get_window_handle(window_name)
+        window_handle, ldtp_window_name, app = self._get_window_handle(window_name)
         if not window_handle or not window_name:
             raise LdtpServerException(u"Unable to find window %s" % window_name)
         strip = r"( |:|\.|_|\n)"

@@ -21,11 +21,13 @@ import time
 import atomac
 import fnmatch
 
+from menu import Menu
+from mouse import Mouse
 from utils import Utils
 from combo_box import ComboBox
 from server_exception import LdtpServerException
 
-class Core(Utils, ComboBox):
+class Core(Utils, ComboBox, Menu, Mouse):
     def __init__(self):
         Utils.__init__(self)
 
@@ -48,11 +50,11 @@ class Core(Utils, ComboBox):
 
     def getobjectlist(self, window_name):
         if not window_name:
-            return {}
-        window_handle, window_name = self._get_window_handle(window_name)
+            raise LdtpServerException(u"Invalid argument window_name")
+        window_handle, name, app = self._get_window_handle(window_name)
         if not window_handle:
-            return {}
-        object_list = self._get_appmap(window_handle, window_name)
+            raise LdtpServerException(u"Unable to find window %s" % window_name)
+        object_list = self._get_appmap(window_handle, name)
         return object_list.keys()
 
     def wait(self, timeout = 5):
@@ -69,34 +71,46 @@ class Core(Utils, ComboBox):
         return 1
 
     def getobjectsize(self, window_name, object_name = None):
+        handle = None
         if not object_name: 
-            window_handle, window_name = self._get_window_handle(window_name)
+            window_handle, name, app = self._get_window_handle(window_name)
             if not window_handle:
-                raise LdtpServerException(u"Unable to find window %s" % object_name)
-            x, y = window_handle.AXPosition
-            width, height = window_handle.AXSize
+                raise LdtpServerException(u"Unable to find window %s" % window_name)
+            handle = window_handle
         else:
             object_handle = self._get_object_handle(window_name, object_name)
             if not object_handle:
                 raise LdtpServerException(u"Unable to find object %s" % object_name)
-            x, y = object_handle.AXPosition
-            width, height = object_handle.AXSize
-        return x, y, width, height
+            handle = object_handle
+        return self._getobjectsize(handle)
 
     def getwindowsize(self, window_name):
         return self.getobjectsize(window_name)
 
     def grabfocus(self, window_name, object_name = None):
-        if not object_name: 
-            window_handle, window_name = self._get_window_handle(window_name)
+        handle = None
+        if not object_name:
+            window_handle, name, app = self._get_window_handle(window_name)
             if not window_handle:
-                raise LdtpServerException(u"Unable to find window %s" % object_name)
-            window_handle.AXWindow.Raise()
+                raise LdtpServerException(u"Unable to find window %s" % window_name)
+            handle = window_handle
         else:
             object_handle = self._get_object_handle(window_name, object_name)
             if not object_handle:
                 raise LdtpServerException(u"Unable to find object %s" % object_name)
-            object_handle.AXWindow.Raise()
+            handle = object_handle
+        return self._grabfocus(handle)
+
+    def objectexist(self, window_name, object_name):
+        object_handle = self._get_object_handle(window_name, object_name)
+        if not object_handle:
+            return 0
+        return 1
+
+    def stateenabled(self, window_name, object_name):
+        object_handle = self._get_object_handle(window_name, object_name)
+        if not object_handle or not object_handle.AXEnabled:
+            return 0
         return 1
 
     def check(self, window_name, object_name):
@@ -111,8 +125,8 @@ class Core(Utils, ComboBox):
             return 1
         # AXPress doesn't work with Instruments
         # So did the following work around
-        self.grabfocus(window_name, object_name)
-        x, y, width, height = self.getobjectsize(window_name, object_name)
+        self.grabfocus(object_handle)
+        x, y, width, height = self.getobjectsize(object_handle)
         # Mouse left click on the object
         # Note: x + width/2, y + height / 2 doesn't work
         object_handle.clickMouseButtonLeft((x + width / 2, y + height / 2))
@@ -129,8 +143,8 @@ class Core(Utils, ComboBox):
             return 1
         # AXPress doesn't work with Instruments
         # So did the following work around
-        self.grabfocus(window_name, object_name)
-        x, y, width, height = self.getobjectsize(window_name, object_name)
+        self.grabfocus(object_handle)
+        x, y, width, height = self.getobjectsize(object_handle)
         # Mouse left click on the object
         # Note: x + width/2, y + height / 2 doesn't work
         object_handle.clickMouseButtonLeft((x + width / 2, y + height / 2))
@@ -156,8 +170,10 @@ class Core(Utils, ComboBox):
 
 if __name__ == "__main__":
     test = Core()
-    #print test.getapplist()
-    #print test.getwindowlist()
+    apps = test.getapplist()
+    windows = test.getwindowlist()
+    #print len(apps), len(windows)
+    #print apps, windows
     #print test.getobjectlist("Contacts")
     #print test.click("Open", "Cancel")
     #print test.comboselect("frmInstruments", "cboAdd", "UiAutomation.js")
@@ -169,3 +185,19 @@ if __name__ == "__main__":
     #print test.uncheck("frmInstruments", "chkPause")
     #print test.verifyuncheck("frmInstruments", "chkPause")
     #print test.verifycheck("frmInstruments", "chkRepeatRecording")
+    #print test.selectmenuitem("Instruments", "File;Open*")
+    #print test.doesmenuitemexist("Instru", "File;Open...")
+    #print test.doesmenuitemexist("Instruments", "File;Open...")
+    #print test.doesmenuitemexist("Instruments", "File;Open*")
+    #print test.checkmenu("Instruments", "View;Instruments")
+    #test.wait(1)
+    #print test.checkmenu("Instruments", "View;Instruments")
+    #print test.uncheckmenu("Instruments", "View;Instruments")
+    #test.wait(1)
+    #print test.verifymenucheck("Instruments", "View;Instruments")
+    #print test.verifymenuuncheck("Instruments", "View;Instruments")
+    #print test.checkmenu("Instruments", "View;Instruments")
+    #test.wait(1)
+    #print test.verifymenucheck("Instruments", "View;Instruments")
+    #print test.verifymenuuncheck("Instruments", "View;Instruments")
+    print test.mouseleftclick("Open", "Cancel")
