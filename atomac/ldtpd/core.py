@@ -22,12 +22,13 @@ import atomac
 import fnmatch
 
 from menu import Menu
+from text import Text
 from mouse import Mouse
 from utils import Utils
 from combo_box import ComboBox
 from server_exception import LdtpServerException
 
-class Core(Utils, ComboBox, Menu, Mouse):
+class Core(Utils, ComboBox, Menu, Mouse, Text):
     def __init__(self):
         Utils.__init__(self)
 
@@ -200,4 +201,11 @@ if __name__ == "__main__":
     #test.wait(1)
     #print test.verifymenucheck("Instruments", "View;Instruments")
     #print test.verifymenuuncheck("Instruments", "View;Instruments")
-    print test.mouseleftclick("Open", "Cancel")
+    #print test.mouseleftclick("Open", "Cancel")
+    a = test.getobjectlist("Open")
+    for i in a:
+        if i.find("txt") != -1:
+            print i
+    print test.settextvalue("Open", "txttextfield", "hello world")
+    print test.gettextvalue("Open", "txttextfield")
+    print test.getcharcount("Open", "txttextfield")

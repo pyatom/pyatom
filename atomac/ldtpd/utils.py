@@ -124,7 +124,11 @@ class Utils:
                 title=obj.AXTitle
         except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
             try:
-                title=obj.AXValue
+                text = re.match("AXTextField", obj.AXRole, re.M | re.U | re.L)
+                if text:
+                    title=obj.AXFilename
+                else:
+                    title=obj.AXValue
             except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
                 try:
                     title=obj.AXRoleDescription
