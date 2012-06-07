@@ -186,26 +186,44 @@ if __name__ == "__main__":
     #print test.uncheck("frmInstruments", "chkPause")
     #print test.verifyuncheck("frmInstruments", "chkPause")
     #print test.verifycheck("frmInstruments", "chkRepeatRecording")
-    #print test.selectmenuitem("Instruments", "File;Open*")
-    #print test.doesmenuitemexist("Instru", "File;Open...")
-    #print test.doesmenuitemexist("Instruments", "File;Open...")
-    #print test.doesmenuitemexist("Instruments", "File;Open*")
-    #print test.checkmenu("Instruments", "View;Instruments")
+    #print test.doesmenuitemexist("Instru*", "File;Open...")
+    #print test.doesmenuitemexist("Instruments*", "File;Open...")
+    #print test.doesmenuitemexist("Instruments*", "File;Open*")
+    #print test.selectmenuitem("Instruments*", "File;Open*")
+    #print test.checkmenu("Instruments*", "View;Instruments")
     #test.wait(1)
-    #print test.checkmenu("Instruments", "View;Instruments")
-    #print test.uncheckmenu("Instruments", "View;Instruments")
+    #print test.checkmenu("Instruments*", "View;Instruments")
+    #print test.uncheckmenu("Instruments*", "View;Instruments")
     #test.wait(1)
-    #print test.verifymenucheck("Instruments", "View;Instruments")
-    #print test.verifymenuuncheck("Instruments", "View;Instruments")
-    #print test.checkmenu("Instruments", "View;Instruments")
+    #print test.verifymenucheck("Instruments*", "View;Instruments")
+    #print test.verifymenuuncheck("Instruments*", "View;Instruments")
+    #print test.checkmenu("Instruments*", "View;Instruments")
     #test.wait(1)
-    #print test.verifymenucheck("Instruments", "View;Instruments")
-    #print test.verifymenuuncheck("Instruments", "View;Instruments")
+    #print test.verifymenucheck("Instruments*", "View;Instruments")
+    #print test.verifymenuuncheck("Instruments*", "View;Instruments")
     #print test.mouseleftclick("Open", "Cancel")
-    a = test.getobjectlist("Open")
-    for i in a:
-        if i.find("txt") != -1:
-            print i
-    print test.settextvalue("Open", "txttextfield", "hello world")
+    #a = test.getobjectlist("Open")
+    #for i in a:
+    #    if i.find("txt") != -1:
+    #        print i
+    print test.settextvalue("Open", "txttextfield", "pyatom ldtp")
     print test.gettextvalue("Open", "txttextfield")
     print test.getcharcount("Open", "txttextfield")
+    #print test.menuitemenabled("Instruments*", "File;Record Trace")
+    #print test.menuitemenabled("Instruments*", "File;Pause Trace")
+    #print test.listsubmenus("Instruments*", "Fi*")
+    #print test.listsubmenus("Instruments*", "File;OpenRecent")
+    #print test.listsubmenus("Instruments*", "File;mnuOpenRecent")
+    #print test.listsubmenus("Instruments*", "File;GetInfo")
+    try:
+        print test.listsubmenus("Instruments*", "File;ding")
+    except LdtpServerException:
+        pass
+    try:
+        print test.listsubmenus("Instruments*", "ding")
+    except LdtpServerException:
+        pass
+    try:
+        print test.listsubmenus("ding", "dong")
+    except LdtpServerException:
+        pass
