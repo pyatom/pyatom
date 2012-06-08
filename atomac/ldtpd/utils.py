@@ -24,7 +24,7 @@ import fnmatch
 from constants import abbreviated_roles
 from server_exception import LdtpServerException
 
-class Utils:
+class Utils(object):
     def __init__(self):
         self._appmap = {}
         self._windows = {}

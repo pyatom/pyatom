@@ -28,9 +28,9 @@ from utils import Utils
 from combo_box import ComboBox
 from server_exception import LdtpServerException
 
-class Core(Utils, ComboBox, Menu, Mouse, Text):
+class Core(ComboBox, Menu, Mouse, Text):
     def __init__(self):
-        Utils.__init__(self)
+        super(Core, self).__init__()
 
     """Core LDTP class"""
     def getapplist(self):
@@ -206,9 +206,9 @@ if __name__ == "__main__":
     #for i in a:
     #    if i.find("txt") != -1:
     #        print i
-    print test.settextvalue("Open", "txttextfield", "pyatom ldtp")
-    print test.gettextvalue("Open", "txttextfield")
-    print test.getcharcount("Open", "txttextfield")
+    #print test.settextvalue("Open", "txttextfield", "pyatom ldtp")
+    #print test.gettextvalue("Open", "txttextfield")
+    #print test.getcharcount("Open", "txttextfield")
     #print test.menuitemenabled("Instruments*", "File;Record Trace")
     #print test.menuitemenabled("Instruments*", "File;Pause Trace")
     #print test.listsubmenus("Instruments*", "Fi*")
