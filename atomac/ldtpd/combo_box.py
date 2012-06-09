@@ -23,6 +23,21 @@ from server_exception import LdtpServerException
 
 class ComboBox(Utils):
     def selectitem(self, window_name, object_name, item_name):
+        """
+        Select combo box / layered pane item
+        
+        @param window_name: Window name to type in, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to type in, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+        @param item_name: Item name to select
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
         object_handle = self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)

@@ -35,9 +35,9 @@ class Core(ComboBox, Menu, Mouse, Text):
     """Core LDTP class"""
     def getapplist(self):
         """
-        Get all currently running application names
-
-        @return: list of unicode application names
+        Get all accessibility application name that are currently running
+        
+        @return: list of appliction name of string type on success.
         @rtype: list
         """
         app_list = []
@@ -47,9 +47,35 @@ class Core(ComboBox, Menu, Mouse, Text):
         return list(set(app_list))
 
     def getwindowlist(self):
+        """
+        Get all accessibility window that are currently open
+        
+        @return: list of window names in LDTP format of string type on success.
+        @rtype: list
+        """
         return self._get_windows().keys()
 
+    def isalive(self):
+        """
+        Client will use this to verify whether the server instance is alive or not.
+
+        @return: True on success.
+        @rtype: boolean
+        """
+
+        return True
+
     def getobjectlist(self, window_name):
+        """
+        Get list of items in given GUI.
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+
+        @return: list of items in LDTP naming convention.
+        @rtype: list
+        """
         if not window_name:
             raise LdtpServerException(u"Invalid argument window_name")
         window_handle, name, app = self._get_window_handle(window_name)
@@ -59,10 +85,32 @@ class Core(ComboBox, Menu, Mouse, Text):
         return object_list.keys()
 
     def wait(self, timeout = 5):
+        """
+        Wait a given amount of seconds.
+
+        @param timeout: Wait timeout in seconds
+        @type timeout: double
+
+        @return: 1
+        @rtype: integer
+        """
         time.sleep(timeout)
         return 1
 
     def click(self, window_name, object_name):
+        """
+        Click item.
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
         object_handle = self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
@@ -72,6 +120,19 @@ class Core(ComboBox, Menu, Mouse, Text):
         return 1
 
     def getobjectsize(self, window_name, object_name = None):
+        """
+        Get object size
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. Or menu heirarchy
+        @type object_name: string
+
+        @return: x, y, width, height on success.
+        @rtype: list
+        """
         handle = None
         if not object_name: 
             window_handle, name, app = self._get_window_handle(window_name)
@@ -86,9 +147,31 @@ class Core(ComboBox, Menu, Mouse, Text):
         return self._getobjectsize(handle)
 
     def getwindowsize(self, window_name):
+        """
+        Get window size.
+        
+        @param window_name: Window name to get size of.
+        @type window_name: string
+
+        @return: list of dimensions [x, y, w, h]
+        @rtype: list
+        """
         return self.getobjectsize(window_name)
 
     def grabfocus(self, window_name, object_name = None):
+        """
+        Grab focus.
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
         handle = None
         if not object_name:
             window_handle, name, app = self._get_window_handle(window_name)
@@ -103,18 +186,57 @@ class Core(ComboBox, Menu, Mouse, Text):
         return self._grabfocus(handle)
 
     def objectexist(self, window_name, object_name):
+        """
+        Checks whether a window or component exists.
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type object_name: string
+
+        @return: 1 if GUI was found, 0 if not.
+        @rtype: integer
+        """
         object_handle = self._get_object_handle(window_name, object_name)
         if not object_handle:
             return 0
         return 1
 
     def stateenabled(self, window_name, object_name):
+        """
+        Check whether an object state is enabled or not
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: 1 on success 0 on failure.
+        @rtype: integer
+        """
         object_handle = self._get_object_handle(window_name, object_name)
         if not object_handle or not object_handle.AXEnabled:
             return 0
         return 1
 
     def check(self, window_name, object_name):
+        """
+        Check item.
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
         # FIXME: Check for object type
         object_handle = self._get_object_handle(window_name, object_name)
         if not object_handle:
@@ -134,6 +256,19 @@ class Core(ComboBox, Menu, Mouse, Text):
         return 1
 
     def uncheck(self, window_name, object_name):
+        """
+        Uncheck item.
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
         object_handle = self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
@@ -152,6 +287,19 @@ class Core(ComboBox, Menu, Mouse, Text):
         return 1
 
     def verifycheck(self, window_name, object_name):
+        """
+        Verify check item.
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: 1 on success 0 on failure.
+        @rtype: integer
+        """
         object_handle = self._get_object_handle(window_name, object_name,
                                                 wait_for_object = False)
         if not object_handle:
@@ -161,6 +309,19 @@ class Core(ComboBox, Menu, Mouse, Text):
         return 0
 
     def verifyuncheck(self, window_name, object_name):
+        """
+        Verify uncheck item.
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: 1 on success 0 on failure.
+        @rtype: integer
+        """
         object_handle = self._get_object_handle(window_name, object_name,
                                                 wait_for_object = False)
         if not object_handle:
@@ -227,3 +388,4 @@ if __name__ == "__main__":
         print test.listsubmenus("ding", "dong")
     except LdtpServerException:
         pass
+    print test.getcursorposition("Open", "txttextfield")

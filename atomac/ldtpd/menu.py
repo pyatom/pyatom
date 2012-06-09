@@ -55,6 +55,19 @@ class Menu(Utils):
         return menu_handle
 
     def selectmenuitem(self, window_name, object_name):
+        """
+        Select (click) a menu item.
+
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. Or menu heirarchy
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
         menu_handle = self._internal_menu_handler(window_name, object_name)
         if not menu_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
@@ -62,6 +75,21 @@ class Menu(Utils):
         return 1
 
     def doesmenuitemexist(self, window_name, object_name):
+        """
+        Check a menu item exist.
+
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. Or menu heirarchy
+        @type object_name: string
+        @param strict_hierarchy: Mandate menu hierarchy if set to True
+        @type object_name: boolean
+
+        @return: 1 on success.
+        @rtype: integer
+        """
         try:
             menu_handle = self._internal_menu_handler(window_name, object_name,
                                                       False)
@@ -70,6 +98,19 @@ class Menu(Utils):
             return 0
 
     def menuitemenabled(self, window_name, object_name):
+        """
+        Verify a menu item is enabled
+
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. Or menu heirarchy
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
         try:
             menu_handle = self._internal_menu_handler(window_name, object_name,
                                                       False)
@@ -80,6 +121,19 @@ class Menu(Utils):
         return 0
 
     def listsubmenus(self, window_name, object_name):
+        """
+        List children of menu item
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. Or menu heirarchy
+        @type object_name: string
+
+        @return: menu item in list on success.
+        @rtype: list
+        """
         menu_handle = self._internal_menu_handler(window_name, object_name)
         role, label = self._ldtpize_accessible(menu_handle) 
         if not menu_handle.AXChildren:
@@ -96,6 +150,19 @@ class Menu(Utils):
         return sub_menus
 
     def verifymenucheck(self, window_name, object_name):
+        """
+        Verify a menu item is checked
+
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. Or menu heirarchy
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
         try:
             menu_handle = self._internal_menu_handler(window_name, object_name,
                                                       False)
@@ -110,6 +177,19 @@ class Menu(Utils):
         return 0
 
     def verifymenuuncheck(self, window_name, object_name):
+        """
+        Verify a menu item is un-checked
+
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. Or menu heirarchy
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
         try:
             menu_handle = self._internal_menu_handler(window_name, object_name,
                                                       False)
@@ -123,7 +203,20 @@ class Menu(Utils):
             pass
         return 0
 
-    def checkmenu(self, window_name, object_name):
+    def menucheck(self, window_name, object_name):
+        """
+        Check (click) a menu item.
+
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. Or menu heirarchy
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
         menu_handle = self._internal_menu_handler(window_name, object_name)
         if not menu_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
@@ -136,7 +229,20 @@ class Menu(Utils):
         menu_handle.Press()
         return 1
 
-    def uncheckmenu(self, window_name, object_name):
+    def menuuncheck(self, window_name, object_name):
+        """
+        Uncheck (click) a menu item.
+
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. Or menu heirarchy
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
         menu_handle = self._internal_menu_handler(window_name, object_name)
         if not menu_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
