@@ -26,9 +26,10 @@ from text import Text
 from mouse import Mouse
 from utils import Utils
 from combo_box import ComboBox
+from page_tab_list import PageTabList
 from server_exception import LdtpServerException
 
-class Core(ComboBox, Menu, Mouse, Text):
+class Core(ComboBox, Menu, Mouse, PageTabList, Text):
     def __init__(self):
         super(Core, self).__init__()
 
@@ -393,3 +394,8 @@ if __name__ == "__main__":
     #print test.cuttext("Open", "txttextfield", 2)
     #print test.cuttext("Open", "txttextfield", 2, 20)
     #print test.pastetext("Open", "txttextfield", 2)
+    #print test.gettabname("*ldtpd*python*", "ptl0", 2)
+    #print test.gettabcount("*ldtpd*python*", "ptl0")
+    #print test.selecttabindex("*ldtpd*python*", "ptl0", 2)
+    print test.selecttab("*ldtpd*python*", "ptl0", "*bash*")
+    print test.verifytabname("*ldtpd*python*", "ptl0", "*gabe*")

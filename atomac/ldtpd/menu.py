@@ -43,10 +43,11 @@ class Menu(Utils):
             children = menu_handle.AXChildren[0]
             if not children:
                 raise LdtpServerException(u"Unable to find menu %s" % menu)
+            tmp_menu = fnmatch.translate(menu)
             for current_menu in children.AXChildren:
                 role, label = self._ldtpize_accessible(current_menu)
-                if re.match(menu, label) or \
-                    re.match(menu, u"%s%s" % (role, label)):
+                if re.match(tmp_menu, label) or \
+                    re.match(tmp_menu, u"%s%s" % (role, label)):
                     menu_handle = current_menu
                     menu_handle_found = True
                     break

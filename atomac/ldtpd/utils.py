@@ -16,6 +16,7 @@
 # St, Fifth Floor, Boston, MA 02110-1301 USA.
 """Utils class."""
 
+import os
 import re
 import time
 import atomac
@@ -32,6 +33,10 @@ class Utils(object):
         self._window_timeout = 5
         # Current opened applications list will be updated
         self._running_apps = atomac.NativeUIElement._getApps()
+        if os.environ.has_key("LDTP_DEBUG"):
+            self._ldtp_debug = True
+        else:
+            self._ldtp_debug = False
 
     def _ldtpize_accessible(self, acc):
         """
@@ -44,9 +49,9 @@ class Utils(object):
                         associated label
         @rtype: tuple
         """
-        role = self._get_role(acc)
+        actual_role = self._get_role(acc)
         label = self._get_title(acc)
-        if re.match("AXWindow", role, re.M | re.U | re.L):
+        if re.match("AXWindow", actual_role, re.M | re.U | re.L):
             # Strip space and new line from window title
             strip = r"( |\n)"
         else:
@@ -60,7 +65,10 @@ class Utils(object):
             if not isinstance(label, unicode):
                 label = u"%s" % label
             label = re.sub(strip, u"", label)
-        return abbreviated_roles.get(role, "ukn"), label
+        role = abbreviated_roles.get(actual_role, "ukn")
+        if self._ldtp_debug and role == "ukn":
+            print actual_role
+        return role, label
 
     def _insert_obj(self, obj_dict, obj):
         ldtpized_name = self._ldtpize_accessible(obj)
@@ -69,7 +77,12 @@ class Utils(object):
         except UnicodeEncodeError:
             key = u"%s%s" % (ldtpized_name[0],
                              ldtpized_name[1].decode("utf-8"))
-        index = 1
+        if not ldtpized_name[1]:
+            index = 0
+            # Object doesn't have any associated label
+            key = "%s%d" % (ldtpized_name[0], index)
+        else:
+            index = 1
         while obj_dict.has_key(key):
             # If the same object type with matching label exist
             # add index to it
@@ -112,8 +125,7 @@ class Utils(object):
     def _get_title(self, obj):
         title = ""
         try:
-            title=None
-            checkBox = re.match("AXCheckBox", obj.AXRole, re.M | re.U | re.L)
+            checkBox=re.match("AXCheckBox", obj.AXRole, re.M | re.U | re.L)
             if checkBox:
                 # Instruments doesn't have AXTitle, AXValue for AXCheckBox
                 try:
@@ -129,7 +141,11 @@ class Utils(object):
                 if text:
                     title=obj.AXFilename
                 else:
-                    title=obj.AXValue
+                    if not re.match("(AXTabGroup)", obj.AXRole,
+                                    re.M | re.U | re.L):
+                        # Tab group has AXRadioButton as AXValue
+                        # So skip it
+                        title=obj.AXValue
             except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
                 try:
                     title=obj.AXRoleDescription

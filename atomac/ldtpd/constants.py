@@ -30,6 +30,7 @@ abbreviated_roles = {
                      "AXScrollBar" : "scbr",
                      "AXMenuItem" : "mnu",
                      "AXCheckBox" : "chk",
+                     "AXTabGroup" : "ptl",
                       # Not sure what"s the following object equivalent in LDTP
                      "AXMenuButton" : "cbo", # Maybe combo-box ?
                      "AXRow" : "tblc",

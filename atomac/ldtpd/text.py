@@ -17,6 +17,7 @@
 """Text class."""
 
 import re
+import fnmatch
 import atomac.Clipboard as Clipboard
 
 from utils import Utils
@@ -144,7 +145,7 @@ class Text(Utils):
         @rtype: integer
         """
         try:
-            if re.search(partial_text,
+            if re.search(fnmatch.translate(partial_text),
                          self.gettextvalue(window_name,
                                            object_name)):
                 return 1
@@ -169,9 +170,9 @@ class Text(Utils):
         @rtype: integer
         """
         try:
-            return int(self._glob_match(text,
-                                        self.gettextvalue(window_name,
-                                                          object_name)))
+            return int(re.match(fnmatch.translate(text),
+                                self.gettextvalue(window_name,
+                                                  object_name)))
         except:
             return 0
 
