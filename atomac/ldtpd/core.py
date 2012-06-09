@@ -376,16 +376,20 @@ if __name__ == "__main__":
     #print test.listsubmenus("Instruments*", "File;OpenRecent")
     #print test.listsubmenus("Instruments*", "File;mnuOpenRecent")
     #print test.listsubmenus("Instruments*", "File;GetInfo")
-    try:
-        print test.listsubmenus("Instruments*", "File;ding")
-    except LdtpServerException:
-        pass
-    try:
-        print test.listsubmenus("Instruments*", "ding")
-    except LdtpServerException:
-        pass
-    try:
-        print test.listsubmenus("ding", "dong")
-    except LdtpServerException:
-        pass
-    print test.getcursorposition("Open", "txttextfield")
+    #try:
+    #    print test.listsubmenus("Instruments*", "File;ding")
+    #except LdtpServerException:
+    #    pass
+    #try:
+    #    print test.listsubmenus("Instruments*", "ding")
+    #except LdtpServerException:
+    #    pass
+    #try:
+    #    print test.listsubmenus("ding", "dong")
+    #except LdtpServerException:
+    #    pass
+    #print test.getcursorposition("Open", "txttextfield")
+    #print test.setcursorposition("Open", "txttextfield", 10)
+    #print test.cuttext("Open", "txttextfield", 2)
+    #print test.cuttext("Open", "txttextfield", 2, 20)
+    #print test.pastetext("Open", "txttextfield", 2)
