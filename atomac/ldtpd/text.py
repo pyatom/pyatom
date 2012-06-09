@@ -17,6 +17,7 @@
 """Text class."""
 
 import re
+import atomac.Clipboard as Clipboard
 
 from utils import Utils
 from server_exception import LdtpServerException
@@ -259,7 +260,161 @@ class Text(Utils):
             raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
-        print object_handle
-        #print object_handle.AXSelectedTextRange
-        print object_handle.AXSelectedTextRange.loc
-        return -1
+        return object_handle.AXSelectedTextRange.loc
+
+    def setcursorposition(self, window_name, object_name, cursor_position):
+        """
+        Set cursor position
+        
+        @param window_name: Window name to type in, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to type in, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+        @param cursor_position: Cursor position to be set
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
+        object_handle = self._get_object_handle(window_name, object_name)
+        if not object_handle:
+            raise LdtpServerException(u"Unable to find object %s" % object_name)
+        if not object_handle.AXEnabled:
+            raise LdtpServerException(u"Object %s state disabled" % object_name)
+        object_handle.AXSelectedTextRange.loc = cursor_position
+        return 1
+
+    def cuttext(self, window_name, object_name, start_position, end_position = -1):
+        """
+        cut text from start position to end position
+        
+        @param window_name: Window name to type in, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to type in, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+        @param start_position: Start position
+        @type object_name: integer
+        @param end_position: End position, default -1
+        Cut all the text from start position till end
+        @type object_name: integer
+
+        @return: 1 on success.
+        @rtype: integer
+        """
+        object_handle = self._get_object_handle(window_name, object_name)
+        if not object_handle:
+            raise LdtpServerException(u"Unable to find object %s" % object_name)
+        if not object_handle.AXEnabled:
+            raise LdtpServerException(u"Object %s state disabled" % object_name)
+        size = object_handle.AXNumberOfCharacters
+        if end_position == -1 or end_position > size:
+            end_position = size
+        if start_position < 0:
+            start_position = 0
+        data = object_handle.AXValue
+        Clipboard.copy(data[start_position:end_position])
+        object_handle.AXValue = data[:start_position] + data[end_position:]
+        return 1
+
+    def copytext(self, window_name, object_name, start_position, end_position = -1):
+        """
+        copy text from start position to end position
+        
+        @param window_name: Window name to type in, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to type in, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+        @param start_position: Start position
+        @type object_name: integer
+        @param end_position: End position, default -1
+        Copy all the text from start position till end
+        @type object_name: integer
+
+        @return: 1 on success.
+        @rtype: integer
+        """
+        object_handle = self._get_object_handle(window_name, object_name)
+        if not object_handle:
+            raise LdtpServerException(u"Unable to find object %s" % object_name)
+        if not object_handle.AXEnabled:
+            raise LdtpServerException(u"Object %s state disabled" % object_name)
+        size = object_handle.AXNumberOfCharacters
+        if end_position == -1 or end_position > size:
+            end_position = size
+        if start_position < 0:
+            start_position = 0
+        data = object_handle.AXValue
+        Clipboard.copy(data[start_position:end_position])
+        return 1
+
+
+    def deletetext(self, window_name, object_name, start_position, end_position = -1):
+        """
+        delete text from start position to end position
+        
+        @param window_name: Window name to type in, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to type in, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+        @param start_position: Start position
+        @type object_name: integer
+        @param end_position: End position, default -1
+        Delete all the text from start position till end
+        @type object_name: integer
+
+        @return: 1 on success.
+        @rtype: integer
+        """
+        object_handle = self._get_object_handle(window_name, object_name)
+        if not object_handle:
+            raise LdtpServerException(u"Unable to find object %s" % object_name)
+        if not object_handle.AXEnabled:
+            raise LdtpServerException(u"Object %s state disabled" % object_name)
+        size = object_handle.AXNumberOfCharacters
+        if end_position == -1 or end_position > size:
+            end_position = size
+        if start_position < 0:
+            start_position = 0
+        data = object_handle.AXValue
+        object_handle.AXValue = data[:start_position] + data[end_position:]
+        return 1
+
+    def pastetext(self, window_name, object_name, position = 0):
+        """
+        paste text from start position to end position
+        
+        @param window_name: Window name to type in, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to type in, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+        @param position: Position to paste the text, default 0
+        @type object_name: integer
+
+        @return: 1 on success.
+        @rtype: integer
+        """
+        object_handle = self._get_object_handle(window_name, object_name)
+        if not object_handle:
+            raise LdtpServerException(u"Unable to find object %s" % object_name)
+        if not object_handle.AXEnabled:
+            raise LdtpServerException(u"Object %s state disabled" % object_name)
+        size = object_handle.AXNumberOfCharacters
+        if position > size:
+            position = size
+        if position < 0:
+            position = 0
+        clipboard = Clipboard.paste()
+        data = object_handle.AXValue
+        object_handle.AXValue = data[:position] + clipboard + data[position:]
+  
+        return 1
