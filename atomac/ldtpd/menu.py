@@ -23,37 +23,17 @@ from utils import Utils
 from server_exception import LdtpServerException
 
 class Menu(Utils):
-    def _internal_menu_handler(self, window_name, object_name,
-                               wait_for_window = True):
-        window_handle, name, app = self._get_window_handle(window_name,
-                                                           wait_for_window)
-        if not window_handle:
-            raise LdtpServerException(u"Unable to find window %s" % window_name)
-        menu_list = object_name.split(";")
-        # pyatom doesn't understand LDTP convention mnu, strip it off
-        menu_handle = app.menuItem(re.sub("mnu", "", menu_list[0]))
-        if not menu_handle:
-            raise LdtpServerException(u"Unable to find menu %s" % menu_list[0])
+    def _get_menu_handle(self, window_name, object_name,
+                               wait_for_window=True):
+        menu_list=re.split(";", object_name)
+        # Call base class get_menu_handle
+        menu_handle=Utils._get_menu_handle(self, window_name,
+                                            menu_list[0],
+                                            wait_for_window)
         if len(menu_list) <= 1:
             # If only first level menu is given, return the handle
             return menu_handle
-        menu_handle_found = False
-        for menu in menu_list[1:]:
-            menu_handle_found = False
-            children = menu_handle.AXChildren[0]
-            if not children:
-                raise LdtpServerException(u"Unable to find menu %s" % menu)
-            tmp_menu = fnmatch.translate(menu)
-            for current_menu in children.AXChildren:
-                role, label = self._ldtpize_accessible(current_menu)
-                if re.match(tmp_menu, label) or \
-                    re.match(tmp_menu, u"%s%s" % (role, label)):
-                    menu_handle = current_menu
-                    menu_handle_found = True
-                    break
-            if not menu_handle_found:
-                raise LdtpServerException(u"Unable to find menu %s" % menu)
-        return menu_handle
+        return self._internal_menu_handler(menu_handle, menu_list[1:])
 
     def selectmenuitem(self, window_name, object_name):
         """
@@ -69,7 +49,7 @@ class Menu(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        menu_handle = self._internal_menu_handler(window_name, object_name)
+        menu_handle=self._get_menu_handle(window_name, object_name)
         if not menu_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         menu_handle.Press()
@@ -92,7 +72,7 @@ class Menu(Utils):
         @rtype: integer
         """
         try:
-            menu_handle = self._internal_menu_handler(window_name, object_name,
+            menu_handle=self._get_menu_handle(window_name, object_name,
                                                       False)
             return 1
         except LdtpServerException:
@@ -113,7 +93,7 @@ class Menu(Utils):
         @rtype: integer
         """
         try:
-            menu_handle = self._internal_menu_handler(window_name, object_name,
+            menu_handle=self._get_menu_handle(window_name, object_name,
                                                       False)
             if menu_handle.AXEnabled:
                 return 1
@@ -135,15 +115,15 @@ class Menu(Utils):
         @return: menu item in list on success.
         @rtype: list
         """
-        menu_handle = self._internal_menu_handler(window_name, object_name)
-        role, label = self._ldtpize_accessible(menu_handle) 
+        menu_handle=self._get_menu_handle(window_name, object_name)
+        role, label=self._ldtpize_accessible(menu_handle) 
         if not menu_handle.AXChildren:
             raise LdtpServerException(u"Unable to find children under menu %s" % \
                                       label)
-        children = menu_handle.AXChildren[0]
-        sub_menus = []
+        children=menu_handle.AXChildren[0]
+        sub_menus=[]
         for current_menu in children.AXChildren:
-            role, label = self._ldtpize_accessible(current_menu)
+            role, label=self._ldtpize_accessible(current_menu)
             if not label:
                 # All splitters have empty label
                 continue
@@ -165,7 +145,7 @@ class Menu(Utils):
         @rtype: integer
         """
         try:
-            menu_handle = self._internal_menu_handler(window_name, object_name,
+            menu_handle=self._get_menu_handle(window_name, object_name,
                                                       False)
             try:
                 if menu_handle.AXMenuItemMarkChar:
@@ -192,7 +172,7 @@ class Menu(Utils):
         @rtype: integer
         """
         try:
-            menu_handle = self._internal_menu_handler(window_name, object_name,
+            menu_handle=self._get_menu_handle(window_name, object_name,
                                                       False)
             try:
                 if not menu_handle.AXMenuItemMarkChar:
@@ -218,7 +198,7 @@ class Menu(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        menu_handle = self._internal_menu_handler(window_name, object_name)
+        menu_handle=self._get_menu_handle(window_name, object_name)
         if not menu_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         try:
@@ -244,7 +224,7 @@ class Menu(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        menu_handle = self._internal_menu_handler(window_name, object_name)
+        menu_handle=self._get_menu_handle(window_name, object_name)
         if not menu_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         try:

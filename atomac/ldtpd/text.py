@@ -77,7 +77,15 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        raise LdtpServerException("Not implemented")
+        if not object_name and not data:
+            raise LdtpServerException("Not implemented")
+        else:
+            object_handle=self._get_object_handle(window_name, object_name)
+            if not object_handle:
+                raise LdtpServerException(u"Unable to find object %s" % object_name)
+            if not object_handle.AXEnabled:
+                raise LdtpServerException(u"Object %s state disabled" % object_name)
+            object_handle.sendKey(data)
 
     def settextvalue(self, window_name, object_name, data):
         """
@@ -95,12 +103,12 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
-        object_handle.AXValue = data
+        object_handle.AXValue=data
         return 1
 
     def gettextvalue(self, window_name, object_name):
@@ -121,7 +129,7 @@ class Text(Utils):
         @return: text on success.
         @rtype: string
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
@@ -190,7 +198,7 @@ class Text(Utils):
         @return: 1 on success 0 on failure.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             return 0
         if not object_handle.AXEnabled:
@@ -211,7 +219,7 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
@@ -234,7 +242,7 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
@@ -256,7 +264,7 @@ class Text(Utils):
         @return: Cursor position on success.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
@@ -279,15 +287,15 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
-        object_handle.AXSelectedTextRange.loc = cursor_position
+        object_handle.AXSelectedTextRange.loc=cursor_position
         return 1
 
-    def cuttext(self, window_name, object_name, start_position, end_position = -1):
+    def cuttext(self, window_name, object_name, start_position, end_position=-1):
         """
         cut text from start position to end position
         
@@ -306,22 +314,22 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
-        size = object_handle.AXNumberOfCharacters
+        size=object_handle.AXNumberOfCharacters
         if end_position == -1 or end_position > size:
-            end_position = size
+            end_position=size
         if start_position < 0:
-            start_position = 0
-        data = object_handle.AXValue
+            start_position=0
+        data=object_handle.AXValue
         Clipboard.copy(data[start_position:end_position])
-        object_handle.AXValue = data[:start_position] + data[end_position:]
+        object_handle.AXValue=data[:start_position] + data[end_position:]
         return 1
 
-    def copytext(self, window_name, object_name, start_position, end_position = -1):
+    def copytext(self, window_name, object_name, start_position, end_position=-1):
         """
         copy text from start position to end position
         
@@ -340,22 +348,22 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
-        size = object_handle.AXNumberOfCharacters
+        size=object_handle.AXNumberOfCharacters
         if end_position == -1 or end_position > size:
-            end_position = size
+            end_position=size
         if start_position < 0:
-            start_position = 0
-        data = object_handle.AXValue
+            start_position=0
+        data=object_handle.AXValue
         Clipboard.copy(data[start_position:end_position])
         return 1
 
 
-    def deletetext(self, window_name, object_name, start_position, end_position = -1):
+    def deletetext(self, window_name, object_name, start_position, end_position=-1):
         """
         delete text from start position to end position
         
@@ -374,21 +382,21 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
-        size = object_handle.AXNumberOfCharacters
+        size=object_handle.AXNumberOfCharacters
         if end_position == -1 or end_position > size:
-            end_position = size
+            end_position=size
         if start_position < 0:
-            start_position = 0
-        data = object_handle.AXValue
-        object_handle.AXValue = data[:start_position] + data[end_position:]
+            start_position=0
+        data=object_handle.AXValue
+        object_handle.AXValue=data[:start_position] + data[end_position:]
         return 1
 
-    def pastetext(self, window_name, object_name, position = 0):
+    def pastetext(self, window_name, object_name, position=0):
         """
         paste text from start position to end position
         
@@ -404,18 +412,17 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
-        size = object_handle.AXNumberOfCharacters
+        size=object_handle.AXNumberOfCharacters
         if position > size:
-            position = size
+            position=size
         if position < 0:
-            position = 0
-        clipboard = Clipboard.paste()
-        data = object_handle.AXValue
-        object_handle.AXValue = data[:position] + clipboard + data[position:]
-  
+            position=0
+        clipboard=Clipboard.paste()
+        data=object_handle.AXValue
+        object_handle.AXValue=data[:position] + clipboard + data[position:]
         return 1

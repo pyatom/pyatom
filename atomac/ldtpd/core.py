@@ -41,7 +41,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @return: list of appliction name of string type on success.
         @rtype: list
         """
-        app_list = []
+        app_list=[]
         for gui in self._running_apps:
             app_list.append(gui.localizedName())
         # Return unique application list
@@ -79,13 +79,13 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         """
         if not window_name:
             raise LdtpServerException(u"Invalid argument window_name")
-        window_handle, name, app = self._get_window_handle(window_name)
+        window_handle, name, app=self._get_window_handle(window_name)
         if not window_handle:
             raise LdtpServerException(u"Unable to find window %s" % window_name)
-        object_list = self._get_appmap(window_handle, name)
+        object_list=self._get_appmap(window_handle, name)
         return object_list.keys()
 
-    def wait(self, timeout = 5):
+    def wait(self, timeout=5):
         """
         Wait a given amount of seconds.
 
@@ -112,7 +112,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @return: 1 on success.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
@@ -120,7 +120,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         object_handle.Press()
         return 1
 
-    def getobjectsize(self, window_name, object_name = None):
+    def getobjectsize(self, window_name, object_name=None):
         """
         Get object size
         
@@ -134,17 +134,17 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @return: x, y, width, height on success.
         @rtype: list
         """
-        handle = None
+        handle=None
         if not object_name: 
-            window_handle, name, app = self._get_window_handle(window_name)
+            window_handle, name, app=self._get_window_handle(window_name)
             if not window_handle:
                 raise LdtpServerException(u"Unable to find window %s" % window_name)
-            handle = window_handle
+            handle=window_handle
         else:
-            object_handle = self._get_object_handle(window_name, object_name)
+            object_handle=self._get_object_handle(window_name, object_name)
             if not object_handle:
                 raise LdtpServerException(u"Unable to find object %s" % object_name)
-            handle = object_handle
+            handle=object_handle
         return self._getobjectsize(handle)
 
     def getwindowsize(self, window_name):
@@ -159,7 +159,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         """
         return self.getobjectsize(window_name)
 
-    def grabfocus(self, window_name, object_name = None):
+    def grabfocus(self, window_name, object_name=None):
         """
         Grab focus.
         
@@ -173,17 +173,17 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @return: 1 on success.
         @rtype: integer
         """
-        handle = None
+        handle=None
         if not object_name:
-            window_handle, name, app = self._get_window_handle(window_name)
+            window_handle, name, app=self._get_window_handle(window_name)
             if not window_handle:
                 raise LdtpServerException(u"Unable to find window %s" % window_name)
-            handle = window_handle
+            handle=window_handle
         else:
-            object_handle = self._get_object_handle(window_name, object_name)
+            object_handle=self._get_object_handle(window_name, object_name)
             if not object_handle:
                 raise LdtpServerException(u"Unable to find object %s" % object_name)
-            handle = object_handle
+            handle=object_handle
         return self._grabfocus(handle)
 
     def objectexist(self, window_name, object_name):
@@ -200,7 +200,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @return: 1 if GUI was found, 0 if not.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             return 0
         return 1
@@ -219,7 +219,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @return: 1 on success 0 on failure.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle or not object_handle.AXEnabled:
             return 0
         return 1
@@ -239,7 +239,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @rtype: integer
         """
         # FIXME: Check for object type
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
@@ -250,7 +250,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         # AXPress doesn't work with Instruments
         # So did the following work around
         self.grabfocus(object_handle)
-        x, y, width, height = self.getobjectsize(object_handle)
+        x, y, width, height=self.getobjectsize(object_handle)
         # Mouse left click on the object
         # Note: x + width/2, y + height / 2 doesn't work
         object_handle.clickMouseButtonLeft((x + width / 2, y + height / 2))
@@ -270,7 +270,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @return: 1 on success.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
@@ -281,7 +281,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         # AXPress doesn't work with Instruments
         # So did the following work around
         self.grabfocus(object_handle)
-        x, y, width, height = self.getobjectsize(object_handle)
+        x, y, width, height=self.getobjectsize(object_handle)
         # Mouse left click on the object
         # Note: x + width/2, y + height / 2 doesn't work
         object_handle.clickMouseButtonLeft((x + width / 2, y + height / 2))
@@ -301,8 +301,8 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @return: 1 on success 0 on failure.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name,
-                                                wait_for_object = False)
+        object_handle=self._get_object_handle(window_name, object_name,
+                                                wait_for_object=False)
         if not object_handle:
             return 0
         if object_handle.AXValue == 1:
@@ -323,8 +323,8 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @return: 1 on success 0 on failure.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name,
-                                                wait_for_object = False)
+        object_handle=self._get_object_handle(window_name, object_name,
+                                                wait_for_object=False)
         if not object_handle:
             return 0
         if object_handle.AXValue == 0:
@@ -332,15 +332,15 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         return 0
 
 if __name__ == "__main__":
-    test = Core()
-    apps = test.getapplist()
-    windows = test.getwindowlist()
+    test=Core()
+    apps=test.getapplist()
+    windows=test.getwindowlist()
     #print len(apps), len(windows)
     #print apps, windows
     #print test.getobjectlist("Contacts")
     #print test.click("Open", "Cancel")
     #print test.comboselect("frmInstruments", "cboAdd", "UiAutomation.js")
-    #print test.comboselect("frmInstruments", "Choose Target", "Choose Target")
+    #print test.comboselect("frmInstruments", "Choose Target", "Choose Target;Octopus")
     #print test.getobjectlist("frmInstruments")
     #print test.check("frmInstruments", "chkRecordOnce")
     #print test.wait(1)
@@ -364,7 +364,7 @@ if __name__ == "__main__":
     #print test.verifymenucheck("Instruments*", "View;Instruments")
     #print test.verifymenuuncheck("Instruments*", "View;Instruments")
     #print test.mouseleftclick("Open", "Cancel")
-    #a = test.getobjectlist("Open")
+    #a=test.getobjectlist("Open")
     #for i in a:
     #    if i.find("txt") != -1:
     #        print i
@@ -397,5 +397,11 @@ if __name__ == "__main__":
     #print test.gettabname("*ldtpd*python*", "ptl0", 2)
     #print test.gettabcount("*ldtpd*python*", "ptl0")
     #print test.selecttabindex("*ldtpd*python*", "ptl0", 2)
-    print test.selecttab("*ldtpd*python*", "ptl0", "*bash*")
-    print test.verifytabname("*ldtpd*python*", "ptl0", "*gabe*")
+    #print test.selecttab("*ldtpd*python*", "ptl0", "*bash*")
+    #print test.verifytabname("*ldtpd*python*", "ptl0", "*gabe*")
+    #print test.selectindex("frmInstruments", "cboAdd", 1)
+    #print test.getallitem("frmInstruments", "cboAdd")
+    #print test.selectindex("frmInstruments", "cboAdd", 10)
+    print test.showlist("frmInstruments", "cboAdd")
+    test.wait(1)
+    print test.hidelist("frmInstruments", "cboAdd")

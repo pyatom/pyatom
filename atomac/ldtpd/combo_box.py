@@ -38,22 +38,190 @@ class ComboBox(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        object_handle = self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
             raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         object_handle.Press()
-        #if re.search(';', item_name, re.U):
-        #for item in re.split()
-        object_handle = self._get_object_handle(window_name, item_name, 'AXMenuItem')
+        # Required for menuitem to appear in accessibility list
+        self.wait(1)
+        menu_list=re.split(";", item_name)
+        menu_handle=None
+        try:
+            menu_handle=self._internal_menu_handler(object_handle, menu_list,
+                                                    True)
+            # Required for menuitem to appear in accessibility list
+            self.wait(1)
+            if not menu_handle.AXEnabled:
+                raise LdtpServerException(u"Object %s state disabled" % \
+                                          menu_list[-1])
+                menu_handle.Press()
+        finally:
+            if menu_handle:
+                menu_handle.Cancel()
+        return 1
+
+    # Since selectitem and comboselect implementation are same,
+    # for Linux/Windows API compatibility let us assign selectitem to comboselect
+    comboselect=selectitem
+
+    def selectindex(self, window_name, object_name, item_index):
+        """
+        Select combo box item / layered pane based on index
+        
+        @param window_name: Window name to type in, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to type in, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+        @param item_index: Item index to select
+        @type object_name: integer
+
+        @return: 1 on success.
+        @rtype: integer
+        """
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle:
-            raise LdtpServerException(u"Unable to find item %s" % item_name)
+            raise LdtpServerException(u"Unable to find object %s" % object_name)
+        if not object_handle.AXEnabled:
+            raise LdtpServerException(u"Object %s state disabled" % object_name)
+        object_handle.Press()
+        # Required for menuitem to appear in accessibility list
+        self.wait(1)
+        if not object_handle.AXChildren:
+            raise LdtpServerException(u"Unable to find menu")
+        # Get AXMenu
+        children=object_handle.AXChildren[0]
+        if not children:
+            raise LdtpServerException(u"Unable to find menu")
+        children=children.AXChildren
+        tmp_children=[]
+        for child in children:
+            role, label=self._ldtpize_accessible(child)
+            # Don't add empty label
+            # Menu separator have empty label's
+            if label:
+                tmp_children.append(child)
+        children=tmp_children
+        length=len(children)
+        try:
+            if item_index < 0 or item_index > length:
+                raise LdtpServerException(u"Invalid item index %d" % item_index)
+            menu_handle=children[item_index]
+            if not menu_handle.AXEnabled:
+                raise LdtpServerException(u"Object %s state disabled" % menu_list[-1])
+            menu_handle.Press()
+            # If menuitem already pressed, set child to None
+            # So, it doesn't click back in combobox in finally block
+            child=None
+        finally:
+            if child:
+                child.Cancel()
+        return 1
+
+    # Since selectindex and comboselectindex implementation are same,
+    # for backward compatibility let us assign selectindex to comboselectindex
+    comboselectindex=selectindex
+
+    def getallitem(self, window_name, object_name):
+        """
+        Get all combo box item
+
+        @param window_name: Window name to type in, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to type in, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: list of string on success.
+        @rtype: list
+        """
+        object_handle=self._get_object_handle(window_name, object_name)
+        if not object_handle:
+            raise LdtpServerException(u"Unable to find object %s" % object_name)
+        if not object_handle.AXEnabled:
+            raise LdtpServerException(u"Object %s state disabled" % object_name)
+        object_handle.Press()
+        # Required for menuitem to appear in accessibility list
+        self.wait(1)
+        child=None
+        try:
+            if not object_handle.AXChildren:
+                raise LdtpServerException(u"Unable to find menu")
+            # Get AXMenu
+            children=object_handle.AXChildren[0]
+            if not children:
+                raise LdtpServerException(u"Unable to find menu")
+            children=children.AXChildren
+            items=[]
+            for child in children:
+                label = self._get_title(child)
+                # Don't add empty label
+                # Menu separator have empty label's
+                if label:
+                    items.append(label)
+        finally:
+            # Set it back, by clicking combo box
+            child.Cancel()
+        return items
+
+    def showlist(self, window_name, object_name):
+        """
+        Show combo box list / menu
+        
+        @param window_name: Window name to type in, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to type in, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
+        object_handle=self._get_object_handle(window_name, object_name)
+        if not object_handle:
+            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         object_handle.Press()
         return 1
 
-    # Since selectitem and comboselect implementation are same,
-    # for Linux/Windows API compatibility let us assign selectitem to comboselect
-    comboselect = selectitem
+    def hidelist(self, window_name, object_name):
+        """
+        Hide combo box list / menu
+        
+        @param window_name: Window name to type in, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to type in, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
+        object_handle=self._get_object_handle(window_name, object_name)
+        if not object_handle:
+            raise LdtpServerException(u"Unable to find object %s" % object_name)
+        # FIXME
+        return 1
+
+    def verifydropdown(self, window_name, object_name):
+        """
+        Verify drop down list / menu poped up
+        
+        @param window_name: Window name to type in, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to type in, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
+        pass
