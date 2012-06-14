@@ -2,6 +2,11 @@
 
 # This file is part of ATOMac.
 
+#@author: Nagappan Alagappan <nagappan@gmail.com>                                                                                                      
+#@copyright: Copyright (c) 2009-12 Nagappan Alagappan                                                                                                  
+
+#http://ldtp.freedesktop.org                                                                                                                           
+
 # ATOMac is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
 # Software Foundation version 2 and no later version.
@@ -17,6 +22,7 @@
 """Combobox class."""
 
 import re
+from atomac import AXKeyCodeConstants
 
 from utils import Utils
 from server_exception import LdtpServerException
@@ -39,15 +45,31 @@ class ComboBox(Utils):
         @rtype: integer
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
-        object_handle.Press()
+        try:
+            object_handle.Press()
+        except AttributeError:
+            # AXPress doesn't work with Instruments
+            # So did the following work around
+            self._grabfocus(object_handle)
+            x, y, width, height=self._getobjectsize(object_handle)
+            print x, y, width, height
+            # Mouse left click on the object
+            # Note: x + width/2, y + height / 2 doesn't work
+            object_handle.clickMouseButtonLeft((x + 5, y + 5))
+            self.wait(5)
+            handle=self._get_sub_menu_handle(object_handle, item_name)
+            print handle, item_name, object_handle
+            x, y, width, height=self._getobjectsize(handle)
+            print x, y, width, height
+            handle.clickMouseButtonLeft((x + 5, y + 5))
+            self.wait(5)
+            print 'clicked'
+            return 1
         # Required for menuitem to appear in accessibility list
         self.wait(1)
         menu_list=re.split(";", item_name)
-        menu_handle=None
         try:
             menu_handle=self._internal_menu_handler(object_handle, menu_list,
                                                     True)
@@ -56,10 +78,11 @@ class ComboBox(Utils):
             if not menu_handle.AXEnabled:
                 raise LdtpServerException(u"Object %s state disabled" % \
                                           menu_list[-1])
-                menu_handle.Press()
-        finally:
-            if menu_handle:
-                menu_handle.Cancel()
+            menu_handle.Press()
+        except LdtpServerException:
+            object_handle.activate()
+            object_handle.sendKey(AXKeyCodeConstants.ESCAPE)
+            raise
         return 1
 
     # Since selectitem and comboselect implementation are same,
@@ -83,8 +106,6 @@ class ComboBox(Utils):
         @rtype: integer
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         object_handle.Press()
@@ -140,8 +161,6 @@ class ComboBox(Utils):
         @rtype: list
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         object_handle.Press()
@@ -164,8 +183,9 @@ class ComboBox(Utils):
                 if label:
                     items.append(label)
         finally:
-            # Set it back, by clicking combo box
-            child.Cancel()
+            if child:
+                # Set it back, by clicking combo box
+                child.Cancel()
         return items
 
     def showlist(self, window_name, object_name):
@@ -183,8 +203,6 @@ class ComboBox(Utils):
         @rtype: integer
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         object_handle.Press()
@@ -205,9 +223,8 @@ class ComboBox(Utils):
         @rtype: integer
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
-        # FIXME
+        object_handle.activate()
+        object_handle.sendKey(AXKeyCodeConstants.ESCAPE)
         return 1
 
     def verifydropdown(self, window_name, object_name):
@@ -221,7 +238,80 @@ class ComboBox(Utils):
         LDTP's name convention, or a Unix glob. 
         @type object_name: string
 
+        @return: 1 on success 0 on failure.
+        @rtype: integer
+        """
+        try:
+            object_handle=self._get_object_handle(window_name, object_name)
+            if not object_handle.AXEnabled or not object_handle.AXChildren:
+                return 0
+            # Get AXMenu
+            children=object_handle.AXChildren[0]
+            if children:
+                return 1
+        except LdtpServerException:
+            pass
+        return 0
+
+    def verifyshowlist(self, window_name, object_name):
+        """
+        Verify drop down list / menu poped up
+        
+        @param window_name: Window name to type in, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to type in, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: 1 on success 0 on failure.
+        @rtype: integer
+        """
+        return self.verifydropdown(window_name, object_name)
+
+    def verifyhidelist(self, window_name, object_name):
+        """
+        Verify list / menu is hidden in combo box
+        
+        @param window_name: Window name to type in, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to type in, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: 1 on success 0 on failure.
+        @rtype: integer
+        """
+        try:
+            object_handle=self._get_object_handle(window_name, object_name)
+            if not object_handle.AXEnabled:
+                return 0
+            if not object_handle.AXChildren:
+                return 1
+            # Get AXMenu
+            children=object_handle.AXChildren[0]
+            if not children:
+                return 1
+            return 1
+        except LdtpServerException:
+            pass
+        return 0
+
+    def verifyselect(self, window_name, object_name, item_name):
+        """
+        Verify the item selected in combo box
+        
+        @param window_name: Window name to type in, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to type in, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+        @param item_name: Item name to select
+        @type object_name: string
+
         @return: 1 on success.
         @rtype: integer
         """
-        pass
+        raise LdtpServerException("Not implemented")

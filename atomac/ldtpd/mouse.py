@@ -35,14 +35,11 @@ class Mouse(Utils):
         @rtype: integer
         """
         object_handle = self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         self._grabfocus(object_handle)
         x, y, width, height = self._getobjectsize(object_handle)
         # Mouse left click on the object
-        # Note: x + width/2, y + height / 2 doesn't work
         object_handle.clickMouseButtonLeft((x + width / 2, y + height / 2))
         return 1
 
@@ -61,8 +58,6 @@ class Mouse(Utils):
         @rtype: integer
         """
         object_handle = self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         self._grabfocus(object_handle)

@@ -2,6 +2,11 @@
 
 # This file is part of ATOMac.
 
+#@author: Nagappan Alagappan <nagappan@gmail.com>                                                                                                      
+#@copyright: Copyright (c) 2009-12 Nagappan Alagappan                                                                                                  
+
+#http://ldtp.freedesktop.org                                                                                                                           
+
 # ATOMac is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
 # Software Foundation version 2 and no later version.
@@ -81,8 +86,6 @@ class Text(Utils):
             raise LdtpServerException("Not implemented")
         else:
             object_handle=self._get_object_handle(window_name, object_name)
-            if not object_handle:
-                raise LdtpServerException(u"Unable to find object %s" % object_name)
             if not object_handle.AXEnabled:
                 raise LdtpServerException(u"Object %s state disabled" % object_name)
             object_handle.sendKey(data)
@@ -104,8 +107,6 @@ class Text(Utils):
         @rtype: integer
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         object_handle.AXValue=data
@@ -130,8 +131,6 @@ class Text(Utils):
         @rtype: string
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         return object_handle.AXValue
@@ -198,12 +197,13 @@ class Text(Utils):
         @return: 1 on success 0 on failure.
         @rtype: integer
         """
-        object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            return 0
-        if not object_handle.AXEnabled:
-            return 0
-        return 1
+        try:
+            object_handle=self._get_object_handle(window_name, object_name)
+            if object_handle.AXEnabled:
+                return 1
+        except LdtpServerException:
+            pass
+        return 0
 
     def getcharcount(self, window_name, object_name):
         """
@@ -220,8 +220,6 @@ class Text(Utils):
         @rtype: integer
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         return object_handle.AXNumberOfCharacters
@@ -243,8 +241,6 @@ class Text(Utils):
         @rtype: integer
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         object_handle.AXValue += data
@@ -265,8 +261,6 @@ class Text(Utils):
         @rtype: integer
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         return object_handle.AXSelectedTextRange.loc
@@ -288,8 +282,6 @@ class Text(Utils):
         @rtype: integer
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         object_handle.AXSelectedTextRange.loc=cursor_position
@@ -315,8 +307,6 @@ class Text(Utils):
         @rtype: integer
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         size=object_handle.AXNumberOfCharacters
@@ -349,8 +339,6 @@ class Text(Utils):
         @rtype: integer
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         size=object_handle.AXNumberOfCharacters
@@ -383,8 +371,6 @@ class Text(Utils):
         @rtype: integer
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         size=object_handle.AXNumberOfCharacters
@@ -413,8 +399,6 @@ class Text(Utils):
         @rtype: integer
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         size=object_handle.AXNumberOfCharacters

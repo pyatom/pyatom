@@ -2,6 +2,11 @@
 
 # This file is part of ATOMac.
 
+#@author: Nagappan Alagappan <nagappan@gmail.com>                                                                                                      
+#@copyright: Copyright (c) 2009-12 Nagappan Alagappan                                                                                                  
+
+#http://ldtp.freedesktop.org                                                                                                                           
+
 # ATOMac is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
 # Software Foundation version 2 and no later version.
@@ -148,7 +153,11 @@ class Utils(object):
                         title=obj.AXValue
             except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
                 try:
-                    title=obj.AXRoleDescription
+                    if not re.match("(AXList)", obj.AXRole,
+                                    re.M | re.U | re.L):
+                        # List have description as list
+                        # So skip it
+                        title=obj.AXRoleDescription
                 except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
                     pass
         return title
@@ -168,7 +177,7 @@ class Utils(object):
     def _grabfocus(self, handle):
         if not handle:
             raise LdtpServerException("Invalid handle")
-        handle.AXWindow.Raise()
+        handle.activate()
         return 1
 
     def _getobjectsize(self, handle):
@@ -181,7 +190,7 @@ class Utils(object):
     def _get_window_handle(self, window_name, wait_for_window=True):
         window_obj=(None, None, None)
         if not window_name:
-            return window_obj
+            raise LdtpServerException(u"Invalid argument passed to window_name")
         strip=r"( |\n)"
         if not isinstance(window_name, unicode):
             # Convert to unicode string
@@ -224,6 +233,8 @@ class Utils(object):
                 break
             time.sleep(1)
             windows=self._get_windows(True)
+        if not window_obj[0]:
+            raise LdtpServerException(u"Unable to find window %s" % window_name)
         return window_obj
 
     def _get_object_handle(self, window_name, obj_name, obj_type=None,
@@ -281,7 +292,7 @@ class Utils(object):
             object_list=self._get_appmap(window_handle,
                                            ldtp_window_name, True)
             # print object_list
-        return None
+        raise LdtpServerException(u"Unable to find object %s" % object_name)
 
     def _get_appmap(self, window_handle, window_name, force_remap=False):
         if not window_handle or not window_name:
@@ -311,41 +322,43 @@ class Utils(object):
             raise LdtpServerException(u"Unable to find menu %s" % object_name)
         return menu_handle
 
+    def _get_sub_menu_handle(self, children, menu):
+        strip=r"( |:|\.|_|\n)"
+        tmp_menu=fnmatch.translate(menu)
+        stripped_menu=fnmatch.translate(re.sub(strip, u"", menu))
+        for current_menu in children.AXChildren:
+            role, label=self._ldtpize_accessible(current_menu)
+            print current_menu, 'hello'
+            x, y, width, height=self._getobjectsize(current_menu)
+            print x, y, width, height
+            if re.match(tmp_menu, label) or \
+                    re.match(tmp_menu, u"%s%s" % (role, label)) or \
+                    re.match(stripped_menu, label) or \
+                    re.match(stripped_menu, u"%s%s" % (role, label)):
+                return current_menu
+        raise LdtpServerException(u"Unable to find menu %s" % menu)
+
     def _internal_menu_handler(self, menu_handle, menu_list,
                                perform_action = False):
         if not menu_handle or not menu_list:
             raise LdtpServerException(u"Unable to find menu %s" % [0])
-        strip=r"( |:|\.|_|\n)"
         for menu in menu_list:
-            menu_handle_found=False
             # Get AXMenu
             children=menu_handle.AXChildren[0]
             if not children:
                 raise LdtpServerException(u"Unable to find menu %s" % menu)
-            # Reset menu_handle
-            menu_handle = None
-            tmp_menu=fnmatch.translate(menu)
-            stripped_menu=fnmatch.translate(re.sub(strip, u"", menu))
-            for current_menu in children.AXChildren:
-                role, label=self._ldtpize_accessible(current_menu)
-                if re.match(tmp_menu, label) or \
-                        re.match(tmp_menu, u"%s%s" % (role, label)) or \
-                        re.match(stripped_menu, label) or \
-                        re.match(stripped_menu, u"%s%s" % (role, label)):
-                    # Don't perform action on last item
-                    if perform_action and menu_list[-1] != menu:
-                        if not current_menu.AXEnabled:
-                            # click back on combo box
-                            current_menu.Cancel()
-                            raise LdtpServerException(u"Object %s state disabled" % \
-                                                      menu)
-                        # Click current menuitem, required for combo box
-                        current_menu.Press()
-                        # Required for menuitem to appear in accessibility list
-                        self.wait(1) 
-                    menu_handle=current_menu
-                    menu_handle_found=True
-                    break
-            if not menu_handle_found:
+            menu_handle=self._get_sub_menu_handle(children, menu)
+            # Don't perform action on last item
+            if perform_action and menu_list[-1] != menu:
+                if not menu_handle.AXEnabled:
+                    # click back on combo box
+                    menu_handle.Cancel()
+                    raise LdtpServerException(u"Object %s state disabled" % \
+                                              menu)
+                    # Click current menuitem, required for combo box
+                    menu_handle.Press()
+                    # Required for menuitem to appear in accessibility list
+                    self.wait(1) 
+            if not menu_handle:
                 raise LdtpServerException(u"Unable to find menu %s" % menu)
         return menu_handle

@@ -2,6 +2,11 @@
 
 # This file is part of ATOMac.
 
+#@author: Nagappan Alagappan <nagappan@gmail.com>                                                                                                      
+#@copyright: Copyright (c) 2009-12 Nagappan Alagappan                                                                                                  
+
+#http://ldtp.freedesktop.org                                                                                                                           
+
 # ATOMac is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
 # Software Foundation version 2 and no later version.
@@ -31,6 +36,7 @@ abbreviated_roles = {
                      "AXMenuItem" : "mnu",
                      "AXCheckBox" : "chk",
                      "AXTabGroup" : "ptl",
+                     "AXList" : "lst",
                       # Not sure what"s the following object equivalent in LDTP
                      "AXMenuButton" : "cbo", # Maybe combo-box ?
                      "AXRow" : "tblc",

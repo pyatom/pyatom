@@ -2,6 +2,11 @@
 
 # This file is part of ATOMac.
 
+#@author: Nagappan Alagappan <nagappan@gmail.com>                                                                                                      
+#@copyright: Copyright (c) 2009-12 Nagappan Alagappan                                                                                                  
+
+#http://ldtp.freedesktop.org                                                                                                                           
+
 # ATOMac is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
 # Software Foundation version 2 and no later version.
@@ -80,8 +85,6 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         if not window_name:
             raise LdtpServerException(u"Invalid argument window_name")
         window_handle, name, app=self._get_window_handle(window_name)
-        if not window_handle:
-            raise LdtpServerException(u"Unable to find window %s" % window_name)
         object_list=self._get_appmap(window_handle, name)
         return object_list.keys()
 
@@ -113,8 +116,6 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @rtype: integer
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         object_handle.Press()
@@ -134,17 +135,10 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @return: x, y, width, height on success.
         @rtype: list
         """
-        handle=None
         if not object_name: 
-            window_handle, name, app=self._get_window_handle(window_name)
-            if not window_handle:
-                raise LdtpServerException(u"Unable to find window %s" % window_name)
-            handle=window_handle
+            handle, name, app=self._get_window_handle(window_name)
         else:
-            object_handle=self._get_object_handle(window_name, object_name)
-            if not object_handle:
-                raise LdtpServerException(u"Unable to find object %s" % object_name)
-            handle=object_handle
+            handle=self._get_object_handle(window_name, object_name)
         return self._getobjectsize(handle)
 
     def getwindowsize(self, window_name):
@@ -173,17 +167,10 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @return: 1 on success.
         @rtype: integer
         """
-        handle=None
         if not object_name:
-            window_handle, name, app=self._get_window_handle(window_name)
-            if not window_handle:
-                raise LdtpServerException(u"Unable to find window %s" % window_name)
-            handle=window_handle
+            handle, name, app=self._get_window_handle(window_name)
         else:
-            object_handle=self._get_object_handle(window_name, object_name)
-            if not object_handle:
-                raise LdtpServerException(u"Unable to find object %s" % object_name)
-            handle=object_handle
+            handle=self._get_object_handle(window_name, object_name)
         return self._grabfocus(handle)
 
     def objectexist(self, window_name, object_name):
@@ -200,10 +187,11 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @return: 1 if GUI was found, 0 if not.
         @rtype: integer
         """
-        object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
+        try:
+            object_handle=self._get_object_handle(window_name, object_name)
+            return 1
+        except LdtpServerException:
             return 0
-        return 1
 
     def stateenabled(self, window_name, object_name):
         """
@@ -219,10 +207,13 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @return: 1 on success 0 on failure.
         @rtype: integer
         """
-        object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle or not object_handle.AXEnabled:
-            return 0
-        return 1
+        try:
+            object_handle=self._get_object_handle(window_name, object_name)
+            if object_handle.AXEnabled:
+                return 1
+        except LdtpServerException:
+            pass
+        return 0
 
     def check(self, window_name, object_name):
         """
@@ -240,8 +231,6 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         """
         # FIXME: Check for object type
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         if object_handle.AXValue == 1:
@@ -271,8 +260,6 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @rtype: integer
         """
         object_handle=self._get_object_handle(window_name, object_name)
-        if not object_handle:
-            raise LdtpServerException(u"Unable to find object %s" % object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         if object_handle.AXValue == 0:
@@ -301,12 +288,13 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @return: 1 on success 0 on failure.
         @rtype: integer
         """
-        object_handle=self._get_object_handle(window_name, object_name,
-                                                wait_for_object=False)
-        if not object_handle:
-            return 0
-        if object_handle.AXValue == 1:
-            return 1
+        try:
+            object_handle=self._get_object_handle(window_name, object_name,
+                                                  wait_for_object=False)
+            if object_handle.AXValue == 1:
+                return 1
+        except LdtpServerException:
+            pass
         return 0
 
     def verifyuncheck(self, window_name, object_name):
@@ -323,12 +311,13 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text):
         @return: 1 on success 0 on failure.
         @rtype: integer
         """
-        object_handle=self._get_object_handle(window_name, object_name,
-                                                wait_for_object=False)
-        if not object_handle:
-            return 0
-        if object_handle.AXValue == 0:
-            return 1
+        try:
+            object_handle=self._get_object_handle(window_name, object_name,
+                                                  wait_for_object=False)
+            if object_handle.AXValue == 0:
+                return 1
+        except LdtpServerException:
+            pass
         return 0
 
 if __name__ == "__main__":
@@ -402,6 +391,16 @@ if __name__ == "__main__":
     #print test.selectindex("frmInstruments", "cboAdd", 1)
     #print test.getallitem("frmInstruments", "cboAdd")
     #print test.selectindex("frmInstruments", "cboAdd", 10)
-    print test.showlist("frmInstruments", "cboAdd")
-    test.wait(1)
-    print test.hidelist("frmInstruments", "cboAdd")
+    #print test.showlist("frmInstruments", "cboAdd")
+    #test.wait(1)
+    #print test.verifydropdown("frmInstruments", "cboAdd")
+    #print test.hidelist("frmInstruments", "cboAdd")
+    #test.wait(1)
+    #print test.verifydropdown("frmInstruments", "cboAdd")
+    #print test.showlist("frmInstruments", "cboAdd")
+    #test.wait(1)
+    #print test.verifyshowlist("frmInstruments", "cboAdd")
+    #print test.hidelist("frmInstruments", "cboAdd")
+    #test.wait(1)
+    #print test.verifyhidelist("frmInstruments", "cboAdd")
+    print test.comboselect("frmInstruments", "lst0", "Trace Log")
