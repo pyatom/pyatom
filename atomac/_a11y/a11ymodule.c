@@ -209,9 +209,7 @@ _PyAttributeValueToCFTypeRef(PyObject *value,    // IN: The value to set
                              CFTypeRef attrValue)// IN: Value of the UIElement
 {
    CFTypeRef val;
-   CGPoint point;
-   CGSize size;
-   int x,y;
+   double x,y;
    double doubleVal;
 
    if (CFBooleanGetTypeID() == CFGetTypeID(attrValue)) {
@@ -231,24 +229,40 @@ _PyAttributeValueToCFTypeRef(PyObject *value,    // IN: The value to set
    }
 
    if (kAXValueCGPointType == AXValueGetType(attrValue)){
-      if (!PyArg_ParseTuple(value, "ii", &x, &y)) {
+      CGPoint point;
+      if (!PyArg_ParseTuple(value, "dd", &x, &y)) {
          return NULL;
       }
-      point.x = x;
-      point.y = y;
+      point.x = (CGFloat)x;
+      point.y = (CGFloat)y;
       val = (CFTypeRef)(AXValueCreate(kAXValueCGPointType,
                                       (const void *)&point));
       return val;
 
    }
+
    if (kAXValueCGSizeType == AXValueGetType(attrValue)) {
-       if (!PyArg_ParseTuple(value, "ii", &x, &y)) {
-          return NULL;
-       }
-      size.width = x;
-      size.height = y;
+      CGSize size;
+      if (!PyArg_ParseTuple(value, "dd", &x, &y)) {
+         return NULL;
+      }
+      size.width = (CGFloat)x;
+      size.height = (CGFloat)y;
       val = (CFTypeRef)(AXValueCreate(kAXValueCGSizeType,
                                       (const void *)&size));
+      return val;
+   }
+
+   if (kAXValueCFRangeType == AXValueGetType(attrValue)) {
+      CFRange range;
+      long a, b;
+      if (!PyArg_ParseTuple(value, "ll", &a, &b)) {
+         return NULL;
+      }
+      range.location = (CFIndex)a;
+      range.length = (CFIndex)b;
+      val = (CFTypeRef)(AXValueCreate(kAXValueCFRangeType,
+                                      (const void *)&range));
       return val;
    }
 
@@ -357,6 +371,10 @@ _CFAttributeToPyObject(PyObject *self,      // IN: Python self object
    }
 
    if (kAXValueCGPointType == AXValueGetType(attrValue)) {
+      return CGValueToPyTuple(attrValue);
+   }
+
+   if (kAXValueCFRangeType == AXValueGetType(attrValue)) {
       return CGValueToPyTuple(attrValue);
    }
 
@@ -832,6 +850,12 @@ AXUIElement_getAttribute(atomac_AXUIElement *self,  // IN: Python self object
                                        attr,
                                        (CFTypeRef *)&attrValue
                                        );
+
+   if (kAXErrorNoValue == err) {
+      CFRelease(attr);
+      Py_RETURN_NONE;
+   }
+
    if (kAXErrorSuccess != err) {
       _setError(err, "Error retrieving attribute");
       CFRelease(attr);

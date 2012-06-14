@@ -1,3 +1,15 @@
+Version 0.9.4
+@@-@@@-@@@@
+* [jonathanw] Fix sending function keys (issue 23)
+* [Andrew Wu] Documentation added (issue 20)
+* [Andrew Wu] sendKeys() now supports newlines (issue 22)
+* [James Tatum] Null attributes now return None rather than raising a
+  atomac.Error exception (AXError -25212) (issue 27)
+* [James Tatum] CFRange attribute values like AXSelectedText are now supported
+  (issue 29)
+* [James Tatum] Attribute values like AXSize and AXPosition now properly
+  returned as floating point numbers
+
 Version 0.9.3
 09-Jul-2011
 * New NativeUIElement convenience methods sliders() and slidersR()
