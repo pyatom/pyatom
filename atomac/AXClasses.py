@@ -492,10 +492,11 @@ class BaseAXUIElement(_a11y.AXUIElement):
          children = target.AXChildren
       except _a11y.Error:
          return
-      for child in children:
-         yield child
-         for c in self._generateChildrenR(child):
-            yield c
+      if children:
+         for child in children:
+            yield child
+            for c in self._generateChildrenR(child):
+               yield c
 
    def _match(self, **kwargs):
       '''_match - Method which indicates if the object matches specified
