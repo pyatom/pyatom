@@ -209,8 +209,6 @@ _PyAttributeValueToCFTypeRef(PyObject *value,    // IN: The value to set
                              CFTypeRef attrValue)// IN: Value of the UIElement
 {
    CFTypeRef val;
-   CGPoint point;
-   CGSize size;
    int x,y;
    double doubleVal;
 
@@ -231,6 +229,7 @@ _PyAttributeValueToCFTypeRef(PyObject *value,    // IN: The value to set
    }
 
    if (kAXValueCGPointType == AXValueGetType(attrValue)){
+      CGPoint point;
       if (!PyArg_ParseTuple(value, "ii", &x, &y)) {
          return NULL;
       }
@@ -241,14 +240,28 @@ _PyAttributeValueToCFTypeRef(PyObject *value,    // IN: The value to set
       return val;
 
    }
+
    if (kAXValueCGSizeType == AXValueGetType(attrValue)) {
-       if (!PyArg_ParseTuple(value, "ii", &x, &y)) {
-          return NULL;
-       }
+      CGSize size;
+      if (!PyArg_ParseTuple(value, "ii", &x, &y)) {
+         return NULL;
+      }
       size.width = x;
       size.height = y;
       val = (CFTypeRef)(AXValueCreate(kAXValueCGSizeType,
                                       (const void *)&size));
+      return val;
+   }
+
+   if (kAXValueCFRangeType == AXValueGetType(attrValue)) {
+      CFRange range;
+      if (!PyArg_ParseTuple(value, "ii", &x, &y)) {
+         return NULL;
+      }
+      range.location = x;
+      range.length = y;
+      val = (CFTypeRef)(AXValueCreate(kAXValueCFRangeType,
+                                      (const void *)&range));
       return val;
    }
 
@@ -357,6 +370,10 @@ _CFAttributeToPyObject(PyObject *self,      // IN: Python self object
    }
 
    if (kAXValueCGPointType == AXValueGetType(attrValue)) {
+      return CGValueToPyTuple(attrValue);
+   }
+
+   if (kAXValueCFRangeType == AXValueGetType(attrValue)) {
       return CGValueToPyTuple(attrValue);
    }
 

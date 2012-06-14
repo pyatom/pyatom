@@ -94,7 +94,7 @@ CFStringRefToPyUnicode(CFStringRef source) // IN: CFString to convert
  *
  * CGValueToPyTuple --
  *
- *      Convert a CG value (CGSize or CGPoint) to Python tuple
+ *      Convert a CG value (CGSize, CGPoint, or CFRange) to Python tuple
  *
  * Results:
  *      Returns a Python Tuple or NULL and a Python exception on
@@ -116,19 +116,28 @@ CGValueToPyTuple(AXValueRef value) //IN: AXValueRef to convert
    if (kAXValueCGSizeType == AXValueGetType(value)) {
       CGSize size;
       if (AXValueGetValue(value,kAXValueCGSizeType,&size) == 0){
-		 return NULL;
+       return NULL;
       }
-	  val1 = size.width;
-	  val2 = size.height;
+      val1 = size.width;
+      val2 = size.height;
    }
 
    if (kAXValueCGPointType == AXValueGetType(value)){
       CGPoint point;
       if (AXValueGetValue(value,kAXValueCGPointType,&point) == 0){
-		 return NULL;
+       return NULL;
       }
-	  val1 = point.x;
-	  val2 = point.y;
+      val1 = point.x;
+      val2 = point.y;
+   }
+
+   if (kAXValueCFRangeType == AXValueGetType(value)){
+      CFRange range;
+      if (AXValueGetValue(value,kAXValueCFRangeType,&range) == 0){
+       return NULL;
+      }
+      val1 = range.location;
+      val2 = range.length;
    }
 
    PyTuple_SetItem(tuple,0,Py_BuildValue("i",val1));
