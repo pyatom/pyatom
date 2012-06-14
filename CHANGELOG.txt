@@ -7,7 +7,8 @@ Version 0.9.4
   atomac.Error exception (AXError -25212) (issue 27)
 * [James Tatum] CFRange attribute values like AXSelectedText are now supported
   (issue 29)
-
+* [James Tatum] Attribute values like AXSize and AXPosition now properly
+  returned as floating point numbers
 
 Version 0.9.3
 09-Jul-2011

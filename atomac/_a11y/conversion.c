@@ -109,40 +109,52 @@ CFStringRefToPyUnicode(CFStringRef source) // IN: CFString to convert
 PyObject *
 CGValueToPyTuple(AXValueRef value) //IN: AXValueRef to convert
 {
-   int val1 = 0;
-   int val2 = 0;
    PyObject *tuple = PyTuple_New(2);
 
    if (kAXValueCGSizeType == AXValueGetType(value)) {
       CGSize size;
+      double float1 = 0.0;
+      double float2 = 0.0;
       if (AXValueGetValue(value,kAXValueCGSizeType,&size) == 0){
        return NULL;
       }
-      val1 = size.width;
-      val2 = size.height;
+      float1 = (double)size.width;
+      float2 = (double)size.height;
+      PyTuple_SetItem(tuple,0,Py_BuildValue("d",float1));
+      PyTuple_SetItem(tuple,1,Py_BuildValue("d",float2));
+      return tuple;
    }
 
    if (kAXValueCGPointType == AXValueGetType(value)){
       CGPoint point;
+      double float1 = 0.0;
+      double float2 = 0.0;
       if (AXValueGetValue(value,kAXValueCGPointType,&point) == 0){
        return NULL;
       }
-      val1 = point.x;
-      val2 = point.y;
+      float1 = (double)point.x;
+      float2 = (double)point.y;
+      PyTuple_SetItem(tuple,0,Py_BuildValue("d",float1));
+      PyTuple_SetItem(tuple,1,Py_BuildValue("d",float2));
+      return tuple;
    }
 
    if (kAXValueCFRangeType == AXValueGetType(value)){
       CFRange range;
+      long index1 = 0;
+      long index2 = 0;
       if (AXValueGetValue(value,kAXValueCFRangeType,&range) == 0){
        return NULL;
       }
-      val1 = range.location;
-      val2 = range.length;
+      index1 = range.location;
+      index2 = range.length;
+      PyTuple_SetItem(tuple,0,Py_BuildValue("l",index1));
+      PyTuple_SetItem(tuple,1,Py_BuildValue("l",index2));
+      return tuple;
    }
 
-   PyTuple_SetItem(tuple,0,Py_BuildValue("i",val1));
-   PyTuple_SetItem(tuple,1,Py_BuildValue("i",val2));
-   return tuple;
+   // @@@TODO: Need to set a python exception here if not already set
+   return NULL;
 }
 
 /*
