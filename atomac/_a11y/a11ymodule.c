@@ -832,6 +832,12 @@ AXUIElement_getAttribute(atomac_AXUIElement *self,  // IN: Python self object
                                        attr,
                                        (CFTypeRef *)&attrValue
                                        );
+
+   if (kAXErrorNoValue == err) {
+      CFRelease(attr);
+      Py_RETURN_NONE;
+   }
+
    if (kAXErrorSuccess != err) {
       _setError(err, "Error retrieving attribute");
       CFRelease(attr);
