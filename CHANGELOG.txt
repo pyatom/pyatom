@@ -5,6 +5,8 @@ Version 0.9.4
 * [Andrew Wu] sendKeys() now supports newlines (issue 22)
 * [James Tatum] Null attributes now return None rather than raising a
   atomac.Error exception (AXError -25212) (issue 27)
+* [James Tatum] CFRange attribute values like AXSelectedText are now supported
+  (issue 29)
 
 
 Version 0.9.3
