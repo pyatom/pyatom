@@ -118,16 +118,11 @@ CGValueToPyTuple(AXValueRef value) //IN: AXValueRef to convert
       if (AXValueGetValue(value,kAXValueCGSizeType,&size) == 0){
        return NULL;
       }
-<<<<<<< HEAD
-	  val1 = (int)size.width;
-	  val2 = (int)size.height;
-=======
       float1 = (double)size.width;
       float2 = (double)size.height;
       PyTuple_SetItem(tuple,0,Py_BuildValue("d",float1));
       PyTuple_SetItem(tuple,1,Py_BuildValue("d",float2));
       return tuple;
->>>>>>> jtatum/master
    }
 
    if (kAXValueCGPointType == AXValueGetType(value)){
@@ -137,16 +132,11 @@ CGValueToPyTuple(AXValueRef value) //IN: AXValueRef to convert
       if (AXValueGetValue(value,kAXValueCGPointType,&point) == 0){
        return NULL;
       }
-<<<<<<< HEAD
-	  val1 = (int)point.x;
-	  val2 = (int)point.y;
-=======
       float1 = (double)point.x;
       float2 = (double)point.y;
       PyTuple_SetItem(tuple,0,Py_BuildValue("d",float1));
       PyTuple_SetItem(tuple,1,Py_BuildValue("d",float2));
       return tuple;
->>>>>>> jtatum/master
    }
 
    if (kAXValueCFRangeType == AXValueGetType(value)){
