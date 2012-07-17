@@ -21,13 +21,9 @@
     tasks. It's the server part of a client/server UI automation architecture.
 """
 
-
 import SimpleXMLRPCServer
 import socket
 import sys
-
-
-
 
 class LDTPServer(SimpleXMLRPCServer.SimpleXMLRPCServer):
    '''Class to override some behavior in SimpleXMLRPCServer'''
@@ -37,10 +33,8 @@ class LDTPServer(SimpleXMLRPCServer.SimpleXMLRPCServer):
        # Can't use super() here since SimpleXMLRPCServer is an old-style class
        SimpleXMLRPCServer.SimpleXMLRPCServer.server_bind(self, *args, **kwargs)
 
-
 def temp():
     return True
-
 
 def main(args=sys.argv[1:]):
     """Main entry point. Parse command line options and start up a server."""
@@ -48,4 +42,8 @@ def main(args=sys.argv[1:]):
     server = LDTPServer(('', port))
     server.register_introspection_functions()
     server.register_function(temp)
-    server.serve_forever()
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+
