@@ -153,7 +153,7 @@ class Utils(object):
                         title=obj.AXValue
             except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
                 try:
-                    if not re.match("(AXList)", obj.AXRole,
+                    if not re.match("(AXList|AXTable)", obj.AXRole,
                                     re.M | re.U | re.L):
                         # List have description as list
                         # So skip it
@@ -292,7 +292,7 @@ class Utils(object):
             object_list=self._get_appmap(window_handle,
                                            ldtp_window_name, True)
             # print object_list
-        raise LdtpServerException(u"Unable to find object %s" % object_name)
+        raise LdtpServerException(u"Unable to find object %s" % obj_name)
 
     def _get_appmap(self, window_handle, window_name, force_remap=False):
         if not window_handle or not window_name:
