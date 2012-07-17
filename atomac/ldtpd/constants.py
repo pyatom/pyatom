@@ -40,7 +40,8 @@ abbreviated_roles = {
                       # Not sure what"s the following object equivalent in LDTP
                      "AXMenuButton" : "cbo", # Maybe combo-box ?
                      "AXRow" : "tblc",
-                     "AXColumn" : "tblc",
+                     #"AXColumn" : "tblc",
+                     "AXTable" : "tbl",
                      "AXScrollArea" : "sar",
                      "AXOutline" : "otl",
                      "AXValueIndicator" : "val",
