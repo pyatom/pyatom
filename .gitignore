@@ -15,7 +15,6 @@ MANIFEST
 .installed.cfg
 *.swp
 doc/_build/
-
+.DS_Store
 pip-log.txt
-
 *~
