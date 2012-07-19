@@ -43,9 +43,10 @@ class LDTPServer(SimpleXMLRPCServer.SimpleXMLRPCServer):
 def main(args=sys.argv[1:]):
     """Main entry point. Parse command line options and start up a server."""
     port = 4118
-    server = LDTPServer(('', port), allow_none = True,
+    server = LDTPServer(('', port), allow_none=True, logRequests=False,
                         requestHandler=RequestHandler)
     server.register_introspection_functions()
+    server.register_multicall_functions()
     ldtp_inst = core.Core()
     server.register_instance(ldtp_inst)
     try:
