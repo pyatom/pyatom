@@ -152,9 +152,15 @@ class Utils(object):
                         # So skip it
                         if re.match("(AXScrollBar)", obj.AXRole,
                                     re.M | re.U | re.L):
-                           title=""
+                            # ScrollBar value is between 0 to 1
+                            # which is used to get the current location
+                            # of the ScrollBar, rather than the object name
+                            # Let us have the title as empty string and
+                            # refer the ScrollBar as scbr0 (Vertical),
+                            # scbr1 (Horizontal)
+                            title=""
                         else:
-                           title=obj.AXValue
+                            title=obj.AXValue
             except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
                 try:
                     if not re.match("(AXList|AXTable)", obj.AXRole,
