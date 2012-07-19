@@ -225,7 +225,6 @@ def logFailures(*args):
 
 def _populateNamespace(d):
     for method in client._client.system.listMethods():
-        print method
         if method.startswith('system.'):
             continue
         if method in d:
@@ -234,7 +233,6 @@ def _populateNamespace(d):
             local_name = method
         d[local_name] = getattr(client._client, method)
         d[local_name].__doc__ = client._client.system.methodHelp(method)
-    print dir()
 
 class PollEvents:
     """
