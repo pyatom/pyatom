@@ -150,7 +150,11 @@ class Utils(object):
                                     re.M | re.U | re.L):
                         # Tab group has AXRadioButton as AXValue
                         # So skip it
-                        title=obj.AXValue
+                        if re.match("(AXScrollBar)", obj.AXRole,
+                                    re.M | re.U | re.L):
+                           title=0
+                        else:
+                           title=obj.AXValue
             except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
                 try:
                     if not re.match("(AXList|AXTable)", obj.AXRole,

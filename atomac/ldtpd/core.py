@@ -30,12 +30,13 @@ from menu import Menu
 from text import Text
 from mouse import Mouse
 from table import Table
+from value import Value
 from utils import Utils
 from combo_box import ComboBox
 from page_tab_list import PageTabList
 from server_exception import LdtpServerException
 
-class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table):
+class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value):
     def __init__(self):
         super(Core, self).__init__()
 
@@ -326,11 +327,13 @@ if __name__ == "__main__":
     apps=test.getapplist()
     windows=test.getwindowlist()
     #print windows
-    objList = test.getobjectlist("frmTryitEditorv1.5")
-    for obj in objList:
-        if re.search("^tbl\d", obj):
-            print obj, test.getrowcount("frmTryitEditorv1.5", obj)
-    print test.selectrow("Accounts", "tbl0", "VMware")
+    #objList = test.getobjectlist("frmTryitEditorv1.5")
+    #for obj in objList:
+        #if re.search("^tbl\d", obj):
+            #print obj, test.getrowcount("frmTryitEditorv1.5", obj)
+    #print test.selectrow("Accounts", "tbl0", "VMware")
+    print test.scrollup("Downloads", "scbr0")
+    print test.oneright("Downloads", "scbr00", 3)
     #print len(apps), len(windows)
     #print apps, windows
     #print test.getobjectlist("Contacts")
@@ -410,4 +413,4 @@ if __name__ == "__main__":
     #print test.hidelist("frmInstruments", "cboAdd")
     #test.wait(1)
     #print test.verifyhidelist("frmInstruments", "cboAdd")
-    print test.comboselect("frmInstruments", "lst0", "Trace Log")
+    #print test.comboselect("frmInstruments", "lst0", "Trace Log")
