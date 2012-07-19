@@ -56,7 +56,8 @@ if 'LDTP_SERVER_PORT' in os.environ:
     _ldtp_server_port = os.environ['LDTP_SERVER_PORT']
 else:
     _ldtp_server_port = '4118'
-if 'LDTP_WINDOWS' in os.environ or sys.platform.find('win') != -1:
+if 'LDTP_WINDOWS' in os.environ or (sys.platform.find('darwin') == -1 and
+                                    sys.platform.find('win') != -1):
     if 'LDTP_LINUX' in os.environ:
         _ldtp_windows_env = False
     else:
@@ -70,7 +71,6 @@ class _Method(xmlrpclib._Method):
             logger.debug('%s(%s)' % (self.__name, \
                                          ', '.join(map(repr, args) + ['%s=%s' % (k, repr(v)) \
                                                                           for k, v in kwargs.items()])))
-        args += (kwargs,)
         return self.__send(self.__name, args)
 
 class Transport(xmlrpclib.Transport):
