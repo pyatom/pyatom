@@ -152,7 +152,7 @@ class Utils(object):
                         # So skip it
                         if re.match("(AXScrollBar)", obj.AXRole,
                                     re.M | re.U | re.L):
-                           title=0
+                           title=""
                         else:
                            title=obj.AXValue
             except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):

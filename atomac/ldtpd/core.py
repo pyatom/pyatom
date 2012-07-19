@@ -333,7 +333,7 @@ if __name__ == "__main__":
             #print obj, test.getrowcount("frmTryitEditorv1.5", obj)
     #print test.selectrow("Accounts", "tbl0", "VMware")
     print test.scrollup("Downloads", "scbr0")
-    print test.oneright("Downloads", "scbr00", 3)
+    print test.oneright("Downloads", "scbr1", 3)
     #print len(apps), len(windows)
     #print apps, windows
     #print test.getobjectlist("Contacts")
