@@ -25,6 +25,7 @@ import re
 import time
 import atomac
 import fnmatch
+import traceback
 
 from menu import Menu
 from text import Text
@@ -175,6 +176,88 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value):
             handle=self._get_object_handle(window_name, object_name)
         return self._grabfocus(handle)
 
+    def guiexist(self, window_name, object_name=None):
+        """
+        Checks whether a window or component exists.
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
+        try:
+            if not object_name:
+                handle, name, app=self._get_window_handle(window_name, False)
+            else:
+                handle=self._get_object_handle(window_name, object_name,
+                                               wait_for_object=False)
+            # If window and/or object exist, exception will not be thrown
+            # blindly return 1
+            return 1
+        except LdtpServerException:
+            pass
+        return 0
+
+    def waittillguiexist(self, window_name, object_name = '',
+                         guiTimeOut = 30, state = ''):
+        """
+        Wait till a window or component exists.
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type object_name: string
+        @param guiTimeOut: Wait timeout in seconds
+        @type guiTimeOut: integer
+        @param state: Object state used only when object_name is provided.
+        @type object_name: string
+
+        @return: 1 if GUI was found, 0 if not.
+        @rtype: integer
+        """
+        timeout = 0
+        while timeout < guiTimeOut:
+            if self.guiexist(window_name, object_name):
+                return 1
+            # Wait 1 second before retrying
+            time.sleep(1)
+            timeout += 1
+        # Object and/or window doesn't appear within the timeout period
+        return 0
+
+    def waittillguinotexist(self, window_name, object_name = '', guiTimeOut = 30):
+        """
+        Wait till a window does not exist.
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type object_name: string
+        @param guiTimeOut: Wait timeout in seconds
+        @type guiTimeOut: integer
+
+        @return: 1 if GUI has gone away, 0 if not.
+        @rtype: integer
+        """
+        timeout = 0
+        while timeout < guiTimeOut:
+            if not self.guiexist(window_name, object_name):
+                return 1
+            # Wait 1 second before retrying
+            time.sleep(1)
+            timeout += 1
+        # Object and/or window still appears within the timeout period
+        return 0
+
     def objectexist(self, window_name, object_name):
         """
         Checks whether a window or component exists.
@@ -324,16 +407,29 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value):
 
 if __name__ == "__main__":
     test=Core()
-    apps=test.getapplist()
-    windows=test.getwindowlist()
+    #apps=test.getapplist()
+    #windows=test.getwindowlist()
+    #print test.guiexist("gedit")
+    #print test.guiexist("gedit", "txt0")
+    #print test.guiexist("Open")
+    #print test.guiexist("Open", "btnCancel")
+    #print test.guiexist("Open", "C0ncel")
+    #print "waittillguiexist"
+    #print test.waittillguiexist("Open")
+    #print test.waittillguiexist("Open", "btnCancel")
+    #print test.waittillguiexist("Open", "C0ncel", 10)
+    #print "waittillguinotexist"
+    #print test.waittillguinotexist("Open", guiTimeOut=5)
+    #print test.waittillguinotexist("Open", "btnCancel", 5)
+    #print test.waittillguinotexist("Open", "C0ncel")
     #print windows
     #objList = test.getobjectlist("frmTryitEditorv1.5")
     #for obj in objList:
         #if re.search("^tbl\d", obj):
             #print obj, test.getrowcount("frmTryitEditorv1.5", obj)
     #print test.selectrow("Accounts", "tbl0", "VMware")
-    print test.scrollup("Downloads", "scbr0")
-    print test.oneright("Downloads", "scbr1", 3)
+    #print test.scrollup("Downloads", "scbr0")
+    #print test.oneright("Downloads", "scbr1", 3)
     #print len(apps), len(windows)
     #print apps, windows
     #print test.getobjectlist("Contacts")
