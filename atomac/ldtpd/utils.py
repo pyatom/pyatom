@@ -235,7 +235,7 @@ class Utils(object):
             window_timeout=1
         for retry in range(0, window_timeout):
             window_obj=_internal_get_window_handle(windows)
-            if window_obj:
+            if window_obj[0]:
                 # If window object found, return immediately
                 return window_obj
             if window_timeout <= 1:
@@ -249,7 +249,8 @@ class Utils(object):
 
     def _get_object_handle(self, window_name, obj_name, obj_type=None,
                            wait_for_object=True):
-        window_handle, ldtp_window_name, app=self._get_window_handle(window_name)
+        window_handle, ldtp_window_name, app=self._get_window_handle(window_name,
+                                                                     wait_for_object)
         if not window_handle or not window_name:
             raise LdtpServerException(u"Unable to find window %s" % window_name)
         strip=r"( |:|\.|_|\n)"
