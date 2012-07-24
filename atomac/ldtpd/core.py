@@ -33,11 +33,12 @@ from mouse import Mouse
 from table import Table
 from value import Value
 from utils import Utils
+from generic import Generic
 from combo_box import ComboBox
 from page_tab_list import PageTabList
 from server_exception import LdtpServerException
 
-class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value):
+class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def __init__(self):
         super(Core, self).__init__()
 
@@ -407,6 +408,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value):
 
 if __name__ == "__main__":
     test=Core()
+    #test.imagecapture('Untitled')
     #apps=test.getapplist()
     #windows=test.getwindowlist()
     #print test.guiexist("gedit")
