@@ -408,7 +408,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
 
 if __name__ == "__main__":
     test=Core()
-    test.imagecapture()
+    #test.imagecapture('Untitled')
     #apps=test.getapplist()
     #windows=test.getwindowlist()
     #print test.guiexist("gedit")

@@ -51,6 +51,8 @@ class Generic(Utils):
         @return: screenshot with base64 encoded for the client
         @rtype: string
         """
+        if x or y or (width and width != -1) or (height and height != -1):
+            raise LdtpServerException("Not implemented")
         if window_name:
             handle, name, app=self._get_window_handle(window_name)
             try:
@@ -65,7 +67,7 @@ class Generic(Utils):
         image = CIImage.imageWithCGImage_(screenshot)
         bitmapRep = NSBitmapImageRep.alloc().initWithCIImage_(image)
         blob = bitmapRep.representationUsingType_properties_(NSPNGFileType, None)
-        tmpFile = tempfile.mktemp('.png', 'ldtpd_', '/tmp')
+        tmpFile = tempfile.mktemp('.png', 'ldtpd_')
         blob.writeToFile_atomically_(tmpFile, False)
         rv = b64encode(open(tmpFile).read())
         os.remove(tmpFile)
