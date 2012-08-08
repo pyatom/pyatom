@@ -4,8 +4,7 @@
 
 #@author: Yingjun Li <yingjunli@gmail.com>                                                                                                      
 #@copyright: Copyright (c) 2009-12 Yingjun Li                                                                                                  
-
-#http://ldtp.freedesktop.org                                                                                                                           
+#http://ldtp.freedesktop.org
 
 # ATOMac is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
@@ -21,9 +20,7 @@
 # St, Fifth Floor, Boston, MA 02110-1301 USA.
 """Value class."""
 
-import re
 import time
-import atomac
 
 from utils import Utils
 from server_exception import LdtpServerException
