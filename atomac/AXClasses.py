@@ -91,6 +91,29 @@ class BaseAXUIElement(_a11y.AXUIElement):
       raise ValueError('Specified application not found in running apps.')
 
    @classmethod
+   def getFrontmostApp(cls):
+      '''getFrontmostApp - Get the current frontmost application'''
+      # Refresh the runningApplications list
+      def runLoopAndExit():
+         AppHelper.stopEventLoop()
+      AppHelper.callLater(1, runLoopAndExit)
+      AppHelper.runConsoleEventLoop()
+      # Get a list of running applications
+      ws = AppKit.NSWorkspace.sharedWorkspace()
+      apps = ws.runningApplications()
+      for app in apps:
+         pid = app.processIdentifier()
+         ref = cls.getAppRefByPid(pid)
+         try:
+            if ref.AXFrontmost:
+               return ref
+         except (_a11y.ErrorUnsupported, _a11y.ErrorCannotComplete):
+            # Some applications do not have an explicit GUI
+            # and so will not have an AXFrontmost attribute
+            pass
+      raise ValueError('No application found to be frontmost - error?')
+
+   @classmethod
    def getSystemObject(cls):
       '''getSystemObject - Get the top level system accessibility object'''
       return _a11y.getSystemObject(cls)
