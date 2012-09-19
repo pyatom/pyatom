@@ -22,7 +22,7 @@
 
 import core
 
-test=Core()
+test=core.Core()
 #test.imagecapture('Untitled')
 #apps=test.getapplist()
 #windows=test.getwindowlist()
@@ -45,6 +45,10 @@ test=Core()
     #if re.search("^tbl\d", obj):
         #print obj, test.getrowcount("frmTryitEditorv1.5", obj)
 #print test.selectrow("Accounts", "tbl0", "VMware")
+#print test.selectrowpartialmatch("Accounts", "tbl0", "Zim")
+#print test.selectrowindex("Accounts", "tbl0", 0)
+#print test.selectlastrow("Accounts", "tbl0")
+#print test.getcellvalue("Accounts", "tbl0", 1)
 #print test.scrollup("Downloads", "scbr0")
 #print test.oneright("Downloads", "scbr1", 3)
 #print len(apps), len(windows)
