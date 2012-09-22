@@ -23,6 +23,9 @@
 import core
 
 test=core.Core()
+#test.launchapp('Calculator')
+#print test.launchapp('Chicken of the VNC')
+#print test.launchapp('app does not exist')
 #test.imagecapture('Untitled')
 #apps=test.getapplist()
 #windows=test.getwindowlist()
