@@ -42,6 +42,10 @@ class Utils(object):
         else:
             self._ldtp_debug=False
 
+    def _get_front_most_window(self):
+        front_app=atomac.NativeUIElement.getFrontmostApp()
+        return front_app.windows()[0]
+
     def _ldtpize_accessible(self, acc):
         """
         Get LDTP format accessibile name
