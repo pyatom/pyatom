@@ -25,6 +25,7 @@ import fnmatch
 import atomac.Clipboard as Clipboard
 
 from utils import Utils
+from keypress_actions import KeyComboAction, KeyPressAction, KeyReleaseAction
 from server_exception import LdtpServerException
 
 class Text(Utils):
@@ -39,7 +40,8 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        raise LdtpServerException("Not implemented")
+        window=self._get_front_most_window()
+        key_combo_action = KeyComboAction(window, data)
 
     def keypress(self, data):
         """
@@ -51,7 +53,8 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        raise LdtpServerException("Not implemented")
+        window=self._get_front_most_window()
+        key_press_action = KeyPressAction(window, data)
 
     def keyrelease(self, data):
         """
@@ -63,7 +66,8 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        raise LdtpServerException("Not implemented")
+        window=self._get_front_most_window()
+        key_release_action = KeyReleaseAction(window, data)
 
     def enterstring(self, window_name, object_name='', data=''):
         """
