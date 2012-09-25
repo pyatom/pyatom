@@ -86,9 +86,17 @@ class Mouse(Utils):
         @rtype: integer
         """
         if eventType == "b1c":
-            # FIXME: object_handle
-            #object_handle.clickMouseButtonLeft((x, y))
-            pass
+            window=self._get_front_most_window()
+            window.clickMouseButtonLeft((x, y))
+            return 1
+        elif eventType == "b3c":
+            window=self._get_front_most_window()
+            window.clickMouseButtonRight((x, y))
+            return 1
+        elif eventType == "b1d":
+            window=self._get_front_most_window()
+            window.doubleClickMouse((x, y))
+            return 1
         raise LdtpServerException("Not implemented")
 
     def mousemove(self, window_name, object_name):
@@ -121,7 +129,9 @@ class Mouse(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        raise LdtpServerException("Not implemented")
+        window=self._get_front_most_window()
+        window.doubleClickMouse((x, y))
+        return 1
 
     def simulatemousemove(self, source_x, source_y, dest_x, dest_y, delay = 0.0):
         """
