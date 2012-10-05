@@ -32,7 +32,7 @@ import AXKeyCodeConstants
 class BaseAXUIElement(_a11y.AXUIElement):
    '''BaseAXUIElement - Base class for UI elements.
 
-      BaseAXUIElement implements three major things:
+      BaseAXUIElement implements four major things:
       1) Factory class methods for getAppRef and getSystemObject which
          properly instantiate the class.
       2) Generators and methods for finding objects for use in child classes.
