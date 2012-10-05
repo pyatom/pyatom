@@ -74,20 +74,6 @@ class BaseAXUIElement(_a11y.AXUIElement):
       return cls.getAppRefByPid(pid)
 
    @classmethod
-   def _getApps(cls):
-       '''getApps - return a list of NSRunningApplication objects for all
-          applications currently running.
-       '''
-       # Refresh the runningApplications list
-       def runLoopAndExit():
-          AppHelper.stopEventLoop()
-       AppHelper.callLater(1, runLoopAndExit)
-       AppHelper.runConsoleEventLoop()
-       # Get a list of running applications
-       ws = AppKit.NSWorkspace.sharedWorkspace()
-       return ws.runningApplications()
-
-   @classmethod
    def getAppRefByLocalizedName(cls, name):
       '''getAppRefByLocalizedName - Get the top level element for the
          application with the specified localized name, such as
