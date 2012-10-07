@@ -342,9 +342,7 @@ class Utils(object):
         stripped_menu=fnmatch.translate(re.sub(strip, u"", menu))
         for current_menu in children.AXChildren:
             role, label=self._ldtpize_accessible(current_menu)
-            print current_menu, 'hello'
             x, y, width, height=self._getobjectsize(current_menu)
-            print x, y, width, height
             if re.match(tmp_menu, label) or \
                     re.match(tmp_menu, u"%s%s" % (role, label)) or \
                     re.match(stripped_menu, label) or \
