@@ -53,18 +53,14 @@ class ComboBox(Utils):
             # So did the following work around
             self._grabfocus(object_handle)
             x, y, width, height=self._getobjectsize(object_handle)
-            print x, y, width, height
             # Mouse left click on the object
             # Note: x + width/2, y + height / 2 doesn't work
             object_handle.clickMouseButtonLeft((x + 5, y + 5))
             self.wait(5)
             handle=self._get_sub_menu_handle(object_handle, item_name)
-            print handle, item_name, object_handle
             x, y, width, height=self._getobjectsize(handle)
-            print x, y, width, height
             handle.clickMouseButtonLeft((x + 5, y + 5))
             self.wait(5)
-            print 'clicked'
             return 1
         # Required for menuitem to appear in accessibility list
         self.wait(1)
