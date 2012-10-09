@@ -36,7 +36,7 @@ class Utils(object):
         self._obj_timeout=5
         self._window_timeout=5
         # Current opened applications list will be updated
-        self._running_apps=atomac.NativeUIElement._getApps()
+        self._running_apps=atomac.NativeUIElement._getRunningApps()
         if os.environ.has_key("LDTP_DEBUG"):
             self._ldtp_debug=True
         else:
@@ -185,7 +185,7 @@ class Utils(object):
 
     def _update_apps(self):
         # Current opened applications list will be updated
-        self._running_apps=atomac.NativeUIElement._getApps()
+        self._running_apps=atomac.NativeUIElement._getRunningApps()
 
     def _grabfocus(self, handle):
         if not handle:
