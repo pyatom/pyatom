@@ -21,9 +21,13 @@
     tasks. It's the server part of a client/server UI automation architecture.
 """
 
+import os
 import sys
 import core
+import time
+import signal
 import socket
+import thread
 import SimpleXMLRPCServer
 from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
 
@@ -40,17 +44,21 @@ class LDTPServer(SimpleXMLRPCServer.SimpleXMLRPCServer):
        # Can't use super() here since SimpleXMLRPCServer is an old-style class
        SimpleXMLRPCServer.SimpleXMLRPCServer.server_bind(self, *args, **kwargs)
 
-def main(args=sys.argv[1:]):
+def notifyclient(parentpid):
+    time.sleep(1)
+    os.kill(int(parentpid), signal.SIGUSR1)
+
+def main(port = 4118, parentpid=None):
     """Main entry point. Parse command line options and start up a server."""
-    port = 4118
     server = LDTPServer(('', port), allow_none=True, logRequests=False,
                         requestHandler=RequestHandler)
     server.register_introspection_functions()
     server.register_multicall_functions()
     ldtp_inst = core.Core()
     server.register_instance(ldtp_inst)
+    if parentpid:
+        thread.start_new_thread(notifyclient, (parentpid,))
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         pass
-
