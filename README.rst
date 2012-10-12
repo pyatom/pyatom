@@ -7,7 +7,7 @@ We are pleased to introduce the first Python library to fully enable GUI testing
 
 Getting started
 ===============
-ATOMac requires a system running OS X and Xcode installed. It has been tested extensively on 10.6. 10.5 may work. If you experience issues with ATOMac on a particular version of OS X, please open a ticket in the issue tracker.
+ATOMac requires a system running OS X and Xcode installed. It has been tested extensively on 10.6, 10.7, and 10.8. 10.5 may work. If you experience issues with ATOMac on a particular version of OS X, please open a ticket in the issue tracker.
 
 Systemwide accessibility must be enabled. Check the checkbox: System Preferences > Universal Access > Enable access for assistive devices. Failure to enable this will result in ErrorAPIDisabled exceptions during some module usage.
 
@@ -68,11 +68,27 @@ Performing an action is as natural as::
 
 Any action can be triggered this way.
 
+LDTP
+====
+Starting with version 1.0.0, ATOMac now includes compatibility with LDTP, a cross platform automation library. This allows testers to write a single script that will automate test cases on Linux, Windows, and now Mac OS X. Information and documentation on LDTP can be found at the `LDTP home page`_.
+
+.. _`LDTP home page`: http://ldtp.freedesktop.org/
+
+LDTP operation is virtually identical to the operation on Linux. The import mechanism is slightly different, since it is shipped with ATOMac. Cross platform scripts executing on the System Under Test should import the LDTP client as follows::
+
+ try:
+     import ldtp
+ except ImportError:
+     import atomac.ldtp as ldtp
+
+In the future, the LDTP client may be broken out into a separate platform independent module to ameliorate this issue.
+
+Like the Linux platform, the LDTP daemon may be run on the SUT, enabling client/server testing by executing 'ldtp' at a shell prompt. See the LDTP documentation for more details on client/server operation.
+
 Todo and contributing
 =====================
 Although ATOMac is fully functional and drives hundreds of automated test cases at VMware, we have a to-do list to make the project even better.
 
-* Documentation - The docstrings need to be better sphynxified, and the basic doc layout needs to be created.
 * Formatting - this code is not currently PEP-8 compliant.
 * Better mouse handling - for example, a method to smoothly drag from one UI Element to another.
 * Cleanup the search methods - We could use currying to define all the search methods in AXClasses in a cleaner way.
@@ -104,4 +120,8 @@ Authors
 James Tatum <jtatum@gmail.com>,
 Andrew Wu,
 Jesse Mendonca,
-Ken Song
+Ken Song,
+Nagappan Alagappan,
+Yingjun Li,
+
+And other contributors listed in the CHANGELOG file. Thank you so much!
