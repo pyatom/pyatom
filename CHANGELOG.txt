@@ -1,5 +1,7 @@
-Version 0.9.4
-@@-@@@-@@@@
+Version 1.0.0
+12-Oct-2012
+* [Nagappan Alagappan] - Added LDTP client and server to atomac. See README
+  for details.
 * [jonathanw] Fix sending function keys (issue 23)
 * [Andrew Wu] Documentation added (issue 20)
 * [Andrew Wu] sendKeys() now supports newlines (issue 22)
@@ -9,6 +11,8 @@ Version 0.9.4
   (issue 29)
 * [James Tatum] Attribute values like AXSize and AXPosition now properly
   returned as floating point numbers
+* [Andrew Wu] atomac.getFrontmostApp() - New class method to return the
+  frontmost app
 
 Version 0.9.3
 09-Jul-2011
