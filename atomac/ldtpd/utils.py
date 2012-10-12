@@ -36,7 +36,7 @@ class Utils(object):
         self._obj_timeout=5
         self._window_timeout=5
         # Current opened applications list will be updated
-        self._running_apps=atomac.NativeUIElement._getApps()
+        self._running_apps=atomac.NativeUIElement._getRunningApps()
         if os.environ.has_key("LDTP_DEBUG"):
             self._ldtp_debug=True
         else:
@@ -185,7 +185,7 @@ class Utils(object):
 
     def _update_apps(self):
         # Current opened applications list will be updated
-        self._running_apps=atomac.NativeUIElement._getApps()
+        self._running_apps=atomac.NativeUIElement._getRunningApps()
 
     def _grabfocus(self, handle):
         if not handle:
@@ -342,9 +342,7 @@ class Utils(object):
         stripped_menu=fnmatch.translate(re.sub(strip, u"", menu))
         for current_menu in children.AXChildren:
             role, label=self._ldtpize_accessible(current_menu)
-            print current_menu, 'hello'
             x, y, width, height=self._getobjectsize(current_menu)
-            print x, y, width, height
             if re.match(tmp_menu, label) or \
                     re.match(tmp_menu, u"%s%s" % (role, label)) or \
                     re.match(stripped_menu, label) or \
