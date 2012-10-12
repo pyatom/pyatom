@@ -28,6 +28,7 @@ import re
 import sys
 import time
 import signal
+import platform
 import traceback
 import xmlrpclib
 import subprocess
@@ -92,6 +93,10 @@ class Transport(xmlrpclib.Transport):
                 cmd = 'CobraWinLDTP.exe'
             subprocess.Popen(cmd, shell = True)
             self._daemon = True
+        elif platform.mac_ver()[0] != '':
+            pycmd = 'import atomac.ldtpd; atomac.ldtpd.main(parentpid=%s)' % pid
+            self._daemon = os.spawnlp(os.P_NOWAIT, 'python',
+                                      'python', '-c', pycmd)
         else:
             pycmd = 'import ldtpd; ldtpd.main(parentpid=%s)' % pid
             self._daemon = os.spawnlp(os.P_NOWAIT, 'python',
@@ -155,6 +160,7 @@ class Transport(xmlrpclib.Transport):
             except SocketError, e:
                 if ((_ldtp_windows_env and e[0] == 10061) or \
                         (not _ldtp_windows_env and (e.errno == 111 or \
+                                                        e.errno == 61 or \
                                                         e.errno == 146))) \
                         and 'localhost' in host:
                     if hasattr(self, 'close'):
