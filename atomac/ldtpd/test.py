@@ -99,6 +99,7 @@ test=core.Core()
 #test.wait(1)
 #print test.verifymenucheck("Instruments*", "View;Instruments")
 #print test.verifymenuuncheck("Instruments*", "View;Instruments")
+# Instruments Open dialog
 #print test.mouseleftclick("Open", "Cancel")
 #a=test.getobjectlist("Open")
 #for i in a:
@@ -106,6 +107,7 @@ test=core.Core()
 #        print i
 #print test.settextvalue("Open", "txttextfield", "pyatom ldtp")
 #print test.gettextvalue("Open", "txttextfield")
+#print test.inserttext("Open", "txttextfield", 0, "pyatom ldtp")
 #print test.getcharcount("Open", "txttextfield")
 #print test.menuitemenabled("Instruments*", "File;Record Trace")
 #print test.menuitemenabled("Instruments*", "File;Pause Trace")
