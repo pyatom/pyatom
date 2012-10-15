@@ -96,15 +96,15 @@ class Utils(object):
             # add index to it
             try:
                 key=u"%s%s%d" % (ldtpized_name[0],
-                                   ldtpized_name[1], index)
+                                 ldtpized_name[1], index)
             except UnicodeEncodeError:
                 key=u"%s%s%d" % (ldtpized_name[0],
-                                   ldtpized_name[1].decode("utf-8"), index)
+                                 ldtpized_name[1].decode("utf-8"), index)
             index += 1
         # FIXME: Change class to LDTP format ?
         # Get child_index, obj_index
         obj_dict[key]={"obj" : obj, "class" : self._get_role(obj),
-                         "label" : ldtpized_name[1]}
+                       "label" : ldtpized_name[1]}
         return key
 
     def _get_windows(self, force_remap=False):
@@ -201,9 +201,9 @@ class Utils(object):
         return x, y, width, height
 
     def _get_window_handle(self, window_name, wait_for_window=True):
-        window_obj=(None, None, None)
         if not window_name:
             raise LdtpServerException(u"Invalid argument passed to window_name")
+        window_obj=(None, None, None)
         strip=r"( |\n)"
         if not isinstance(window_name, unicode):
             # Convert to unicode string
@@ -252,9 +252,20 @@ class Utils(object):
 
     def _get_object_handle(self, window_name, obj_name, obj_type=None,
                            wait_for_object=True):
+        obj=self._get_object_map(window_name, obj_name, obj_type,
+                                 wait_for_object)
+        # Return object handle
+        # FIXME: Check object validity before returning
+        # if object state is invalid, then remap
+        return obj["obj"]
+
+    def _get_object_map(self, window_name, obj_name, obj_type=None,
+                           wait_for_object=True):
+        if not window_name:
+            raise LdtpServerException(u"Unable to find window %s" % window_name)
         window_handle, ldtp_window_name, app=self._get_window_handle(window_name,
                                                                      wait_for_object)
-        if not window_handle or not window_name:
+        if not window_handle:
             raise LdtpServerException(u"Unable to find window %s" % window_name)
         strip=r"( |:|\.|_|\n)"
         if not isinstance(obj_name, unicode):
@@ -284,10 +295,8 @@ class Utils(object):
                         re.match(stripped_obj_name, obj) or \
                         re.match(stripped_obj_name, label) or \
                         re.match(stripped_obj_name, stripped_label):
-                    # Return object handle
-                    # FIXME: Check object validity before returning
-                    # if object state is invalid, then remap
-                    return object_list[obj]["obj"]
+                    # Return object map
+                    return object_list[obj]
         if wait_for_object:
             obj_timeout=self._obj_timeout
         else:
