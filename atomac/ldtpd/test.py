@@ -107,6 +107,8 @@ test=core.Core()
 #        print i
 #print test.settextvalue("Open", "txttextfield", "pyatom ldtp")
 #print test.gettextvalue("Open", "txttextfield")
+#print test.getobjectinfo('Open', 'txttextfield')
+#print test.getobjectproperty('Open', 'txttextfield', 'class')
 #print test.inserttext("Open", "txttextfield", 0, "pyatom ldtp")
 #print test.getcharcount("Open", "txttextfield")
 #print test.menuitemenabled("Instruments*", "File;Record Trace")
