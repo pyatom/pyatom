@@ -32,7 +32,6 @@ import platform
 import traceback
 import xmlrpclib
 import subprocess
-import signal
 from socket import error as SocketError
 from client_exception import LdtpExecutionError, ERROR_CODE
 from log import logger

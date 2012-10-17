@@ -34,6 +34,7 @@ from value import Value
 from utils import Utils
 from generic import Generic
 from combo_box import ComboBox
+from constants import ldtp_class_type
 from page_tab_list import PageTabList
 from server_exception import LdtpServerException
 
@@ -84,11 +85,63 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @return: list of items in LDTP naming convention.
         @rtype: list
         """
-        if not window_name:
-            raise LdtpServerException(u"Invalid argument window_name")
         window_handle, name, app=self._get_window_handle(window_name)
         object_list=self._get_appmap(window_handle, name)
         return object_list.keys()
+
+    def getobjectinfo(self, window_name, object_name):
+        """
+        Get object properties.
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: list of properties
+        @rtype: list
+        """
+        obj_info=self._get_object_map(window_name, object_name,
+                                      wait_for_object=False)
+        props = []
+        if obj_info:
+            for obj_prop in obj_info.keys():
+                if not obj_info[obj_prop] and obj_prop != "obj":
+                    # Don't add object handle to the list
+                    continue
+                props.append(obj_prop)
+        return props
+
+    def getobjectproperty(self, window_name, object_name, prop):
+        """
+        Get object property value.
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+        @param prop: property name.
+        @type prop: string
+
+        @return: property
+        @rtype: string
+        """
+        obj_info=self._get_object_map(window_name, object_name,
+                                      wait_for_object=False)
+        if obj_info and prop != "obj" and prop in obj_info:
+            if prop == "class":
+                # ldtp_class_type are compatible with Linux and Windows class name
+                # If defined class name exist return that,
+                # else return as it is
+                return ldtp_class_type.get(obj_info[prop], obj_info[prop])
+            else:
+                return obj_info[prop]
+        raise LdtpServerException('Unknown property "%s" in %s' % \
+                                      (prop, object_name))
 
     def launchapp(self, cmd, args = [], delay = 0, env = 1, lang = "C"):
         """
