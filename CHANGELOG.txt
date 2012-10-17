@@ -1,6 +1,10 @@
+Version 1.0.1
+12-Oct-2012
+* [Nagappan Alagappan] Fixing 'Connection refused' error when importing ldtp
+
 Version 1.0.0
 12-Oct-2012
-* [Nagappan Alagappan] - Added LDTP client and server to atomac. See README
+* [Nagappan Alagappan] Added LDTP client and server to ATOMac. See README
   for details.
 * [jonathanw] Fix sending function keys (issue 23)
 * [Andrew Wu] Documentation added (issue 20)
