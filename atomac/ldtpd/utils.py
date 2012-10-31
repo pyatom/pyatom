@@ -372,8 +372,6 @@ class Utils(object):
         obj_dict={}
         self._ldtpized_obj_index={}
         # Populate the appmap and cache it
-        #for obj in window_handle.findAllR():
-        #    self._insert_obj(obj_dict, obj, "", -1)
         self._populate_appmap(obj_dict, window_handle, "", -1)
         # Cache the object dictionary
         self._appmap[window_name]=obj_dict
