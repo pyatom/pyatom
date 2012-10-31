@@ -25,6 +25,7 @@ import re
 import time
 import atomac
 import fnmatch
+import traceback
 
 from constants import abbreviated_roles
 from server_exception import LdtpServerException
@@ -41,6 +42,14 @@ class Utils(object):
             self._ldtp_debug=True
         else:
             self._ldtp_debug=False
+
+    def _dispatch(self, method, args):
+        try:
+            return getattr(self, method)(*args)
+        except:
+            if self._ldtp_debug:
+                print traceback.format_exc()
+            raise
 
     def _get_front_most_window(self):
         front_app=atomac.NativeUIElement.getFrontmostApp()
@@ -78,13 +87,17 @@ class Utils(object):
             print actual_role
         return role, label
 
-    def _insert_obj(self, obj_dict, obj):
+    def _insert_obj(self, obj_dict, obj, parent, child_index):
         ldtpized_name=self._ldtpize_accessible(obj)
+        if ldtpized_name[0] in self._ldtpized_obj_index:
+            self._ldtpized_obj_index[ldtpized_name[0]] += 1
+        else:
+            self._ldtpized_obj_index[ldtpized_name[0]]=0
         try:
             key=u"%s%s" % (ldtpized_name[0], ldtpized_name[1])
         except UnicodeEncodeError:
             key=u"%s%s" % (ldtpized_name[0],
-                             ldtpized_name[1].decode("utf-8"))
+                           ldtpized_name[1].decode("utf-8"))
         if not ldtpized_name[1]:
             index=0
             # Object doesn't have any associated label
@@ -101,10 +114,27 @@ class Utils(object):
                 key=u"%s%s%d" % (ldtpized_name[0],
                                  ldtpized_name[1].decode("utf-8"), index)
             index += 1
-        # FIXME: Change class to LDTP format ?
-        # Get child_index, obj_index
+        if ldtpized_name[0] == "frm":
+            # Window
+            # FIXME: As in Linux
+            obj_index="%s#%d" % (ldtpized_name[0],
+                                 self._ldtpized_obj_index[ldtpized_name[0]])
+        else:
+            obj_index="%s#%d" % (ldtpized_name[0],
+                                 self._ldtpized_obj_index[ldtpized_name[0]])
+        if parent in obj_dict:
+            _current_children=obj_dict[parent]["children"]
+            if _current_children:
+                _current_children=u"%s %s" % (_current_children, key)
+            else:
+                _current_children=key
+            obj_dict[parent]["children"]=_current_children
         obj_dict[key]={"obj" : obj, "class" : self._get_role(obj),
-                       "label" : ldtpized_name[1]}
+                       "label" : ldtpized_name[1],
+                       "parent" : parent,
+                       "children" : "",
+                       "child_index" : child_index,
+                       "obj_index" : obj_index}
         return key
 
     def _get_windows(self, force_remap=False):
@@ -115,6 +145,7 @@ class Utils(object):
         # as force_remap flag has been set
         self._update_apps()
         windows={}
+        self._ldtpized_obj_index={}
         for gui in set(self._running_apps):
             # Get process id
             pid=gui.processIdentifier()
@@ -124,7 +155,7 @@ class Utils(object):
             for window in app.windows():
                 if not window:
                     continue
-                key=self._insert_obj(windows, window)
+                key=self._insert_obj(windows, window, "", -1)
                 windows[key]["app"]=app
         # Replace existing windows list
         self._windows=windows
@@ -317,6 +348,19 @@ class Utils(object):
             # print object_list
         raise LdtpServerException(u"Unable to find object %s" % obj_name)
 
+    def _populate_appmap(self, obj_dict, obj, parent, child_index):
+        index=-1
+        if obj:
+            if child_index != -1:
+                parent=self._insert_obj(obj_dict, obj, parent, child_index)
+            if not obj.AXChildren:
+                return
+            for child in obj.AXChildren:
+                index += 1
+                if not child:
+                    continue
+                self._populate_appmap(obj_dict, child, parent, index)
+
     def _get_appmap(self, window_handle, window_name, force_remap=False):
         if not window_handle or not window_name:
             # If invalid argument return empty dict
@@ -326,9 +370,11 @@ class Utils(object):
             # unless remap is forced
             return self._appmap[window_name]
         obj_dict={}
+        self._ldtpized_obj_index={}
         # Populate the appmap and cache it
-        for obj in window_handle.findAllR():
-            self._insert_obj(obj_dict, obj)
+        #for obj in window_handle.findAllR():
+        #    self._insert_obj(obj_dict, obj, "", -1)
+        self._populate_appmap(obj_dict, window_handle, "", -1)
         # Cache the object dictionary
         self._appmap[window_name]=obj_dict
         return obj_dict
