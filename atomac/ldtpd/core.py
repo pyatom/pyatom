@@ -108,7 +108,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         props = []
         if obj_info:
             for obj_prop in obj_info.keys():
-                if not obj_info[obj_prop] and obj_prop != "obj":
+                if not obj_info[obj_prop] or obj_prop == "obj":
                     # Don't add object handle to the list
                     continue
                 props.append(obj_prop)
