@@ -35,7 +35,7 @@ class Utils(object):
         self._appmap={}
         self._windows={}
         self._obj_timeout=5
-        self._window_timeout=5
+        self._window_timeout=30
         # Current opened applications list will be updated
         self._running_apps=atomac.NativeUIElement._getRunningApps()
         if os.environ.has_key("LDTP_DEBUG"):
