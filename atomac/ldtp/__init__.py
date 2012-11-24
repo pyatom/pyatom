@@ -367,50 +367,44 @@ def imagecapture(window_name = None, out_file = None, x = 0, y = 0,
 
     return out_file
 
-### WINDOWS
-### XML-RPC.NET doesn't support optional arguments
-### We have to wrap those wrappers locally
-if _ldtp_windows_env:
-    def wait(timeout=5):
-        return _remote_wait(timeout)
-    def waittillguiexist(window_name, object_name = '',
-                         guiTimeOut = 30, state = ''):
-        return _remote_waittillguiexist(window_name, object_name,
-                                        guiTimeOut)
-    
-    def waittillguinotexist(window_name, object_name = '',
-                            guiTimeOut = 30, state = ''):
-        return _remote_waittillguinotexist(window_name, object_name,
-                                           guiTimeOut)
-    def guiexist(window_name, object_name = ''):
-        return _remote_guiexist(window_name, object_name)
-    def launchapp(cmd, args = [], delay = 0, env = 1, lang = "C"):
-        return _remote_launchapp(cmd, args, delay, env, lang)
-    def hasstate(window_name, object_name, state, guiTimeOut = 0):
-        return _remote_hasstate(window_name, object_name, state, guiTimeOut)
-    def selectrow(window_name, object_name, row_text):
-        return _remote_selectrow(window_name, object_name, row_text, False)
-    def getchild(window_name, child_name = '', role = '', parent = ''):
-        return _remote_getchild(window_name, child_name, role, parent)
-    def enterstring(window_name, object_name = '', data = ''):
-        return _remote_enterstring(window_name, object_name, data)
-    def setvalue(window_name, object_name, data):
-        return _remote_setvalue(window_name, object_name, float(data))
-    def grabfocus(window_name, object_name = ''):
-        # On Linux just with window name, grab focus doesn't work
-        # So, we can't make this call generic
-        return _remote_grabfocus(window_name, object_name)
-    def copytext(window_name, object_name, start, end = -1):
-        return _remote_copytext(window_name, object_name, start, end)
-    def cuttext(window_name, object_name, start, end = -1):
-        return _remote_cuttext(window_name, object_name, start, end)
-    def deletetext(window_name, object_name, start, end = -1):
-        return _remote_deletetext(window_name, object_name, start, end)
-    def startprocessmonitor(process_name, interval = 2):
-        return _remote_startprocessmonitor(process_name, interval)
-    def gettextvalue(window_name, object_name, startPosition = 0, endPosition = 0):
-        return _remote_gettextvalue(window_name, object_name, startPosition, endPosition)
-### WINDOWS
+def wait(timeout=5):
+    return _remote_wait(timeout)
+def waittillguiexist(window_name, object_name = '',
+                     guiTimeOut = 30, state = ''):
+    return _remote_waittillguiexist(window_name, object_name,
+                                    guiTimeOut)
+def waittillguinotexist(window_name, object_name = '',
+                        guiTimeOut = 30, state = ''):
+    return _remote_waittillguinotexist(window_name, object_name,
+                                       guiTimeOut)
+def guiexist(window_name, object_name = ''):
+    return _remote_guiexist(window_name, object_name)
+def launchapp(cmd, args = [], delay = 0, env = 1, lang = "C"):
+    return _remote_launchapp(cmd, args, delay, env, lang)
+def hasstate(window_name, object_name, state, guiTimeOut = 0):
+    return _remote_hasstate(window_name, object_name, state, guiTimeOut)
+def selectrow(window_name, object_name, row_text):
+    return _remote_selectrow(window_name, object_name, row_text, False)
+def getchild(window_name, child_name = '', role = '', parent = ''):
+    return _remote_getchild(window_name, child_name, role, parent)
+def enterstring(window_name, object_name = '', data = ''):
+    return _remote_enterstring(window_name, object_name, data)
+def setvalue(window_name, object_name, data):
+    return _remote_setvalue(window_name, object_name, float(data))
+def grabfocus(window_name, object_name = ''):
+    # On Linux just with window name, grab focus doesn't work
+    # So, we can't make this call generic
+    return _remote_grabfocus(window_name, object_name)
+def copytext(window_name, object_name, start, end = -1):
+    return _remote_copytext(window_name, object_name, start, end)
+def cuttext(window_name, object_name, start, end = -1):
+    return _remote_cuttext(window_name, object_name, start, end)
+def deletetext(window_name, object_name, start, end = -1):
+    return _remote_deletetext(window_name, object_name, start, end)
+def startprocessmonitor(process_name, interval = 2):
+    return _remote_startprocessmonitor(process_name, interval)
+def gettextvalue(window_name, object_name, startPosition = 0, endPosition = 0):
+    return _remote_gettextvalue(window_name, object_name, startPosition, endPosition)
 
 def onwindowcreate(window_name, fn_name, *args):
     """
