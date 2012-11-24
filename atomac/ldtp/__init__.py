@@ -405,6 +405,13 @@ def startprocessmonitor(process_name, interval = 2):
     return _remote_startprocessmonitor(process_name, interval)
 def gettextvalue(window_name, object_name, startPosition = 0, endPosition = 0):
     return _remote_gettextvalue(window_name, object_name, startPosition, endPosition)
+def getcellvalue(window_name, object_name, row_index, column = 0):
+    return _remote_getcellvalue(window_name, object_name, row_index, column)
+def getcellsize(window_name, object_name, row_index, column = 0):
+    return _remote_getcellsize(window_name, object_name, row_index, column)
+def getobjectnameatcoords(waitTime = 0):
+    # FIXME: Yet to implement in Mac, works on Windows/Linux
+    return _remote_getobjectnameatcoords(waitTime)
 
 def onwindowcreate(window_name, fn_name, *args):
     """
