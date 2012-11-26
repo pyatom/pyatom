@@ -50,7 +50,11 @@ def notifyclient(parentpid):
 
 def main(port = 4118, parentpid=None):
     """Main entry point. Parse command line options and start up a server."""
-    server = LDTPServer(('', port), allow_none=True, logRequests=False,
+    if os.environ.has_key("LDTP_DEBUG"):
+        _ldtp_debug=True
+    else:
+        _ldtp_debug=False
+    server = LDTPServer(('', port), allow_none=True, logRequests=_ldtp_debug,
                         requestHandler=RequestHandler)
     server.register_introspection_functions()
     server.register_multicall_functions()
