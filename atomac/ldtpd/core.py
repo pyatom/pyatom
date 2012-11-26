@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2012 VMware, Inc. All Rights Reserved.
 
 # This file is part of ATOMac.
@@ -52,7 +53,15 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         """
         app_list=[]
         for gui in self._running_apps:
-            app_list.append(gui.localizedName())
+            name=gui.localizedName()
+            # default type was objc.pyobjc_unicode
+            # convert to Unicode, else exception is thrown
+            # TypeError: "cannot marshal <type 'objc.pyobjc_unicode'> objects"
+            try:
+                name=u"%s" % name
+            except UnicodeEncodeError:
+                name=name.decode("utf-8")
+            app_list.append(name)
         # Return unique application list
         return list(set(app_list))
 
