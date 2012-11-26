@@ -72,7 +72,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @return: list of window names in LDTP format of string type on success.
         @rtype: list
         """
-        return self._get_windows().keys()
+        return self._get_windows(True).keys()
 
     def isalive(self):
         """
