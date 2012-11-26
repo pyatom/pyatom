@@ -43,6 +43,17 @@ class Utils(object):
         else:
             self._ldtp_debug=False
 
+    def _listMethods(self):
+        _methods=[]
+        for symbol in dir(self):
+            if symbol.startswith('_'): 
+                continue
+            _methods.append(symbol)
+        return _methods
+
+    def _methodHelp(self, method):
+        return getattr(self, method).__doc__
+
     def _dispatch(self, method, args):
         try:
             return getattr(self, method)(*args)
