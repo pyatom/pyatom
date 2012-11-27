@@ -94,8 +94,8 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @return: list of items in LDTP naming convention.
         @rtype: list
         """
-        window_handle, name, app=self._get_window_handle(window_name)
-        object_list=self._get_appmap(window_handle, name)
+        window_handle, name, app=self._get_window_handle(window_name, True)
+        object_list=self._get_appmap(window_handle, name, True)
         return object_list.keys()
 
     def getobjectinfo(self, window_name, object_name):
