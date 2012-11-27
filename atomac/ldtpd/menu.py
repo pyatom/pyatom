@@ -32,8 +32,7 @@ class Menu(Utils):
         menu_list=re.split(";", object_name)
         # Call base class get_menu_handle
         menu_handle=Utils._get_menu_handle(self, window_name,
-                                            menu_list[0],
-                                            wait_for_window)
+                                           menu_list[0], wait_for_window)
         if len(menu_list) <= 1:
             # If only first level menu is given, return the handle
             return menu_handle
