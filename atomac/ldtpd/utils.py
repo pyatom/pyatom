@@ -162,8 +162,21 @@ class Utils(object):
             pid=gui.processIdentifier()
             # Get app id
             app=atomac.getAppRefByPid(pid)
+            # Get all windows of current app
+            app_windows=app.windows()
+            try:
+                # Tested with
+                # selectmenuitem('appChickenoftheVNC', 'Connection;Open Connection…')
+                if not app_windows and app.AXRole == "AXApplication":
+                    # If app doesn't have any windows and its role is AXApplication
+                    # add to window list
+                    key=self._insert_obj(windows, app, "", -1)
+                    windows[key]["app"]=app
+                    continue
+            except (atomac._a11y.ErrorAPIDisabled, atomac._a11y.ErrorCannotComplete):
+                pass
             # Navigate all the windows
-            for window in app.windows():
+            for window in app_windows:
                 if not window:
                     continue
                 key=self._insert_obj(windows, window, "", -1)
@@ -413,7 +426,6 @@ class Utils(object):
         stripped_menu=fnmatch.translate(re.sub(strip, u"", menu))
         for current_menu in children.AXChildren:
             role, label=self._ldtpize_accessible(current_menu)
-            x, y, width, height=self._getobjectsize(current_menu)
             if re.match(tmp_menu, label) or \
                     re.match(tmp_menu, u"%s%s" % (role, label)) or \
                     re.match(stripped_menu, label) or \
