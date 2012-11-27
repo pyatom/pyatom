@@ -228,6 +228,10 @@ class Utils(object):
                         title=obj.AXRoleDescription
                 except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
                     pass
+        if not title:
+            # Noticed that some of the above one assigns title as None
+            # in that case return empty string
+            return ""
         return title
 
     def _get_role(self, obj):
@@ -258,6 +262,8 @@ class Utils(object):
     def _get_window_handle(self, window_name, wait_for_window=True):
         if not window_name:
             raise LdtpServerException(u"Invalid argument passed to window_name")
+        # Will be used to raise the exception with user passed window name
+        orig_window_name=window_name
         window_obj=(None, None, None)
         strip=r"( |\n)"
         if not isinstance(window_name, unicode):
@@ -302,7 +308,8 @@ class Utils(object):
             time.sleep(1)
             windows=self._get_windows(True)
         if not window_obj[0]:
-            raise LdtpServerException(u"Unable to find window %s" % window_name)
+            raise LdtpServerException(u"Unable to find window %s" % \
+                                          orig_window_name)
         return window_obj
 
     def _get_object_handle(self, window_name, obj_name, obj_type=None,
@@ -368,7 +375,7 @@ class Utils(object):
             time.sleep(1)
             # Force remap
             object_list=self._get_appmap(window_handle,
-                                           ldtp_window_name, True)
+                                         ldtp_window_name, True)
             # print object_list
         raise LdtpServerException(u"Unable to find object %s" % obj_name)
 
