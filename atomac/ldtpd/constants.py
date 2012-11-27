@@ -47,9 +47,11 @@ abbreviated_roles = {
     "AXDisclosureTriangle" : "dct",
     "AXGroup" : "grp",
     "AXPopUpButton" : "pubtn",
+    "AXApplication" : "app",
     }
 ldtp_class_type = {
     "AXWindow" : "frame",
+    "AXApplication" : "application",
     "AXTextArea" : "text",
     "AXTextField" : "text",
     "AXButton" : "push_button",
