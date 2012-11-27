@@ -391,14 +391,21 @@ class Utils(object):
     def _get_menu_handle(self, window_name, object_name,
                          wait_for_window=True):
         window_handle, name, app=self._get_window_handle(window_name,
-                                                           wait_for_window)
+                                                         wait_for_window)
         if not window_handle:
             raise LdtpServerException(u"Unable to find window %s" % window_name)
         # pyatom doesn't understand LDTP convention mnu, strip it off
         menu_handle=app.menuItem(re.sub("mnu", "", object_name))
-        if not menu_handle:
-            raise LdtpServerException(u"Unable to find menu %s" % object_name)
-        return menu_handle
+        if  menu_handle:
+            return menu_handle
+        # Above one looks for menubar item
+        # Following looks for menuitem inside the window
+        menu_handle_list=window_handle.findAllR(AXRole="AXMenu")
+        for menu_handle in menu_handle_list:
+            sub_menu_handle=self._get_sub_menu_handle(menu_handle, object_name)
+            if sub_menu_handle:
+                return sub_menu_handle
+        raise LdtpServerException(u"Unable to find menu %s" % object_name)
 
     def _get_sub_menu_handle(self, children, menu):
         strip=r"( |:|\.|_|\n)"
