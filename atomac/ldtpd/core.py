@@ -32,16 +32,27 @@ from text import Text
 from mouse import Mouse
 from table import Table
 from value import Value
-from utils import Utils
 from generic import Generic
 from combo_box import ComboBox
 from constants import ldtp_class_type
 from page_tab_list import PageTabList
+from utils import Utils, ProcessStats
 from server_exception import LdtpServerException
+
+try:
+    import psutil
+except ImportError:
+    pass
 
 class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def __init__(self):
         super(Core, self).__init__()
+        self._process_stats={}
+
+    def __del__(self):
+        for key in self._process_stats.keys():
+            # Stop all process monitoring instances
+            self._process_stats[key].stop()
 
     """Core LDTP class"""
     def getapplist(self):
@@ -82,6 +93,117 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @rtype: boolean
         """
         return True
+
+    def poll_events(self):
+        """
+        Poll for any registered events or window create events
+
+        @return: window name
+        @rtype: string
+        """
+
+        if not self._callback_event:
+            return ''
+        return self._callback_event.pop()
+
+    def getlastlog(self):
+        """
+        Returns one line of log at any time, if any available, else empty string
+
+        @return: log as string
+        @rtype: string
+        """
+
+        if not self._custom_logger.log_events:
+            return ''
+        
+        return self._custom_logger.log_events.pop()
+
+    def startprocessmonitor(self, process_name, interval=2):
+        """
+        Start memory and CPU monitoring, with the time interval between
+        each process scan
+
+        @param process_name: Process name, ex: firefox-bin.
+        @type process_name: string
+        @param interval: Time interval between each process scan
+        @type interval: double
+
+        @return: 1 on success
+        @rtype: integer
+        """
+        if self._process_stats.has_key(process_name):
+            # Stop previously running instance
+            # At any point, only one process name can be tracked
+            # If an instance already exist, then stop it
+            self._process_stats[process_name].stop()
+        # Create an instance of process stat
+        self._process_stats[process_name]=ProcessStats(process_name, interval)
+        # start monitoring the process
+        self._process_stats[process_name].start()
+        return 1
+
+    def stopprocessmonitor(self, process_name):
+        """
+        Stop memory and CPU monitoring
+
+        @param process_name: Process name, ex: firefox-bin.
+        @type process_name: string
+
+        @return: 1 on success
+        @rtype: integer
+        """
+        if self._process_stats.has_key(process_name):
+            # Stop monitoring process
+            self._process_stats[process_name].stop()
+        return 1
+
+    def getcpustat(self, process_name):
+        """
+        get CPU stat for the give process name
+
+        @param process_name: Process name, ex: firefox-bin.
+        @type process_name: string
+
+        @return: cpu stat list on success, else empty list
+                If same process name, running multiple instance,
+                get the stat of all the process CPU usage
+        @rtype: list
+        """
+        # Create an instance of process stat
+        _stat_inst=ProcessStats(process_name)
+        _stat_list=[]
+        for p in _stat_inst.get_cpu_memory_stat():
+            try:
+                _stat_list.append(p.get_cpu_percent())
+            except psutil.AccessDenied:
+                pass
+        return _stat_list
+
+    def getmemorystat(self, process_name):
+        """
+        get memory stat
+
+        @param process_name: Process name, ex: firefox-bin.
+        @type process_name: string
+
+        @return: memory stat list on success, else empty list
+                If same process name, running multiple instance,
+                get the stat of all the process memory usage
+        @rtype: list
+        """
+        # Create an instance of process stat
+        _stat_inst=ProcessStats(process_name)
+        _stat_list=[]
+        for p in _stat_inst.get_cpu_memory_stat():
+            # Memory percent returned with 17 decimal values
+            # ex: 0.16908645629882812, round it to 2 decimal values
+            # as 0.03
+            try:
+                _stat_list.append(round(p.get_memory_percent(), 2))
+            except psutil.AccessDenied:
+                pass
+        return _stat_list
 
     def getobjectlist(self, window_name):
         """
