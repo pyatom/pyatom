@@ -25,10 +25,126 @@ import re
 import time
 import atomac
 import fnmatch
+import logging
+import threading
 import traceback
+import logging.handlers
 
 from constants import abbreviated_roles
 from server_exception import LdtpServerException
+
+importPsUtil = False
+try:
+    import psutil
+    importPsUtil=True
+except ImportError:
+    pass
+
+class LdtpCustomLog(logging.Handler):
+    """
+    Custom LDTP log, inherit logging.Handler and implement
+    required API
+    """
+    def __init__(self):
+        # Call base handler
+        logging.Handler.__init__(self)
+        # Log all the events in list
+        self.log_events=[]
+
+    def emit(self, record):
+        # Get the message and add to the list
+        # Later the list element can be poped out
+        self.log_events.append(u'%s-%s' % (record.levelname, record.getMessage()))
+
+# Add LdtpCustomLog handler
+logging.handlers.LdtpCustomLog=LdtpCustomLog
+# Create instance of LdtpCustomLog handler
+_custom_logger=logging.handlers.LdtpCustomLog()
+# Set default log level as ERROR
+_custom_logger.setLevel(logging.ERROR)
+# Add handler to root logger
+logger=logging.getLogger('')
+# Add custom logger to the root logger
+logger.addHandler(_custom_logger)
+
+LDTP_LOG_MEMINFO=60
+LDTP_LOG_CPUINFO=61
+logging.addLevelName(LDTP_LOG_MEMINFO, 'MEMINFO')
+logging.addLevelName(LDTP_LOG_CPUINFO, 'CPUINFO')
+
+class ProcessStats(threading.Thread):
+    """
+    Capturing Memory and CPU Utilization statistics for an application and its related processes
+    NOTE: You have to install python-psutil package
+    EXAMPLE USAGE:
+
+    xstats = ProcessStats('evolution', 2)
+    # Start Logging by calling start
+    xstats.start()
+    # Stop the process statistics gathering thread by calling the stopstats method
+    xstats.stop()
+    """
+
+    def __init__(self, appname, interval = 2):
+        """
+        Start memory and CPU monitoring, with the time interval between
+        each process scan
+
+        @param appname: Process name, ex: firefox-bin.
+        @type appname: string
+        @param interval: Time interval between each process scan
+        @type interval: float
+        """
+        if not importPsUtil:
+            raise LdtpServerException('python-psutil package is not installed')
+        threading.Thread.__init__(self)
+        self._appname = appname
+        self._interval = interval
+        self._stop = False
+        self.running = True
+
+    def __del__(self):
+        self._stop = False
+        self.running = False
+
+    def get_cpu_memory_stat(self):
+        proc_list = []
+        for p in psutil.process_iter():
+            if self._stop:
+                self.running = False
+                return proc_list
+            if not re.match(fnmatch.translate(self._appname),
+                            p.name, re.U | re.L):
+                # If process name doesn't match, continue
+                continue
+            proc_list.append(p)
+        return proc_list
+
+    def run(self):
+        while not self._stop:
+            for p in self.get_cpu_memory_stat():
+                try:
+                    # Add the stats into ldtp log
+                    # Resident memory will be in bytes, to convert it to MB
+                    # divide it by 1024*1024
+                    logger.log(LDTP_LOG_MEMINFO, '%s(%s) - %s' % \
+                                   (p.name, str(p.pid), p.get_memory_percent()))
+                    # CPU percent returned with 14 decimal values
+                    # ex: 0.0281199122531, round it to 2 decimal values
+                    # as 0.03
+                    logger.log(LDTP_LOG_CPUINFO, '%s(%s) - %s' % \
+                                   (p.name, str(p.pid), p.get_cpu_percent()))
+                except psutil.AccessDenied:
+                    pass
+            # Wait for interval seconds before gathering stats again
+            try:
+                time.sleep(self._interval)
+            except KeyboardInterrupt:
+                self._stop = True
+
+    def stop(self):
+        self._stop = True
+        self.running = False
 
 class Utils(object):
     def __init__(self):
@@ -36,10 +152,12 @@ class Utils(object):
         self._windows={}
         self._obj_timeout=5
         self._window_timeout=30
+        self._custom_logger=_custom_logger
         # Current opened applications list will be updated
         self._running_apps=atomac.NativeUIElement._getRunningApps()
         if os.environ.has_key("LDTP_DEBUG"):
             self._ldtp_debug=True
+            self._custom_logger.setLevel(logging.DEBUG)
         else:
             self._ldtp_debug=False
 
