@@ -546,9 +546,9 @@ def windowuptime(window_name):
     return None
 
 _populateNamespace(globals())
-#_pollEvents = PollEvents()
-#thread.start_new_thread(_pollEvents.run, ())
-#_pollLogs = PollLogs()
-#thread.start_new_thread(_pollLogs.run, ())
+_pollEvents = PollEvents()
+thread.start_new_thread(_pollEvents.run, ())
+_pollLogs = PollLogs()
+thread.start_new_thread(_pollLogs.run, ())
 
 atexit.register(client._client.kill_daemon)
