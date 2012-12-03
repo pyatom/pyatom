@@ -30,7 +30,7 @@ import threading
 import traceback
 import logging.handlers
 
-from constants import abbreviated_roles
+from constants import abbreviated_roles, ldtp_class_type
 from server_exception import LdtpServerException
 
 importPsUtil = False
@@ -245,10 +245,11 @@ class Utils(object):
             index += 1
         if ldtpized_name[0] == "frm":
             # Window
-            # FIXME: As in Linux
+            # FIXME: As in Linux (app#index, rather than window#index)
             obj_index="%s#%d" % (ldtpized_name[0],
                                  self._ldtpized_obj_index[ldtpized_name[0]])
         else:
+            # Object inside the window
             obj_index="%s#%d" % (ldtpized_name[0],
                                  self._ldtpized_obj_index[ldtpized_name[0]])
         if parent in obj_dict:
@@ -258,7 +259,11 @@ class Utils(object):
             else:
                 _current_children=key
             obj_dict[parent]["children"]=_current_children
-        obj_dict[key]={"obj" : obj, "class" : self._get_role(obj),
+        actual_role=self._get_role(obj)
+        obj_dict[key]={"obj" : obj,
+                       # Use Linux based class type for compatibility
+                       # If class type doesn't exist in list, use actual type
+                       "class" : ldtp_class_type.get(actual_role, actual_role),
                        "label" : ldtpized_name[1],
                        "parent" : parent,
                        "children" : "",
