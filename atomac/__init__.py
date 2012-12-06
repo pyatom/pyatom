@@ -29,4 +29,5 @@ launchAppByBundlePath = NativeUIElement.launchAppByBundlePath
 setSystemWideTimeout = NativeUIElement.setSystemWideTimeout
 getAppRefByBundleId = NativeUIElement.getAppRefByBundleId
 launchAppByBundleId = NativeUIElement.launchAppByBundleId
+getFrontmostApp = NativeUIElement.getFrontmostApp
 getAppRefByPid = NativeUIElement.getAppRefByPid

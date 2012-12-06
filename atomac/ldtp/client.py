@@ -28,17 +28,17 @@ import re
 import sys
 import time
 import signal
+import platform
 import traceback
 import xmlrpclib
 import subprocess
-import signal
 from socket import error as SocketError
 from client_exception import LdtpExecutionError, ERROR_CODE
 from log import logger
 
-_python25 = False
-if sys.version_info[:2] <= (2, 5):
-    _python25 = True
+_python26 = False
+if sys.version_info[:2] <= (2, 6):
+    _python26 = True
 _ldtp_windows_env = False
 if 'LDTP_DEBUG' in os.environ:
     _ldtp_debug = os.environ['LDTP_DEBUG']
@@ -92,6 +92,10 @@ class Transport(xmlrpclib.Transport):
                 cmd = 'CobraWinLDTP.exe'
             subprocess.Popen(cmd, shell = True)
             self._daemon = True
+        elif platform.mac_ver()[0] != '':
+            pycmd = 'import atomac.ldtpd; atomac.ldtpd.main(parentpid=%s)' % pid
+            self._daemon = os.spawnlp(os.P_NOWAIT, 'python',
+                                      'python', '-c', pycmd)
         else:
             pycmd = 'import ldtpd; ldtpd.main(parentpid=%s)' % pid
             self._daemon = os.spawnlp(os.P_NOWAIT, 'python',
@@ -103,7 +107,7 @@ class Transport(xmlrpclib.Transport):
     # @param host Target host.
     # @return A connection handle.
 
-    if not _python25:
+    if not _python26:
         # Add to the class, only if > python 2.5
         def make_connection(self, host):
             # create a HTTP connection object from a host descriptor
@@ -124,13 +128,12 @@ class Transport(xmlrpclib.Transport):
         retry_count = 1
         while True:
             try:
-                if _python25:
+                if _python26:
                     # Noticed this in Hutlab environment (Windows 7 SP1)
                     # Activestate python 2.5, use the old method
                     return xmlrpclib.Transport.request(
                         self, host, handler, request_body, verbose=verbose)
-                # Follwing implementation not supported in Python <= 2.5
-                # FIXME: Verify with Python 2.6
+                # Follwing implementation not supported in Python <= 2.6
                 h = self.make_connection(host)
                 if verbose:
                     h.set_debuglevel(1)
@@ -155,6 +158,7 @@ class Transport(xmlrpclib.Transport):
             except SocketError, e:
                 if ((_ldtp_windows_env and e[0] == 10061) or \
                         (not _ldtp_windows_env and (e.errno == 111 or \
+                                                        e.errno == 61 or \
                                                         e.errno == 146))) \
                         and 'localhost' in host:
                     if hasattr(self, 'close'):

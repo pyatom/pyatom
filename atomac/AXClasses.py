@@ -40,6 +40,18 @@ class BaseAXUIElement(_a11y.AXUIElement):
       4) waitFor utility based upon AX notifications.
    '''
    @classmethod
+   def _getRunningApps(cls):
+      '''Get a list of the running applications'''
+      def runLoopAndExit():
+         AppHelper.stopEventLoop()
+      AppHelper.callLater(1, runLoopAndExit)
+      AppHelper.runConsoleEventLoop()
+      # Get a list of running applications
+      ws = AppKit.NSWorkspace.sharedWorkspace()
+      apps = ws.runningApplications()
+      return apps
+
+   @classmethod
    def getAppRefByPid(cls, pid):
       '''getAppRef - Get the top level element for the application specified
       by pid
@@ -62,20 +74,6 @@ class BaseAXUIElement(_a11y.AXUIElement):
       return cls.getAppRefByPid(pid)
 
    @classmethod
-   def _getApps(cls):
-       '''getApps - return a list of NSRunningApplication objects for all
-          applications currently running.
-       '''
-       # Refresh the runningApplications list
-       def runLoopAndExit():
-          AppHelper.stopEventLoop()
-       AppHelper.callLater(1, runLoopAndExit)
-       AppHelper.runConsoleEventLoop()
-       # Get a list of running applications
-       ws = AppKit.NSWorkspace.sharedWorkspace()
-       return ws.runningApplications()
-
-   @classmethod
    def getAppRefByLocalizedName(cls, name):
       '''getAppRefByLocalizedName - Get the top level element for the
          application with the specified localized name, such as
@@ -83,12 +81,33 @@ class BaseAXUIElement(_a11y.AXUIElement):
 
          Wildcards are also allowed.
       '''
-      apps = cls._getApps()
+      # Refresh the runningApplications list
+      apps = cls._getRunningApps()
       for app in apps:
          if fnmatch.fnmatch(app.localizedName(), name):
             pid = app.processIdentifier()
             return cls.getAppRefByPid(pid)
       raise ValueError('Specified application not found in running apps.')
+
+   @classmethod
+   def getFrontmostApp(cls):
+      '''getFrontmostApp - Get the current frontmost application.
+
+         Raise a ValueError exception if no GUI applications are found. 
+      '''
+      # Refresh the runningApplications list
+      apps = cls._getRunningApps()
+      for app in apps:
+         pid = app.processIdentifier()
+         ref = cls.getAppRefByPid(pid)
+         try:
+            if ref.AXFrontmost:
+               return ref
+         except (_a11y.ErrorUnsupported, _a11y.ErrorCannotComplete):
+            # Some applications do not have an explicit GUI
+            # and so will not have an AXFrontmost attribute
+            pass
+      raise ValueError('No GUI application found.')
 
    @classmethod
    def getSystemObject(cls):

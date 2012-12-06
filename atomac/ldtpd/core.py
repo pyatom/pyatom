@@ -1,11 +1,11 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2012 VMware, Inc. All Rights Reserved.
 
 # This file is part of ATOMac.
 
-#@author: Nagappan Alagappan <nagappan@gmail.com>                                                                                                      
-#@copyright: Copyright (c) 2009-12 Nagappan Alagappan                                                                                                  
-
-#http://ldtp.freedesktop.org                                                                                                                           
+#@author: Nagappan Alagappan <nagappan@gmail.com>
+#@copyright: Copyright (c) 2009-12 Nagappan Alagappan
+#http://ldtp.freedesktop.org
 
 # ATOMac is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
@@ -32,15 +32,27 @@ from text import Text
 from mouse import Mouse
 from table import Table
 from value import Value
-from utils import Utils
 from generic import Generic
 from combo_box import ComboBox
+from constants import ldtp_class_type
 from page_tab_list import PageTabList
+from utils import Utils, ProcessStats
 from server_exception import LdtpServerException
+
+try:
+    import psutil
+except ImportError:
+    pass
 
 class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def __init__(self):
         super(Core, self).__init__()
+        self._process_stats={}
+
+    def __del__(self):
+        for key in self._process_stats.keys():
+            # Stop all process monitoring instances
+            self._process_stats[key].stop()
 
     """Core LDTP class"""
     def getapplist(self):
@@ -52,7 +64,15 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         """
         app_list=[]
         for gui in self._running_apps:
-            app_list.append(gui.localizedName())
+            name=gui.localizedName()
+            # default type was objc.pyobjc_unicode
+            # convert to Unicode, else exception is thrown
+            # TypeError: "cannot marshal <type 'objc.pyobjc_unicode'> objects"
+            try:
+                name=u"%s" % name
+            except UnicodeEncodeError:
+                name=name.decode("utf-8")
+            app_list.append(name)
         # Return unique application list
         return list(set(app_list))
 
@@ -63,7 +83,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @return: list of window names in LDTP format of string type on success.
         @rtype: list
         """
-        return self._get_windows().keys()
+        return self._get_windows(True).keys()
 
     def isalive(self):
         """
@@ -72,8 +92,118 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @return: True on success.
         @rtype: boolean
         """
-
         return True
+
+    def poll_events(self):
+        """
+        Poll for any registered events or window create events
+
+        @return: window name
+        @rtype: string
+        """
+
+        if not self._callback_event:
+            return ''
+        return self._callback_event.pop()
+
+    def getlastlog(self):
+        """
+        Returns one line of log at any time, if any available, else empty string
+
+        @return: log as string
+        @rtype: string
+        """
+
+        if not self._custom_logger.log_events:
+            return ''
+        
+        return self._custom_logger.log_events.pop()
+
+    def startprocessmonitor(self, process_name, interval=2):
+        """
+        Start memory and CPU monitoring, with the time interval between
+        each process scan
+
+        @param process_name: Process name, ex: firefox-bin.
+        @type process_name: string
+        @param interval: Time interval between each process scan
+        @type interval: double
+
+        @return: 1 on success
+        @rtype: integer
+        """
+        if self._process_stats.has_key(process_name):
+            # Stop previously running instance
+            # At any point, only one process name can be tracked
+            # If an instance already exist, then stop it
+            self._process_stats[process_name].stop()
+        # Create an instance of process stat
+        self._process_stats[process_name]=ProcessStats(process_name, interval)
+        # start monitoring the process
+        self._process_stats[process_name].start()
+        return 1
+
+    def stopprocessmonitor(self, process_name):
+        """
+        Stop memory and CPU monitoring
+
+        @param process_name: Process name, ex: firefox-bin.
+        @type process_name: string
+
+        @return: 1 on success
+        @rtype: integer
+        """
+        if self._process_stats.has_key(process_name):
+            # Stop monitoring process
+            self._process_stats[process_name].stop()
+        return 1
+
+    def getcpustat(self, process_name):
+        """
+        get CPU stat for the give process name
+
+        @param process_name: Process name, ex: firefox-bin.
+        @type process_name: string
+
+        @return: cpu stat list on success, else empty list
+                If same process name, running multiple instance,
+                get the stat of all the process CPU usage
+        @rtype: list
+        """
+        # Create an instance of process stat
+        _stat_inst=ProcessStats(process_name)
+        _stat_list=[]
+        for p in _stat_inst.get_cpu_memory_stat():
+            try:
+                _stat_list.append(p.get_cpu_percent())
+            except psutil.AccessDenied:
+                pass
+        return _stat_list
+
+    def getmemorystat(self, process_name):
+        """
+        get memory stat
+
+        @param process_name: Process name, ex: firefox-bin.
+        @type process_name: string
+
+        @return: memory stat list on success, else empty list
+                If same process name, running multiple instance,
+                get the stat of all the process memory usage
+        @rtype: list
+        """
+        # Create an instance of process stat
+        _stat_inst=ProcessStats(process_name)
+        _stat_list=[]
+        for p in _stat_inst.get_cpu_memory_stat():
+            # Memory percent returned with 17 decimal values
+            # ex: 0.16908645629882812, round it to 2 decimal values
+            # as 0.03
+            try:
+                _stat_list.append(round(p.get_memory_percent(), 2))
+            except psutil.AccessDenied:
+                pass
+        return _stat_list
 
     def getobjectlist(self, window_name):
         """
@@ -86,11 +216,93 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @return: list of items in LDTP naming convention.
         @rtype: list
         """
-        if not window_name:
-            raise LdtpServerException(u"Invalid argument window_name")
-        window_handle, name, app=self._get_window_handle(window_name)
-        object_list=self._get_appmap(window_handle, name)
+        window_handle, name, app=self._get_window_handle(window_name, True)
+        object_list=self._get_appmap(window_handle, name, True)
         return object_list.keys()
+
+    def getobjectinfo(self, window_name, object_name):
+        """
+        Get object properties.
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: list of properties
+        @rtype: list
+        """
+        obj_info=self._get_object_map(window_name, object_name,
+                                      wait_for_object=False)
+        props = []
+        if obj_info:
+            for obj_prop in obj_info.keys():
+                if not obj_info[obj_prop] or obj_prop == "obj":
+                    # Don't add object handle to the list
+                    continue
+                props.append(obj_prop)
+        return props
+
+    def getobjectproperty(self, window_name, object_name, prop):
+        """
+        Get object property value.
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+        @param prop: property name.
+        @type prop: string
+
+        @return: property
+        @rtype: string
+        """
+        obj_info=self._get_object_map(window_name, object_name,
+                                      wait_for_object=False)
+        if obj_info and prop != "obj" and prop in obj_info:
+            if prop == "class":
+                # ldtp_class_type are compatible with Linux and Windows class name
+                # If defined class name exist return that,
+                # else return as it is
+                return ldtp_class_type.get(obj_info[prop], obj_info[prop])
+            else:
+                return obj_info[prop]
+        raise LdtpServerException('Unknown property "%s" in %s' % \
+                                      (prop, object_name))
+
+    def launchapp(self, cmd, args = [], delay = 0, env = 1, lang = "C"):
+        """
+        Launch application.
+
+        @param cmd: Command line string to execute.
+        @type cmd: string
+        @param args: Arguments to the application
+        @type args: list
+        @param delay: Delay after the application is launched
+        @type delay: int
+        @param env: GNOME accessibility environment to be set or not
+        @type env: int
+        @param lang: Application language to be used
+        @type lang: string
+
+        @return: 1 on success
+        @rtype: integer
+
+        @raise LdtpServerException: When command fails
+        """
+        if atomac.NativeUIElement.launchAppByBundlePath(cmd):
+            # Let us wait so that the application launches
+            try:
+                time.sleep(int(delay))
+            except ValueError:
+                time.sleep(5)
+            return 1
+        else:
+            raise LdtpServerException(u"Unable to find app '%s'" % cmd)
 
     def wait(self, timeout=5):
         """
@@ -124,6 +336,77 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         object_handle.Press()
         return 1
+
+    def getallstates(self, window_name, object_name):
+        """
+        Get all states of given object
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+
+        @return: list of string on success.
+        @rtype: list
+        """
+        object_handle=self._get_object_handle(window_name, object_name)
+        _obj_states = []
+        if object_handle.AXEnabled:
+            _obj_states.append("enabled")
+        if object_handle.AXFocused:
+            _obj_states.append("focused")
+        else:
+            try:
+                if object_handle.AXFocused:
+                    _obj_states.append("focusable")
+            except:
+                pass
+        if re.match("AXCheckBox", object_handle.AXRole, re.M | re.U | re.L) or \
+                re.match("AXRadioButton", object_handle.AXRole,
+                         re.M | re.U | re.L):
+            if object_handle.AXValue:
+                _obj_states.append("checked")
+        return _obj_states
+
+    def hasstate(self, window_name, object_name, state, guiTimeOut = 0):
+        """
+        has state
+        
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to look for, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+        @type window_name: string
+        @param state: State of the current object.
+        @type object_name: string
+        @param guiTimeOut: Wait timeout in seconds
+        @type guiTimeOut: integer
+
+        @return: 1 on success.
+        @rtype: integer
+        """
+        try:
+            object_handle=self._get_object_handle(window_name, object_name)
+            if state == "enabled":
+                return int(object_handle.AXEnabled)
+            elif state == "focused":
+                return int(object_handle.AXFocused)
+            elif state == "focusable":
+                return int(object_handle.AXFocused)
+            elif state == "checked":
+                if re.match("AXCheckBox", object_handle.AXRole,
+                            re.M | re.U | re.L) or \
+                            re.match("AXRadioButton", object_handle.AXRole,
+                                     re.M | re.U | re.L):
+                    if object_handle.AXValue:
+                        return 1
+        except:
+            pass
+        return 0
 
     def getobjectsize(self, window_name, object_name=None):
         """
@@ -203,6 +486,32 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         except LdtpServerException:
             pass
         return 0
+
+    def guitimeout(self, timeout):
+      """
+        GUI timeout period, default 30 seconds.
+
+        @param timeout: timeout in seconds
+        @type timeout: integer
+
+        @return: 1 if GUI was found, 0 if not.
+        @rtype: integer
+      """
+      self._window_timeout=timeout
+      return 1
+
+    def objtimeout(self, timeout):
+      """
+        Object timeout period, default 5 seconds.
+
+        @param timeout: timeout in seconds
+        @type timeout: integer
+
+        @return: 1 if GUI was found, 0 if not.
+        @rtype: integer
+      """
+      self._obj_timeout=timeout
+      return 1
 
     def waittillguiexist(self, window_name, object_name = '',
                          guiTimeOut = 30, state = ''):
@@ -405,110 +714,3 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         except LdtpServerException:
             pass
         return 0
-
-if __name__ == "__main__":
-    test=Core()
-    #test.imagecapture('Untitled')
-    #apps=test.getapplist()
-    #windows=test.getwindowlist()
-    #print test.guiexist("gedit")
-    #print test.guiexist("gedit", "txt0")
-    #print test.guiexist("Open")
-    #print test.guiexist("Open", "btnCancel")
-    #print test.guiexist("Open", "C0ncel")
-    #print "waittillguiexist"
-    #print test.waittillguiexist("Open")
-    #print test.waittillguiexist("Open", "btnCancel")
-    #print test.waittillguiexist("Open", "C0ncel", 10)
-    #print "waittillguinotexist"
-    #print test.waittillguinotexist("Open", guiTimeOut=5)
-    #print test.waittillguinotexist("Open", "btnCancel", 5)
-    #print test.waittillguinotexist("Open", "C0ncel")
-    #print windows
-    #objList = test.getobjectlist("frmTryitEditorv1.5")
-    #for obj in objList:
-        #if re.search("^tbl\d", obj):
-            #print obj, test.getrowcount("frmTryitEditorv1.5", obj)
-    #print test.selectrow("Accounts", "tbl0", "VMware")
-    #print test.scrollup("Downloads", "scbr0")
-    #print test.oneright("Downloads", "scbr1", 3)
-    #print len(apps), len(windows)
-    #print apps, windows
-    #print test.getobjectlist("Contacts")
-    #print test.click("Open", "Cancel")
-    #print test.comboselect("frmInstruments", "cboAdd", "UiAutomation.js")
-    #print test.comboselect("frmInstruments", "Choose Target", "Choose Target;Octopus")
-    #print test.getobjectlist("frmInstruments")
-    #print test.check("frmInstruments", "chkRecordOnce")
-    #print test.wait(1)
-    #print test.uncheck("frmInstruments", "chkRepeatRecording")
-    #print test.uncheck("frmInstruments", "chkPause")
-    #print test.verifyuncheck("frmInstruments", "chkPause")
-    #print test.verifycheck("frmInstruments", "chkRepeatRecording")
-    #print test.doesmenuitemexist("Instru*", "File;Open...")
-    #print test.doesmenuitemexist("Instruments*", "File;Open...")
-    #print test.doesmenuitemexist("Instruments*", "File;Open*")
-    #print test.selectmenuitem("Instruments*", "File;Open*")
-    #print test.checkmenu("Instruments*", "View;Instruments")
-    #test.wait(1)
-    #print test.checkmenu("Instruments*", "View;Instruments")
-    #print test.uncheckmenu("Instruments*", "View;Instruments")
-    #test.wait(1)
-    #print test.verifymenucheck("Instruments*", "View;Instruments")
-    #print test.verifymenuuncheck("Instruments*", "View;Instruments")
-    #print test.checkmenu("Instruments*", "View;Instruments")
-    #test.wait(1)
-    #print test.verifymenucheck("Instruments*", "View;Instruments")
-    #print test.verifymenuuncheck("Instruments*", "View;Instruments")
-    #print test.mouseleftclick("Open", "Cancel")
-    #a=test.getobjectlist("Open")
-    #for i in a:
-    #    if i.find("txt") != -1:
-    #        print i
-    #print test.settextvalue("Open", "txttextfield", "pyatom ldtp")
-    #print test.gettextvalue("Open", "txttextfield")
-    #print test.getcharcount("Open", "txttextfield")
-    #print test.menuitemenabled("Instruments*", "File;Record Trace")
-    #print test.menuitemenabled("Instruments*", "File;Pause Trace")
-    #print test.listsubmenus("Instruments*", "Fi*")
-    #print test.listsubmenus("Instruments*", "File;OpenRecent")
-    #print test.listsubmenus("Instruments*", "File;mnuOpenRecent")
-    #print test.listsubmenus("Instruments*", "File;GetInfo")
-    #try:
-    #    print test.listsubmenus("Instruments*", "File;ding")
-    #except LdtpServerException:
-    #    pass
-    #try:
-    #    print test.listsubmenus("Instruments*", "ding")
-    #except LdtpServerException:
-    #    pass
-    #try:
-    #    print test.listsubmenus("ding", "dong")
-    #except LdtpServerException:
-    #    pass
-    #print test.getcursorposition("Open", "txttextfield")
-    #print test.setcursorposition("Open", "txttextfield", 10)
-    #print test.cuttext("Open", "txttextfield", 2)
-    #print test.cuttext("Open", "txttextfield", 2, 20)
-    #print test.pastetext("Open", "txttextfield", 2)
-    #print test.gettabname("*ldtpd*python*", "ptl0", 2)
-    #print test.gettabcount("*ldtpd*python*", "ptl0")
-    #print test.selecttabindex("*ldtpd*python*", "ptl0", 2)
-    #print test.selecttab("*ldtpd*python*", "ptl0", "*bash*")
-    #print test.verifytabname("*ldtpd*python*", "ptl0", "*gabe*")
-    #print test.selectindex("frmInstruments", "cboAdd", 1)
-    #print test.getallitem("frmInstruments", "cboAdd")
-    #print test.selectindex("frmInstruments", "cboAdd", 10)
-    #print test.showlist("frmInstruments", "cboAdd")
-    #test.wait(1)
-    #print test.verifydropdown("frmInstruments", "cboAdd")
-    #print test.hidelist("frmInstruments", "cboAdd")
-    #test.wait(1)
-    #print test.verifydropdown("frmInstruments", "cboAdd")
-    #print test.showlist("frmInstruments", "cboAdd")
-    #test.wait(1)
-    #print test.verifyshowlist("frmInstruments", "cboAdd")
-    #print test.hidelist("frmInstruments", "cboAdd")
-    #test.wait(1)
-    #print test.verifyhidelist("frmInstruments", "cboAdd")
-    #print test.comboselect("frmInstruments", "lst0", "Trace Log")

@@ -72,3 +72,4 @@ class Generic(Utils):
         rv = b64encode(open(tmpFile).read())
         os.remove(tmpFile)
         return rv
+

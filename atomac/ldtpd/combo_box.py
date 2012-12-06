@@ -2,10 +2,9 @@
 
 # This file is part of ATOMac.
 
-#@author: Nagappan Alagappan <nagappan@gmail.com>                                                                                                      
-#@copyright: Copyright (c) 2009-12 Nagappan Alagappan                                                                                                  
-
-#http://ldtp.freedesktop.org                                                                                                                           
+#@author: Nagappan Alagappan <nagappan@gmail.com>
+#@copyright: Copyright (c) 2009-12 Nagappan Alagappan
+#http://ldtp.freedesktop.org
 
 # ATOMac is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
@@ -54,18 +53,14 @@ class ComboBox(Utils):
             # So did the following work around
             self._grabfocus(object_handle)
             x, y, width, height=self._getobjectsize(object_handle)
-            print x, y, width, height
             # Mouse left click on the object
             # Note: x + width/2, y + height / 2 doesn't work
             object_handle.clickMouseButtonLeft((x + 5, y + 5))
             self.wait(5)
             handle=self._get_sub_menu_handle(object_handle, item_name)
-            print handle, item_name, object_handle
             x, y, width, height=self._getobjectsize(handle)
-            print x, y, width, height
             handle.clickMouseButtonLeft((x + 5, y + 5))
             self.wait(5)
-            print 'clicked'
             return 1
         # Required for menuitem to appear in accessibility list
         self.wait(1)

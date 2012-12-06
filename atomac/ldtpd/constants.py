@@ -2,10 +2,9 @@
 
 # This file is part of ATOMac.
 
-#@author: Nagappan Alagappan <nagappan@gmail.com>                                                                                                      
-#@copyright: Copyright (c) 2009-12 Nagappan Alagappan                                                                                                  
-
-#http://ldtp.freedesktop.org                                                                                                                           
+#@author: Nagappan Alagappan <nagappan@gmail.com>
+#@copyright: Copyright (c) 2009-12 Nagappan Alagappan
+#http://ldtp.freedesktop.org
 
 # ATOMac is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
@@ -22,29 +21,53 @@
 """Constants class."""
 
 abbreviated_roles = {
-                     "AXWindow" : "frm",
-                     "AXTextArea" : "txt",
-                     "AXTextField" : "txt",
-                     "AXButton" : "btn",
-                     "AXStaticText" : "lbl",
-                     "AXRadioButton" : "rbtn",
-                     "AXSlider" : "sldr",
-                     "AXCell" : "tblc",
-                     "AXImage" : "img",
-                     "AXToolbar" : "tbar",
-                     "AXScrollBar" : "scbr",
-                     "AXMenuItem" : "mnu",
-                     "AXCheckBox" : "chk",
-                     "AXTabGroup" : "ptl",
-                     "AXList" : "lst",
-                      # Not sure what"s the following object equivalent in LDTP
-                     "AXMenuButton" : "cbo", # Maybe combo-box ?
-                     "AXRow" : "tblc",
-                     #"AXColumn" : "tblc",
-                     "AXTable" : "tbl",
-                     "AXScrollArea" : "sar",
-                     "AXOutline" : "otl",
-                     "AXValueIndicator" : "val",
-                     "AXDisclosureTriangle" : "dct",
-                     "AXGroup" : "grp",
-                     }
+    "AXWindow" : "frm",
+    "AXTextArea" : "txt",
+    "AXTextField" : "txt",
+    "AXButton" : "btn",
+    "AXStaticText" : "lbl",
+    "AXRadioButton" : "rbtn",
+    "AXSlider" : "sldr",
+    "AXCell" : "tblc",
+    "AXImage" : "img",
+    "AXToolbar" : "tbar",
+    "AXScrollBar" : "scbr",
+    "AXMenuItem" : "mnu",
+    "AXCheckBox" : "chk",
+    "AXTabGroup" : "ptl",
+    "AXList" : "lst",
+    # Not sure what"s the following object equivalent in LDTP
+    "AXMenuButton" : "cbo", # Maybe combo-box ?
+    "AXRow" : "tblc",
+    #"AXColumn" : "tblc",
+    "AXTable" : "tbl",
+    "AXScrollArea" : "sar",
+    "AXOutline" : "otl",
+    "AXValueIndicator" : "val",
+    "AXDisclosureTriangle" : "dct",
+    "AXGroup" : "grp",
+    "AXPopUpButton" : "pubtn",
+    "AXApplication" : "app",
+    }
+ldtp_class_type = {
+    "AXWindow" : "frame",
+    "AXApplication" : "application",
+    "AXTextArea" : "text",
+    "AXTextField" : "text",
+    "AXButton" : "push_button",
+    "AXStaticText" : "label",
+    "AXRadioButton" : "radion_button",
+    "AXSlider" : "slider",
+    "AXCell" : "table_cell",
+    "AXImage" : "image",
+    "AXToolbar" : "toolbar",
+    "AXScrollBar" : "scroll_bar",
+    "AXMenuItem" : "menu_item",
+    "AXCheckBox" : "check_box",
+    "AXTabGroup" : "page_tab_list",
+    "AXList" : "list",
+    "AXRow" : "table_cell",
+    "AXTable" : "table",
+    "AXScrollArea" : "scroll_area",
+    "AXPopUpButton" : "popup_button",
+    }

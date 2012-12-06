@@ -2,10 +2,9 @@
 
 # This file is part of ATOMac.
 
-#@author: Nagappan Alagappan <nagappan@gmail.com>                                                                                                      
-#@copyright: Copyright (c) 2009-12 Nagappan Alagappan                                                                                                  
-
-#http://ldtp.freedesktop.org                                                                                                                           
+#@author: Nagappan Alagappan <nagappan@gmail.com>
+#@copyright: Copyright (c) 2009-12 Nagappan Alagappan
+#http://ldtp.freedesktop.org
 
 # ATOMac is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by the Free
@@ -26,6 +25,7 @@ import fnmatch
 import atomac.Clipboard as Clipboard
 
 from utils import Utils
+from keypress_actions import KeyComboAction, KeyPressAction, KeyReleaseAction
 from server_exception import LdtpServerException
 
 class Text(Utils):
@@ -40,7 +40,8 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        raise LdtpServerException("Not implemented")
+        window=self._get_front_most_window()
+        key_combo_action = KeyComboAction(window, data)
 
     def keypress(self, data):
         """
@@ -52,7 +53,8 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        raise LdtpServerException("Not implemented")
+        window=self._get_front_most_window()
+        key_press_action = KeyPressAction(window, data)
 
     def keyrelease(self, data):
         """
@@ -64,7 +66,8 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        raise LdtpServerException("Not implemented")
+        window=self._get_front_most_window()
+        key_release_action = KeyReleaseAction(window, data)
 
     def enterstring(self, window_name, object_name='', data=''):
         """
@@ -134,6 +137,37 @@ class Text(Utils):
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         return object_handle.AXValue
+
+    def inserttext(self, window_name, object_name, position, data):
+        """
+        Insert string sequence in given position.
+        
+        @param window_name: Window name to type in, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+        @param object_name: Object name to type in, either full name,
+        LDTP's name convention, or a Unix glob. 
+        @type object_name: string
+        @param position: position where text has to be entered.
+        @type data: int
+        @param data: data to type.
+        @type data: string
+
+        @return: 1 on success.
+        @rtype: integer
+        """
+        object_handle=self._get_object_handle(window_name, object_name)
+        if not object_handle.AXEnabled:
+            raise LdtpServerException(u"Object %s state disabled" % object_name)
+        existing_data=object_handle.AXValue
+        size=len(existing_data)
+        if position < 0:
+            position=0
+        if position > size:
+            position=size
+        object_handle.AXValue=existing_data[:position] + data + \
+            existing_data[position:]
+        return 1
 
     def verifypartialmatch(self, window_name, object_name, partial_text):
         """
