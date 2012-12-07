@@ -25,23 +25,152 @@ import re
 import time
 import atomac
 import fnmatch
+import logging
+import threading
 import traceback
+import logging.handlers
 
-from constants import abbreviated_roles
+from constants import abbreviated_roles, ldtp_class_type
 from server_exception import LdtpServerException
+
+importPsUtil = False
+try:
+    import psutil
+    importPsUtil=True
+except ImportError:
+    pass
+
+class LdtpCustomLog(logging.Handler):
+    """
+    Custom LDTP log, inherit logging.Handler and implement
+    required API
+    """
+    def __init__(self):
+        # Call base handler
+        logging.Handler.__init__(self)
+        # Log all the events in list
+        self.log_events=[]
+
+    def emit(self, record):
+        # Get the message and add to the list
+        # Later the list element can be poped out
+        self.log_events.append(u'%s-%s' % (record.levelname, record.getMessage()))
+
+# Add LdtpCustomLog handler
+logging.handlers.LdtpCustomLog=LdtpCustomLog
+# Create instance of LdtpCustomLog handler
+_custom_logger=logging.handlers.LdtpCustomLog()
+# Set default log level as ERROR
+_custom_logger.setLevel(logging.ERROR)
+# Add handler to root logger
+logger=logging.getLogger('')
+# Add custom logger to the root logger
+logger.addHandler(_custom_logger)
+
+LDTP_LOG_MEMINFO=60
+LDTP_LOG_CPUINFO=61
+logging.addLevelName(LDTP_LOG_MEMINFO, 'MEMINFO')
+logging.addLevelName(LDTP_LOG_CPUINFO, 'CPUINFO')
+
+class ProcessStats(threading.Thread):
+    """
+    Capturing Memory and CPU Utilization statistics for an application and its related processes
+    NOTE: You have to install python-psutil package
+    EXAMPLE USAGE:
+
+    xstats = ProcessStats('evolution', 2)
+    # Start Logging by calling start
+    xstats.start()
+    # Stop the process statistics gathering thread by calling the stopstats method
+    xstats.stop()
+    """
+
+    def __init__(self, appname, interval = 2):
+        """
+        Start memory and CPU monitoring, with the time interval between
+        each process scan
+
+        @param appname: Process name, ex: firefox-bin.
+        @type appname: string
+        @param interval: Time interval between each process scan
+        @type interval: float
+        """
+        if not importPsUtil:
+            raise LdtpServerException('python-psutil package is not installed')
+        threading.Thread.__init__(self)
+        self._appname = appname
+        self._interval = interval
+        self._stop = False
+        self.running = True
+
+    def __del__(self):
+        self._stop = False
+        self.running = False
+
+    def get_cpu_memory_stat(self):
+        proc_list = []
+        for p in psutil.process_iter():
+            if self._stop:
+                self.running = False
+                return proc_list
+            if not re.match(fnmatch.translate(self._appname),
+                            p.name, re.U | re.L):
+                # If process name doesn't match, continue
+                continue
+            proc_list.append(p)
+        return proc_list
+
+    def run(self):
+        while not self._stop:
+            for p in self.get_cpu_memory_stat():
+                try:
+                    # Add the stats into ldtp log
+                    # Resident memory will be in bytes, to convert it to MB
+                    # divide it by 1024*1024
+                    logger.log(LDTP_LOG_MEMINFO, '%s(%s) - %s' % \
+                                   (p.name, str(p.pid), p.get_memory_percent()))
+                    # CPU percent returned with 14 decimal values
+                    # ex: 0.0281199122531, round it to 2 decimal values
+                    # as 0.03
+                    logger.log(LDTP_LOG_CPUINFO, '%s(%s) - %s' % \
+                                   (p.name, str(p.pid), p.get_cpu_percent()))
+                except psutil.AccessDenied:
+                    pass
+            # Wait for interval seconds before gathering stats again
+            try:
+                time.sleep(self._interval)
+            except KeyboardInterrupt:
+                self._stop = True
+
+    def stop(self):
+        self._stop = True
+        self.running = False
 
 class Utils(object):
     def __init__(self):
         self._appmap={}
         self._windows={}
         self._obj_timeout=5
-        self._window_timeout=5
+        self._window_timeout=30
+        self._custom_logger=_custom_logger
         # Current opened applications list will be updated
         self._running_apps=atomac.NativeUIElement._getRunningApps()
         if os.environ.has_key("LDTP_DEBUG"):
             self._ldtp_debug=True
+            self._custom_logger.setLevel(logging.DEBUG)
         else:
             self._ldtp_debug=False
+
+    def _listMethods(self):
+        _methods=[]
+        for symbol in dir(self):
+            if symbol.startswith('_'): 
+                continue
+            _methods.append(symbol)
+        return _methods
+
+    def _methodHelp(self, method):
+        return getattr(self, method).__doc__
 
     def _dispatch(self, method, args):
         try:
@@ -116,10 +245,11 @@ class Utils(object):
             index += 1
         if ldtpized_name[0] == "frm":
             # Window
-            # FIXME: As in Linux
+            # FIXME: As in Linux (app#index, rather than window#index)
             obj_index="%s#%d" % (ldtpized_name[0],
                                  self._ldtpized_obj_index[ldtpized_name[0]])
         else:
+            # Object inside the window
             obj_index="%s#%d" % (ldtpized_name[0],
                                  self._ldtpized_obj_index[ldtpized_name[0]])
         if parent in obj_dict:
@@ -129,7 +259,11 @@ class Utils(object):
             else:
                 _current_children=key
             obj_dict[parent]["children"]=_current_children
-        obj_dict[key]={"obj" : obj, "class" : self._get_role(obj),
+        actual_role=self._get_role(obj)
+        obj_dict[key]={"obj" : obj,
+                       # Use Linux based class type for compatibility
+                       # If class type doesn't exist in list, use actual type
+                       "class" : ldtp_class_type.get(actual_role, actual_role),
                        "label" : ldtpized_name[1],
                        "parent" : parent,
                        "children" : "",
@@ -151,8 +285,21 @@ class Utils(object):
             pid=gui.processIdentifier()
             # Get app id
             app=atomac.getAppRefByPid(pid)
+            # Get all windows of current app
+            app_windows=app.windows()
+            try:
+                # Tested with
+                # selectmenuitem('appChickenoftheVNC', 'Connection;Open Connection…')
+                if not app_windows and app.AXRole == "AXApplication":
+                    # If app doesn't have any windows and its role is AXApplication
+                    # add to window list
+                    key=self._insert_obj(windows, app, "", -1)
+                    windows[key]["app"]=app
+                    continue
+            except (atomac._a11y.ErrorAPIDisabled, atomac._a11y.ErrorCannotComplete):
+                pass
             # Navigate all the windows
-            for window in app.windows():
+            for window in app_windows:
                 if not window:
                     continue
                 key=self._insert_obj(windows, window, "", -1)
@@ -204,6 +351,10 @@ class Utils(object):
                         title=obj.AXRoleDescription
                 except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
                     pass
+        if not title:
+            # Noticed that some of the above one assigns title as None
+            # in that case return empty string
+            return ""
         return title
 
     def _get_role(self, obj):
@@ -234,6 +385,8 @@ class Utils(object):
     def _get_window_handle(self, window_name, wait_for_window=True):
         if not window_name:
             raise LdtpServerException(u"Invalid argument passed to window_name")
+        # Will be used to raise the exception with user passed window name
+        orig_window_name=window_name
         window_obj=(None, None, None)
         strip=r"( |\n)"
         if not isinstance(window_name, unicode):
@@ -278,7 +431,8 @@ class Utils(object):
             time.sleep(1)
             windows=self._get_windows(True)
         if not window_obj[0]:
-            raise LdtpServerException(u"Unable to find window %s" % window_name)
+            raise LdtpServerException(u"Unable to find window %s" % \
+                                          orig_window_name)
         return window_obj
 
     def _get_object_handle(self, window_name, obj_name, obj_type=None,
@@ -344,7 +498,7 @@ class Utils(object):
             time.sleep(1)
             # Force remap
             object_list=self._get_appmap(window_handle,
-                                           ldtp_window_name, True)
+                                         ldtp_window_name, True)
             # print object_list
         raise LdtpServerException(u"Unable to find object %s" % obj_name)
 
@@ -380,14 +534,21 @@ class Utils(object):
     def _get_menu_handle(self, window_name, object_name,
                          wait_for_window=True):
         window_handle, name, app=self._get_window_handle(window_name,
-                                                           wait_for_window)
+                                                         wait_for_window)
         if not window_handle:
             raise LdtpServerException(u"Unable to find window %s" % window_name)
         # pyatom doesn't understand LDTP convention mnu, strip it off
         menu_handle=app.menuItem(re.sub("mnu", "", object_name))
-        if not menu_handle:
-            raise LdtpServerException(u"Unable to find menu %s" % object_name)
-        return menu_handle
+        if  menu_handle:
+            return menu_handle
+        # Above one looks for menubar item
+        # Following looks for menuitem inside the window
+        menu_handle_list=window_handle.findAllR(AXRole="AXMenu")
+        for menu_handle in menu_handle_list:
+            sub_menu_handle=self._get_sub_menu_handle(menu_handle, object_name)
+            if sub_menu_handle:
+                return sub_menu_handle
+        raise LdtpServerException(u"Unable to find menu %s" % object_name)
 
     def _get_sub_menu_handle(self, children, menu):
         strip=r"( |:|\.|_|\n)"
@@ -395,7 +556,6 @@ class Utils(object):
         stripped_menu=fnmatch.translate(re.sub(strip, u"", menu))
         for current_menu in children.AXChildren:
             role, label=self._ldtpize_accessible(current_menu)
-            x, y, width, height=self._getobjectsize(current_menu)
             if re.match(tmp_menu, label) or \
                     re.match(tmp_menu, u"%s%s" % (role, label)) or \
                     re.match(stripped_menu, label) or \

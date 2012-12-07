@@ -129,8 +129,15 @@ class Mouse(Utils):
         @return: 1 on success.
         @rtype: integer
         """
+        object_handle = self._get_object_handle(window_name, object_name)
+        if not object_handle.AXEnabled:
+            raise LdtpServerException(u"Object %s state disabled" % object_name)
+        self._grabfocus(object_handle)
+        x, y, width, height = self._getobjectsize(object_handle)
         window=self._get_front_most_window()
-        window.doubleClickMouse((x, y))
+        # Mouse left click on the object
+        #object_handle.doubleClick()
+        window.doubleClickMouse((x + width / 2, y + height / 2))
         return 1
 
     def simulatemousemove(self, source_x, source_y, dest_x, dest_y, delay = 0.0):

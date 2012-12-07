@@ -103,7 +103,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
          try:
             if ref.AXFrontmost:
                return ref
-         except (_a11y.ErrorUnsupported, _a11y.ErrorCannotComplete):
+         except (_a11y.ErrorUnsupported, _a11y.ErrorCannotComplete, _a11y.ErrorAPIDisabled):
             # Some applications do not have an explicit GUI
             # and so will not have an AXFrontmost attribute
             pass
