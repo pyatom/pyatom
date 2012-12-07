@@ -334,7 +334,18 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
-        object_handle.Press()
+        try:
+            object_handle.Press()
+        except AttributeError:
+            size=self._getobjectsize(object_handle)
+            self._grabfocus(object_handle)
+            self.wait(0.5)
+            # If object doesn't support Press, trying clicking with the object
+            # coordinates, where size=(x, y, width, height)
+            # click on center of the widget
+            # Noticed this issue on clicking AXImage
+            # click('Instruments*', 'Automation')
+            self.generatemouseevent(size[0] + size[2]/2, size[1] + size[3]/2)
         return 1
 
     def getallstates(self, window_name, object_name):
