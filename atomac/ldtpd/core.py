@@ -742,6 +742,8 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @return: access key in string format on success.
         @rtype: string
         """
+        # Used http://www.danrodney.com/mac/ as reference for
+        # mapping keys with specific control
         # In Mac noticed (in accessibility inspector) only menu had access keys
         # so, get the menu_handle of given object and
         # return the access key
