@@ -739,7 +739,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         LDTP's name convention, or a Unix glob. Or menu heirarchy
         @type object_name: string
 
-        @return: access key in string format on success.
+        @return: access key in string format on success, else LdtpExecutionError on failure.
         @rtype: string
         """
         # Used http://www.danrodney.com/mac/ as reference for
