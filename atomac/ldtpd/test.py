@@ -160,3 +160,5 @@ test=core.Core()
 #print test.getallstates("Settings", "chkAntialiastext")
 #print test.getallstates("Settings", "rbtn*Block")
 #print test.getallstates("Settings", "rbtn*Underline")
+#print test.getaccesskey("test*Python*", "Window;Zoom") # Will raise exception
+#print test.getaccesskey("test*Python*", "View;Scroll to Bottom")

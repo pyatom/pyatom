@@ -180,9 +180,9 @@ class Table(Utils):
         LDTP's name convention, or a Unix glob. 
         @type object_name: string
         @param row_index: Row index to get
-        @type row_index: index
+        @type row_index: integer
         @param column: Column index to get, default value 0
-        @type column: index
+        @type column: integer
         @param data: data, default value None
                 None, used for toggle button
         @type data: string
@@ -203,9 +203,9 @@ class Table(Utils):
         LDTP's name convention, or a Unix glob. 
         @type object_name: string
         @param row_index: Row index to get
-        @type row_index: index
+        @type row_index: integer
         @param column: Column index to get, default value 0
-        @type column: index
+        @type column: integer
 
         @return: cell value on success.
         @rtype: string
@@ -237,9 +237,9 @@ class Table(Utils):
         LDTP's name convention, or a Unix glob. 
         @type object_name: string
         @param row_index: Row index to get
-        @type row_index: index
+        @type row_index: integer
         @param column: Column index to get, default value 0
-        @type column: index
+        @type column: integer
 
         @return: cell coordinates on success.
         @rtype: list
@@ -270,10 +270,8 @@ class Table(Utils):
         @param object_name: Object name to type in, either full name,
         LDTP's name convention, or a Unix glob. 
         @type object_name: string
-        @param row_index: Row index to get
-        @type row_index: index
-        @param column: Column index to get, default value 0
-        @type column: index
+        @param row_text: Row text to right click
+        @type row_text: string
 
         @return: 1 on success.
         @rtype: integer
@@ -291,9 +289,9 @@ class Table(Utils):
         LDTP's name convention, or a Unix glob. 
         @type object_name: string
         @param row_index: Row index to get
-        @type row_index: index
+        @type row_index: integer
         @param column: Column index to get, default value 0
-        @type column: index
+        @type column: integer
 
         @return: cell value on success.
         @rtype: string
@@ -311,9 +309,9 @@ class Table(Utils):
         LDTP's name convention, or a Unix glob. 
         @type object_name: string
         @param row_index: Row index to get
-        @type row_index: index
+        @type row_index: integer
         @param column: Column index to get, default value 0
-        @type column: index
+        @type column: integer
 
         @return: cell value on success.
         @rtype: string
@@ -331,9 +329,9 @@ class Table(Utils):
         LDTP's name convention, or a Unix glob. 
         @type object_name: string
         @param row_index: Row index to get
-        @type row_index: index
+        @type row_index: integer
         @param column: Column index to get, default value 0
-        @type column: index
+        @type column: integer
 
         @return: 1 on success.
         @rtype: integer
@@ -416,9 +414,9 @@ class Table(Utils):
         LDTP's name convention, or a Unix glob. 
         @type object_name: string
         @param row_index: Row index to get
-        @type row_index: index
+        @type row_index: integer
         @param column_index: Column index to get, default value 0
-        @type column_index: index
+        @type column_index: integer
         @param row_text: Row text to match
         @type string
 
@@ -480,9 +478,9 @@ class Table(Utils):
         LDTP's name convention, or a Unix glob. 
         @type object_name: string
         @param row_index: Row index to get
-        @type row_index: index
+        @type row_index: integer
         @param column_index: Column index to get, default value 0
-        @type column_index: index
+        @type column_index: integer
         @param row_text: Row text to match
         @type string
 

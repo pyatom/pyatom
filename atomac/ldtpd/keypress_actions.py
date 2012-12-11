@@ -46,6 +46,26 @@ class KeyboardOp:
       keyval="control_l"
     elif keyval == "shift":
       keyval="shift_l"
+    elif keyval == "left":
+      keyval="cursor_left"
+    elif keyval == "right":
+      keyval="cursor_right"
+    elif keyval == "up":
+      keyval="cursor_up"
+    elif keyval == "down":
+      keyval="cursor_down"
+    elif keyval == "bksp":
+      keyval="backspace"
+    elif keyval == "enter":
+      keyval="return"
+    elif keyval == "pgdown":
+      keyval="page_down"
+    elif keyval == "pagedown":
+      keyval="page_down"
+    elif keyval == "pgup":
+      keyval="page_up"
+    elif keyval == "pageup":
+      keyval="page_up"
     key="<%s>" % keyval
     # This will identify Modifiers
     if key in ["<command_l>", "<command_r>",
