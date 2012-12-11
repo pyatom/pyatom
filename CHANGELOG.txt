@@ -1,3 +1,28 @@
+Version 1.0.2
+??-???-????
+Core ATOMac changes:
+
+* [Nagappan Alagappan] Resolved a bug in getFrontmostApp that occurs when
+  Google Chrome is running
+
+LDTP related changes:
+
+* [ebass] LDTP client updated to require Python 2.6
+* [Nagappan Alagappan] Minor LDTP client and server bug fixes
+* [Nagappan Alagappan] LDTP debugging can be enabled by setting the LDTP_DEBUG
+  environment variable
+* [Nagappan Alagappan] Fixed an LDTP error involving unicode strings in
+  getapplist()
+* [Nagappan Alagappan] Added automatic object refreshing in getwindowlist()
+  and getobjectlist()
+* [Nagappan Alagappan] Added LDTP support for new object types popup button
+  and application
+* [Nagappan Alagappan] New LDTP process stat monitoring support (same as
+  Linux)
+* [Nagappan Alagappan] Can now manipulate menus in applications that have
+  no open window (by using appApplicationName as the window name)
+* [Nagappan Alagappan] Fixed doubleclick()
+
 Version 1.0.1
 12-Oct-2012
 * [Nagappan Alagappan] Fixing 'Connection refused' error when importing ldtp
