@@ -216,6 +216,33 @@ class Utils(object):
             print actual_role
         return role, label
 
+    def _glob_match(self, pattern, string):
+        """
+        Match given string, by escaping regex characters
+        """
+        # regex flags Multi-line, Unicode, Locale
+        return bool(re.match(fnmatch.translate(pattern), string,
+                             re.M | re.U | re.L))
+ 
+    def _match_name_to_appmap(self, name, acc):
+        if not name:
+            return 0
+        if self._glob_match(name, acc['obj_index']):
+            return 1
+        if self._glob_match(name, acc['label']):
+            return 1
+        role = acc['class']
+        if role == 'frame' or role == 'dialog' or role == 'window':
+            strip = '( |\n)'
+        else:
+            strip = '( |:|\.|_|\n)'
+        obj_name = re.sub(strip, '', name)
+        if acc['label']:
+            _tmp_name = re.sub(strip, '', acc['label'])
+            if self._glob_match(obj_name, _tmp_name):
+                return 1
+        return 0
+
     def _insert_obj(self, obj_dict, obj, parent, child_index):
         ldtpized_name=self._ldtpize_accessible(obj)
         if ldtpized_name[0] in self._ldtpized_obj_index:
