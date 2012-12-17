@@ -55,10 +55,32 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
             self._process_stats[key].stop()
 
     """Core LDTP class"""
+    def appundertest(self, app_name):
+        """
+        Application under test
+        app_name: Application name should be app identifier
+        eg: com.apple.AppleSpell', 'com.apple.talagent', 'com.apple.dock',
+        'com.adiumX.adiumX', 'com.apple.notificationcenterui', 'org.3rddev.xchatazure',
+        'com.skype.skype', 'com.mcafee.McAfeeReporter', 'com.microsoft.outlook.database_daemon',
+        'com.apple.photostream-agent', 'com.google.GoogleTalkPluginD',
+        'com.microsoft.SyncServicesAgent', 'com.google.Chrome.helper.EH',
+        'com.apple.dashboard.client', 'None', 'com.vmware.fusionStartMenu',
+        'com.apple.ImageCaptureExtension2', 'com.apple.loginwindow', 'com.mozypro.status',
+        'com.apple.Preview', 'com.google.Chrome.helper', 'com.apple.calculator',
+        'com.apple.Terminal', 'com.apple.iTunesHelper', 'com.apple.ActivityMonitor',
+        'net.juniper.NetworkConnect', 'com.google.Chrome', 'com.apple.dock.extra',
+        'com.apple.finder', 'com.yourcompany.Menulet', 'com.apple.systemuiserver'
+
+        @return: return 1 on success
+        @rtype: int
+        """
+        self._app_under_test=app_name
+        return 1
+
     def getapplist(self):
         """
         Get all accessibility application name that are currently running
-        
+
         @return: list of appliction name of string type on success.
         @rtype: list
         """
@@ -296,15 +318,19 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
 
         @raise LdtpServerException: When command fails
         """
-        if atomac.NativeUIElement.launchAppByBundlePath(cmd):
-            # Let us wait so that the application launches
-            try:
-                time.sleep(int(delay))
-            except ValueError:
-                time.sleep(5)
+        try:
+            atomac.NativeUIElement.launchAppByBundleId(cmd)
             return 1
-        else:
-            raise LdtpServerException(u"Unable to find app '%s'" % cmd)
+        except RuntimeError:
+            if atomac.NativeUIElement.launchAppByBundlePath(cmd):
+                # Let us wait so that the application launches
+                try:
+                    time.sleep(int(delay))
+                except ValueError:
+                    time.sleep(5)
+                return 1
+            else:
+                raise LdtpServerException(u"Unable to find app '%s'" % cmd)
 
     def wait(self, timeout=5):
         """
