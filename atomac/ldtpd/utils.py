@@ -152,6 +152,7 @@ class Utils(object):
         self._windows={}
         self._obj_timeout=5
         self._window_timeout=30
+        self._app_under_test=None
         self._custom_logger=_custom_logger
         # Current opened applications list will be updated
         self._running_apps=atomac.NativeUIElement._getRunningApps()
@@ -281,6 +282,11 @@ class Utils(object):
         windows={}
         self._ldtpized_obj_index={}
         for gui in set(self._running_apps):
+            if self._app_under_test and \
+                    self._app_under_test != gui.bundleIdentifier() and \
+                    self._app_under_test != gui.localizedName():
+                # Not the app under test, search next application
+                continue
             # Get process id
             pid=gui.processIdentifier()
             # Get app id
