@@ -29,7 +29,7 @@ class Table(Utils):
     def getrowcount(self, window_name, object_name):
         """
         Get count of rows in table object.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -48,7 +48,7 @@ class Table(Utils):
     def selectrow(self, window_name, object_name, row_text):
         """
         Select row
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -80,7 +80,7 @@ class Table(Utils):
     def selectrowpartialmatch(self, window_name, object_name, row_text):
         """
         Select row partial match
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -112,7 +112,7 @@ class Table(Utils):
     def selectrowindex(self, window_name, object_name, row_index):
         """
         Select row index
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -144,7 +144,7 @@ class Table(Utils):
     def selectlastrow(self, window_name, object_name):
         """
         Select last row
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -172,7 +172,7 @@ class Table(Utils):
                      column=0, data=None):
         """
         Set cell value
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -195,7 +195,7 @@ class Table(Utils):
     def getcellvalue(self, window_name, object_name, row_index, column=0):
         """
         Get cell value
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -229,7 +229,7 @@ class Table(Utils):
     def getcellsize(self, window_name, object_name, row_index, column=0):
         """
         Get cell size
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -263,7 +263,7 @@ class Table(Utils):
     def rightclick(self, window_name, object_name, row_text):
         """
         Right click on table cell
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -281,7 +281,7 @@ class Table(Utils):
     def checkrow(self, window_name, object_name, row_index, column = 0):
         """
         Check row
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -301,7 +301,7 @@ class Table(Utils):
     def expandtablecell(self, window_name, object_name, row_index, column = 0):
         """
         Expand or contract table cell
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -321,7 +321,7 @@ class Table(Utils):
     def uncheckrow(self, window_name, object_name, row_index, column = 0):
         """
         Check row
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -341,7 +341,7 @@ class Table(Utils):
     def gettablerowindex(self, window_name, object_name, row_text):
         """
         Get table row index matching given text
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -369,7 +369,7 @@ class Table(Utils):
     def singleclickrow(self, window_name, object_name, row_text):
         """
         Single click row matching given text
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -386,8 +386,8 @@ class Table(Utils):
 
     def doubleclickrow(self, window_name, object_name, row_text):
         """
-        Single click row matching given text
-        
+        Double click row matching given text
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -406,7 +406,7 @@ class Table(Utils):
                         column_index, row_text):
         """
         Verify table cell value with given text
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -435,7 +435,7 @@ class Table(Utils):
                      partial_match = False):
         """
         Verify table cell value with given text
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -470,7 +470,7 @@ class Table(Utils):
                                column_index, row_text):
         """
         Verify partial table cell value
-        
+
         @param window_name: Window name to type in, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
