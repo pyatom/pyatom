@@ -454,7 +454,14 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @return: 1 on success.
         @rtype: integer
         """
-        object_handle=self._get_object_handle(window_name, object_name)
+        try:
+            object_handle=self._get_object_handle(window_name, object_name)
+        except atomac._a11y.ErrorInvalidUIElement:
+            # During the test, when the window closed and reopened
+            # ErrorInvalidUIElement exception will be thrown
+            self._windows={}
+            # Call the method again, after updating apps
+            object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         try:
