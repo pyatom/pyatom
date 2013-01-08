@@ -470,15 +470,25 @@ class Utils(object):
 
     def _get_object_handle(self, window_name, obj_name, obj_type=None,
                            wait_for_object=True):
-        obj=self._get_object_map(window_name, obj_name, obj_type,
-                                 wait_for_object)
+        try:
+            obj=self._get_object_map(window_name, obj_name, obj_type,
+                                     wait_for_object)
+            # Object might not exist, just check whether it exist
+            obj["obj"].AXRole
+        except (atomac._a11y.ErrorCannotComplete, atomac._a11y.ErrorInvalidUIElement):
+            # During the test, when the window closed and reopened
+            # ErrorCannotComplete exception will be thrown
+            self._windows={}
+            # Call the method again, after updating apps
+            obj=self._get_object_map(window_name, obj_name, obj_type,
+                                     wait_for_object, True)
         # Return object handle
         # FIXME: Check object validity before returning
         # if object state is invalid, then remap
         return obj["obj"]
 
     def _get_object_map(self, window_name, obj_name, obj_type=None,
-                           wait_for_object=True):
+                           wait_for_object=True, force_remap=False):
         if not window_name:
             raise LdtpServerException(u"Unable to find window %s" % window_name)
         window_handle, ldtp_window_name, app=self._get_window_handle(window_name,
@@ -492,7 +502,7 @@ class Utils(object):
         stripped_obj_name=re.sub(strip, u"", obj_name)
         obj_name=fnmatch.translate(obj_name)
         stripped_obj_name=fnmatch.translate(stripped_obj_name)
-        object_list=self._get_appmap(window_handle, ldtp_window_name)
+        object_list=self._get_appmap(window_handle, ldtp_window_name, force_remap)
         def _internal_get_object_handle(object_list):
             # To handle retry this function has been introduced
             for obj in object_list:
