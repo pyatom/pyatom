@@ -31,8 +31,16 @@ class Menu(Utils):
                                wait_for_window=True):
         menu_list=re.split(";", object_name)
         # Call base class get_menu_handle
-        menu_handle=Utils._get_menu_handle(self, window_name,
-                                           menu_list[0], wait_for_window)
+        try:
+            menu_handle=Utils._get_menu_handle(self, window_name,
+                                               menu_list[0], wait_for_window)
+        except (atomac._a11y.ErrorCannotComplete, atomac._a11y.ErrorInvalidUIElement):
+            # During the test, when the window closed and reopened
+            # ErrorCannotComplete exception will be thrown
+            self._windows={}
+            # Call the method again, after updating apps
+            menu_handle=Utils._get_menu_handle(self, window_name,
+                                               menu_list[0], wait_for_window)
         if len(menu_list) <= 1:
             # If only first level menu is given, return the handle
             return menu_handle
