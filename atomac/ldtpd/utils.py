@@ -471,6 +471,19 @@ class Utils(object):
     def _get_object_handle(self, window_name, obj_name, obj_type=None,
                            wait_for_object=True):
         try:
+            return self._internal_get_object_handle(window_name, obj_name,
+                                                    obj_type, wait_for_object)
+        except atomac._a11y.ErrorInvalidUIElement:
+            # During the test, when the window closed and reopened
+            # ErrorInvalidUIElement exception will be thrown
+            self._windows={}
+            # Call the method again, after updating apps
+            return self._internal_get_object_handle(window_name, obj_name,
+                                                    obj_type, wait_for_object)
+
+    def _internal_get_object_handle(self, window_name, obj_name, obj_type=None,
+                                    wait_for_object=True):
+        try:
             obj=self._get_object_map(window_name, obj_name, obj_type,
                                      wait_for_object)
             # Object might not exist, just check whether it exist
