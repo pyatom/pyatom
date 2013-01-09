@@ -240,8 +240,16 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @return: list of items in LDTP naming convention.
         @rtype: list
         """
-        window_handle, name, app=self._get_window_handle(window_name, True)
-        object_list=self._get_appmap(window_handle, name, True)
+        try:
+            window_handle, name, app=self._get_window_handle(window_name, True)
+            object_list=self._get_appmap(window_handle, name, True)
+        except atomac._a11y.ErrorInvalidUIElement:
+            # During the test, when the window closed and reopened
+            # ErrorInvalidUIElement exception will be thrown
+            self._windows={}
+            # Call the method again, after updating apps
+            window_handle, name, app=self._get_window_handle(window_name, True)
+            object_list=self._get_appmap(window_handle, name, True)
         return object_list.keys()
 
     def getobjectinfo(self, window_name, object_name):
@@ -258,8 +266,16 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @return: list of properties
         @rtype: list
         """
-        obj_info=self._get_object_map(window_name, object_name,
-                                      wait_for_object=False)
+        try:
+            obj_info=self._get_object_map(window_name, object_name,
+                                          wait_for_object=False)
+        except atomac._a11y.ErrorInvalidUIElement:
+            # During the test, when the window closed and reopened
+            # ErrorInvalidUIElement exception will be thrown
+            self._windows={}
+            # Call the method again, after updating apps
+            obj_info=self._get_object_map(window_name, object_name,
+                                          wait_for_object=False)
         props = []
         if obj_info:
             for obj_prop in obj_info.keys():
@@ -285,8 +301,16 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @return: property
         @rtype: string
         """
-        obj_info=self._get_object_map(window_name, object_name,
-                                      wait_for_object=False)
+        try:
+            obj_info=self._get_object_map(window_name, object_name,
+                                          wait_for_object=False)
+        except atomac._a11y.ErrorInvalidUIElement:
+            # During the test, when the window closed and reopened
+            # ErrorInvalidUIElement exception will be thrown
+            self._windows={}
+            # Call the method again, after updating apps
+            obj_info=self._get_object_map(window_name, object_name,
+                                          wait_for_object=False)
         if obj_info and prop != "obj" and prop in obj_info:
             if prop == "class":
                 # ldtp_class_type are compatible with Linux and Windows class name
@@ -454,14 +478,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @return: 1 on success.
         @rtype: integer
         """
-        try:
-            object_handle=self._get_object_handle(window_name, object_name)
-        except atomac._a11y.ErrorInvalidUIElement:
-            # During the test, when the window closed and reopened
-            # ErrorInvalidUIElement exception will be thrown
-            self._windows={}
-            # Call the method again, after updating apps
-            object_handle=self._get_object_handle(window_name, object_name)
+        object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         try:
@@ -616,6 +633,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @rtype: integer
         """
         try:
+            self._windows={}
             if not object_name:
                 handle, name, app=self._get_window_handle(window_name, False)
             else:
