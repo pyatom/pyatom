@@ -490,7 +490,9 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         # click on center of the widget
         # Noticed this issue on clicking AXImage
         # click('Instruments*', 'Automation')
-        self.generatemouseevent(size[0] + size[2]/2, size[1] + size[3]/2)
+        # on OSX 10.7 default "b1c" doesn't work
+        # so using "b1d", verified with Fusion test, this works
+        self.generatemouseevent(size[0] + size[2]/2, size[1] + size[3]/2, "b1d")
         return 1
 
     def getallstates(self, window_name, object_name):
