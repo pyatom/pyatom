@@ -792,11 +792,11 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
             return 1
         # AXPress doesn't work with Instruments
         # So did the following work around
-        self.grabfocus(object_handle)
-        x, y, width, height=self.getobjectsize(object_handle)
+        self._grabfocus(object_handle)
+        x, y, width, height=self._getobjectsize(object_handle)
         # Mouse left click on the object
         # Note: x + width/2, y + height / 2 doesn't work
-        object_handle.clickMouseButtonLeft((x + width / 2, y + height / 2))
+        self.generatemouseevent(x + width / 2, y + height / 2, "b1c")
         return 1
 
     def uncheck(self, window_name, object_name):
@@ -821,11 +821,11 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
             return 1
         # AXPress doesn't work with Instruments
         # So did the following work around
-        self.grabfocus(object_handle)
-        x, y, width, height=self.getobjectsize(object_handle)
+        self._grabfocus(object_handle)
+        x, y, width, height=self._getobjectsize(object_handle)
         # Mouse left click on the object
         # Note: x + width/2, y + height / 2 doesn't work
-        object_handle.clickMouseButtonLeft((x + width / 2, y + height / 2))
+        self.generatemouseevent(x + width / 2, y + height / 2, "b1c")
         return 1
 
     def verifycheck(self, window_name, object_name):
