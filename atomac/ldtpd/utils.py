@@ -487,7 +487,7 @@ class Utils(object):
             obj=self._get_object_map(window_name, obj_name, obj_type,
                                      wait_for_object)
             # Object might not exist, just check whether it exist
-            obj["obj"].AXRole
+            obj["obj"].getFrontmostApp()
         except (atomac._a11y.ErrorCannotComplete, atomac._a11y.ErrorInvalidUIElement):
             # During the test, when the window closed and reopened
             # ErrorCannotComplete exception will be thrown
