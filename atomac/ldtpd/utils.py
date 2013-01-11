@@ -464,7 +464,7 @@ class Utils(object):
             time.sleep(1)
             windows=self._get_windows(True)
         if not window_obj[0]:
-            raise LdtpServerException(u"Unable to find window %s" % \
+            raise LdtpServerException(u'Unable to find window "%s"' % \
                                           orig_window_name)
         return window_obj
 
@@ -487,8 +487,13 @@ class Utils(object):
             obj=self._get_object_map(window_name, obj_name, obj_type,
                                      wait_for_object)
             # Object might not exist, just check whether it exist
-            obj["obj"].getFrontmostApp()
-        except (atomac._a11y.ErrorCannotComplete, atomac._a11y.ErrorInvalidUIElement):
+            object_handle=obj["obj"]
+            # Look for Window's role, on stale windows this will
+            # throw AttributeError exception, if so relookup windows
+            # and search for the object
+            object_handle.AXWindow.AXRole
+        except (atomac._a11y.ErrorCannotComplete,
+                atomac._a11y.ErrorInvalidUIElement, AttributeError):
             # During the test, when the window closed and reopened
             # ErrorCannotComplete exception will be thrown
             self._windows={}
