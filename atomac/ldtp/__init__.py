@@ -383,8 +383,12 @@ def launchapp(cmd, args = [], delay = 0, env = 1, lang = "C"):
     return _remote_launchapp(cmd, args, delay, env, lang)
 def hasstate(window_name, object_name, state, guiTimeOut = 0):
     return _remote_hasstate(window_name, object_name, state, guiTimeOut)
-def selectrow(window_name, object_name, row_text):
-    return _remote_selectrow(window_name, object_name, row_text, False)
+def selectrow(window_name, object_name, row_text, partial_match=False):
+    return _remote_selectrow(window_name, object_name, row_text, partial_match)
+def verifyselectrow(window_name, object_name, row_text, partial_match=False):
+    return _remote_verifyselectrow(window_name, object_name, row_text, partial_match)
+def doesrowexist(window_name, object_name, row_text, partial_match = False):
+    return _remote_doesrowexist(window_name, object_name, row_text, partial_match)
 def getchild(window_name, child_name = '', role = '', parent = ''):
     return _remote_getchild(window_name, child_name, role, parent)
 def enterstring(window_name, object_name = '', data = ''):
