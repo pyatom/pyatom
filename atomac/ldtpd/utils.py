@@ -385,6 +385,14 @@ class Utils(object):
                 except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
                     pass
         if not title:
+            if re.match("(AXButton|AXCheckBox)", obj.AXRole,
+                        re.M | re.U | re.L):
+                try:
+                    title=obj.AXRoleDescription
+                    if title:
+                       return title 
+                except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
+                    pass
             # Noticed that some of the above one assigns title as None
             # in that case return empty string
             return ""
