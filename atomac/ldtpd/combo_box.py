@@ -140,7 +140,6 @@ class ComboBox(Utils):
                 raise LdtpServerException(u"Object %s state disabled" % menu_list[-1])
             self._grabfocus(menu_handle)
             x, y, width, height=self._getobjectsize(menu_handle)
-            print menu_handle, x, y, width, height
             # on OSX 10.7 default "b1c" doesn't work
             # so using "b1d", verified with Fusion test, this works
             window=object_handle.AXWindow
