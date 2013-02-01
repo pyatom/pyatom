@@ -178,7 +178,7 @@ class Utils(object):
             return getattr(self, method)(*args)
         except:
             if self._ldtp_debug:
-                print traceback.format_exc()
+                print(traceback.format_exc())
             raise
 
     def _get_front_most_window(self):
@@ -214,7 +214,7 @@ class Utils(object):
             label=re.sub(strip, u"", label)
         role=abbreviated_roles.get(actual_role, "ukn")
         if self._ldtp_debug and role == "ukn":
-            print actual_role
+            print(actual_role)
         return role, label
 
     def _glob_match(self, pattern, string):
@@ -251,10 +251,10 @@ class Utils(object):
         else:
             self._ldtpized_obj_index[ldtpized_name[0]]=0
         try:
-            key=u"%s%s" % (ldtpized_name[0], ldtpized_name[1])
+            key="%s%s" % (ldtpized_name[0], ldtpized_name[1])
         except UnicodeEncodeError:
-            key=u"%s%s" % (ldtpized_name[0],
-                           ldtpized_name[1].decode("utf-8"))
+            key="%s%s" % (ldtpized_name[0],
+                          ldtpized_name[1].decode("utf-8"))
         if not ldtpized_name[1]:
             index=0
             # Object doesn't have any associated label
@@ -265,11 +265,11 @@ class Utils(object):
             # If the same object type with matching label exist
             # add index to it
             try:
-                key=u"%s%s%d" % (ldtpized_name[0],
-                                 ldtpized_name[1], index)
+                key="%s%s%d" % (ldtpized_name[0],
+                                ldtpized_name[1], index)
             except UnicodeEncodeError:
-                key=u"%s%s%d" % (ldtpized_name[0],
-                                 ldtpized_name[1].decode("utf-8"), index)
+                key="%s%s%d" % (ldtpized_name[0],
+                                ldtpized_name[1].decode("utf-8"), index)
             index += 1
         if ldtpized_name[0] == "frm":
             # Window
@@ -283,7 +283,7 @@ class Utils(object):
         if parent in obj_dict:
             _current_children=obj_dict[parent]["children"]
             if _current_children:
-                _current_children=u"%s %s" % (_current_children, key)
+                _current_children="%s %s" % (_current_children, key)
             else:
                 _current_children=key
             obj_dict[parent]["children"]=_current_children
@@ -413,7 +413,14 @@ class Utils(object):
     def _grabfocus(self, handle):
         if not handle:
             raise LdtpServerException("Invalid handle")
-        handle.activate()
+        if handle.AXRole == "AXWindow":
+            # Raise window
+            handle.Raise()
+        else:
+            # First bring the window to front
+            handle.AXWindow.Raise()
+            # Focus object
+            handle.activate()
         return 1
 
     def _getobjectsize(self, handle):
@@ -425,7 +432,7 @@ class Utils(object):
 
     def _get_window_handle(self, window_name, wait_for_window=True):
         if not window_name:
-            raise LdtpServerException(u"Invalid argument passed to window_name")
+            raise LdtpServerException("Invalid argument passed to window_name")
         # Will be used to raise the exception with user passed window name
         orig_window_name=window_name
         window_obj=(None, None, None)
@@ -472,7 +479,7 @@ class Utils(object):
             time.sleep(1)
             windows=self._get_windows(True)
         if not window_obj[0]:
-            raise LdtpServerException(u'Unable to find window "%s"' % \
+            raise LdtpServerException('Unable to find window "%s"' % \
                                           orig_window_name)
         return window_obj
 
@@ -516,11 +523,11 @@ class Utils(object):
     def _get_object_map(self, window_name, obj_name, obj_type=None,
                            wait_for_object=True, force_remap=False):
         if not window_name:
-            raise LdtpServerException(u"Unable to find window %s" % window_name)
+            raise LdtpServerException("Unable to find window %s" % window_name)
         window_handle, ldtp_window_name, app=self._get_window_handle(window_name,
                                                                      wait_for_object)
         if not window_handle:
-            raise LdtpServerException(u"Unable to find window %s" % window_name)
+            raise LdtpServerException("Unable to find window %s" % window_name)
         strip=r"( |:|\.|_|\n)"
         if not isinstance(obj_name, unicode):
             # Convert to unicode string
@@ -568,8 +575,8 @@ class Utils(object):
             # Force remap
             object_list=self._get_appmap(window_handle,
                                          ldtp_window_name, True)
-            # print object_list
-        raise LdtpServerException(u"Unable to find object %s" % obj_name)
+            # print(object_list)
+        raise LdtpServerException("Unable to find object %s" % obj_name)
 
     def _populate_appmap(self, obj_dict, obj, parent, child_index):
         index=-1
@@ -605,7 +612,7 @@ class Utils(object):
         window_handle, name, app=self._get_window_handle(window_name,
                                                          wait_for_window)
         if not window_handle:
-            raise LdtpServerException(u"Unable to find window %s" % window_name)
+            raise LdtpServerException("Unable to find window %s" % window_name)
         # pyatom doesn't understand LDTP convention mnu, strip it off
         menu_handle=app.menuItem(re.sub("mnu", "", object_name))
         if  menu_handle:
@@ -617,7 +624,7 @@ class Utils(object):
             sub_menu_handle=self._get_sub_menu_handle(menu_handle, object_name)
             if sub_menu_handle:
                 return sub_menu_handle
-        raise LdtpServerException(u"Unable to find menu %s" % object_name)
+        raise LdtpServerException("Unable to find menu %s" % object_name)
 
     def _get_sub_menu_handle(self, children, menu):
         strip=r"( |:|\.|_|\n)"
@@ -630,29 +637,29 @@ class Utils(object):
                     re.match(stripped_menu, label) or \
                     re.match(stripped_menu, u"%s%s" % (role, label)):
                 return current_menu
-        raise LdtpServerException(u"Unable to find menu %s" % menu)
+        raise LdtpServerException("Unable to find menu %s" % menu)
 
     def _internal_menu_handler(self, menu_handle, menu_list,
                                perform_action = False):
         if not menu_handle or not menu_list:
-            raise LdtpServerException(u"Unable to find menu %s" % [0])
+            raise LdtpServerException("Unable to find menu %s" % [0])
         for menu in menu_list:
             # Get AXMenu
             children=menu_handle.AXChildren[0]
             if not children:
-                raise LdtpServerException(u"Unable to find menu %s" % menu)
+                raise LdtpServerException("Unable to find menu %s" % menu)
             menu_handle=self._get_sub_menu_handle(children, menu)
             # Don't perform action on last item
             if perform_action and menu_list[-1] != menu:
                 if not menu_handle.AXEnabled:
                     # click back on combo box
                     menu_handle.Cancel()
-                    raise LdtpServerException(u"Object %s state disabled" % \
+                    raise LdtpServerException("Object %s state disabled" % \
                                               menu)
                     # Click current menuitem, required for combo box
                     menu_handle.Press()
                     # Required for menuitem to appear in accessibility list
                     self.wait(1) 
             if not menu_handle:
-                raise LdtpServerException(u"Unable to find menu %s" % menu)
+                raise LdtpServerException("Unable to find menu %s" % menu)
         return menu_handle
