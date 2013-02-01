@@ -99,7 +99,7 @@ def log(message, level = logging.DEBUG):
     """
 
     if _ldtp_debug:
-        print message
+        print(message)
     logger.log(level, str(message))
     return 1
 
@@ -130,7 +130,7 @@ def startlog(filename, overwrite = True):
     # Create logging file handler
     _file_logger = logging.FileHandler(os.path.expanduser(filename), _mode)
     # Log 'Levelname: Messages', eg: 'ERROR: Logged message'
-    _formatter = logging.Formatter(u'%(levelname)-8s: %(message)s')
+    _formatter = logging.Formatter('%(levelname)-8s: %(message)s')
     _file_logger.setFormatter(_formatter)
     logger.addHandler(_file_logger)
     if _ldtp_debug:
@@ -465,7 +465,7 @@ def registerevent(event_name, fn_name, *args):
     @rtype: integer
     """
     if not isinstance(event_name, str):
-        raise ValueError, "event_name should be string"
+        raise ValueError("event_name should be string")
     _pollEvents._callback[event_name] = [event_name, fn_name, args]
     return _remote_registerevent(event_name)
 
@@ -500,7 +500,7 @@ def registerkbevent(keys, modifiers, fn_name, *args):
     @return: 1 if registration was successful, 0 if not.
     @rtype: integer
     """
-    event_name = u"kbevent%s%s" % (keys, modifiers)
+    event_name = "kbevent%s%s" % (keys, modifiers)
     _pollEvents._callback[event_name] = [event_name, fn_name, args]
     return _remote_registerkbevent(keys, modifiers)
 
@@ -517,7 +517,7 @@ def deregisterkbevent(keys, modifiers):
     @rtype: integer
     """
 
-    event_name = u"kbevent%s%s" % (keys, modifiers)
+    event_name = "kbevent%s%s" % (keys, modifiers)
     if event_name in _pollEvents._callback:
         del _pollEvents._callback[event_name]
     return _remote_deregisterkbevent(keys, modifiers)
