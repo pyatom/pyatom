@@ -76,7 +76,7 @@ class KeyboardOp:
         return_val.modVal=[key]
         return return_val
     # This will identify all US_keyboard characters
-    if keyval in US_keyboard:
+    if keyval.lower() in US_keyboard:
         return_val.value=keyval
         return return_val
     # This will identify all specialKeys
