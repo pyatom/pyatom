@@ -91,7 +91,7 @@ class Text(Utils):
             object_handle=self._get_object_handle(window_name, object_name)
             if not object_handle.AXEnabled:
                 raise LdtpServerException(u"Object %s state disabled" % object_name)
-            object_handle.sendKey(data)
+            object_handle.sendKeys(data)
 
     def settextvalue(self, window_name, object_name, data):
         """
