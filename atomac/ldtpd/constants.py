@@ -51,6 +51,7 @@ abbreviated_roles = {
     "AXGroup" : "grp",
     "AXPopUpButton" : "pubtn",
     "AXApplication" : "app",
+    "AXDocItem" : "doc",
     }
 ldtp_class_type = {
     "AXWindow" : "frame",
@@ -77,4 +78,5 @@ ldtp_class_type = {
     "AXTable" : "table",
     "AXScrollArea" : "scroll_area",
     "AXPopUpButton" : "popup_button",
+    "AXDocItem" : "doc_item",
     }
