@@ -508,6 +508,7 @@ class Utils(object):
             # and search for the object
             object_handle.AXWindow.AXRole
         except (atomac._a11y.ErrorCannotComplete,
+                atomac._a11y.ErrorUnsupported,
                 atomac._a11y.ErrorInvalidUIElement, AttributeError):
             # During the test, when the window closed and reopened
             # ErrorCannotComplete exception will be thrown
@@ -617,7 +618,11 @@ class Utils(object):
         if not window_handle:
             raise LdtpServerException("Unable to find window %s" % window_name)
         # pyatom doesn't understand LDTP convention mnu, strip it off
-        menu_handle=app.menuItem(re.sub("mnu", "", object_name))
+        menu=re.sub("mnu", "", object_name)
+        if re.match("^\d", menu):
+            obj_dict=self._get_appmap(window_handle, name)
+            return obj_dict[object_name]["obj"]
+        menu_handle=app.menuItem(menu)
         if  menu_handle:
             return menu_handle
         # Above one looks for menubar item
@@ -648,6 +653,13 @@ class Utils(object):
             raise LdtpServerException("Unable to find menu %s" % [0])
         for menu in menu_list:
             # Get AXMenu
+            if not menu_handle.AXChildren:
+                try:
+                    # Noticed this issue, on clicking Skype
+                    # menu in notification area
+                    menu_handle.Press()
+                except atomac._a11y.ErrorCannotComplete:
+                    pass
             children=menu_handle.AXChildren[0]
             if not children:
                 raise LdtpServerException("Unable to find menu %s" % menu)
