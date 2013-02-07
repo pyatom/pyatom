@@ -214,7 +214,7 @@ class Utils(object):
             label=re.sub(strip, u"", label)
         role=abbreviated_roles.get(actual_role, "ukn")
         if self._ldtp_debug and role == "ukn":
-            print(actual_role)
+            print(actual_role, acc)
         return role, label
 
     def _glob_match(self, pattern, string):
@@ -583,7 +583,10 @@ class Utils(object):
         if obj:
             if child_index != -1:
                 parent=self._insert_obj(obj_dict, obj, parent, child_index)
-            if not obj.AXChildren:
+            try:
+                if not obj.AXChildren:
+                    return
+            except atomac._a11y.Error:
                 return
             for child in obj.AXChildren:
                 index += 1
