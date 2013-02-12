@@ -410,7 +410,7 @@ class Utils(object):
         # Current opened applications list will be updated
         self._running_apps=atomac.NativeUIElement._getRunningApps()
 
-    def _singleclick(window_name, object_name):
+    def _singleclick(self, window_name, object_name):
         object_handle=self._get_object_handle(window_name, object_name)
         if not object_handle.AXEnabled:
             raise LdtpServerException(u"Object %s state disabled" % object_name)
