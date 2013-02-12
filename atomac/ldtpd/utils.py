@@ -410,6 +410,16 @@ class Utils(object):
         # Current opened applications list will be updated
         self._running_apps=atomac.NativeUIElement._getRunningApps()
 
+    def _singleclick(window_name, object_name):
+        object_handle=self._get_object_handle(window_name, object_name)
+        if not object_handle.AXEnabled:
+            raise LdtpServerException(u"Object %s state disabled" % object_name)
+        size=self._getobjectsize(object_handle)
+        self._grabfocus(object_handle)
+        self.wait(0.5)
+        self.generatemouseevent(size[0] + size[2]/2, size[1] + size[3]/2, "b1c")
+        return 1
+
     def _grabfocus(self, handle):
         if not handle:
             raise LdtpServerException("Invalid handle")
