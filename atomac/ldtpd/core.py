@@ -560,9 +560,8 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @return: 1 on success.
         @rtype: integer
         """
-        object_name="btnminimizebutton"
-        object_handle=self._get_object_handle(window_name, object_name)
-        self._grabfocus(object_handle.AXWindow)
+        window_handle=self._get_window_handle(window_name)
+        self._grabfocus(window_handle)
         return 1
 
     def click(self, window_name, object_name):
