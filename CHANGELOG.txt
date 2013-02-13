@@ -37,7 +37,7 @@ LDTP related changes:
   _populate_appmap
 * [Satpal Chander] enterstring() now supports strings
 * [Satpal Chander] keyboard functions didn't work with uppercase characters
-* [Nagappan Alagappan] Python 3 support
+* [Nagappan Alagappan] Python 3 support for LDTP client
 * [Nagappan Alagappan] closewindow(), minimizewindow(), maximizewindow(), and
   activatewindow() now supported
 * [Nagappan Alagappan] selectitem() and selectindex() now works with popup
@@ -47,7 +47,7 @@ LDTP related changes:
   accessibility
 * [Nagappan Alagappan] Added appundertest() which narrows down the search
   scope for UI elements to the specified application
-* [Nagappan Alagappan] Added getchild() which allows you to search the
+* ["John" Yingjun Li] Added getchild() which allows you to search the
   accessibility hierarchy for children of the specified element
 * [Nagappan Alagappan] Updated keyboard controls for parity with Linux LDTP
 * [Nagappan Alagappan] getaccesskey() added
