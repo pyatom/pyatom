@@ -52,6 +52,8 @@ abbreviated_roles = {
     "AXPopUpButton" : "pubtn",
     "AXApplication" : "app",
     "AXDocItem" : "doc",
+    "AXHeading" : "tch",
+    "AXGenericElement" : "gen",
     }
 ldtp_class_type = {
     "AXWindow" : "frame",
@@ -79,4 +81,6 @@ ldtp_class_type = {
     "AXScrollArea" : "scroll_area",
     "AXPopUpButton" : "popup_button",
     "AXDocItem" : "doc_item",
+    "AXHeading" : "heading",
+    "AXGenericElement" : "generic_element",
     }
