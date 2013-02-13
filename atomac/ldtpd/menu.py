@@ -31,8 +31,16 @@ class Menu(Utils):
                                wait_for_window=True):
         menu_list=re.split(";", object_name)
         # Call base class get_menu_handle
-        menu_handle=Utils._get_menu_handle(self, window_name,
-                                           menu_list[0], wait_for_window)
+        try:
+            menu_handle=Utils._get_menu_handle(self, window_name,
+                                               menu_list[0], wait_for_window)
+        except (atomac._a11y.ErrorCannotComplete, atomac._a11y.ErrorInvalidUIElement):
+            # During the test, when the window closed and reopened
+            # ErrorCannotComplete exception will be thrown
+            self._windows={}
+            # Call the method again, after updating apps
+            menu_handle=Utils._get_menu_handle(self, window_name,
+                                               menu_list[0], wait_for_window)
         if len(menu_list) <= 1:
             # If only first level menu is given, return the handle
             return menu_handle
@@ -119,18 +127,30 @@ class Menu(Utils):
         @rtype: list
         """
         menu_handle=self._get_menu_handle(window_name, object_name)
-        role, label=self._ldtpize_accessible(menu_handle) 
-        if not menu_handle.AXChildren:
-            raise LdtpServerException(u"Unable to find children under menu %s" % \
-                                      label)
-        children=menu_handle.AXChildren[0]
-        sub_menus=[]
-        for current_menu in children.AXChildren:
-            role, label=self._ldtpize_accessible(current_menu)
-            if not label:
-                # All splitters have empty label
-                continue
-            sub_menus.append(u"%s%s" % (role, label))
+        role, label=self._ldtpize_accessible(menu_handle)
+        menu_clicked=False
+        try:
+            if not menu_handle.AXChildren:
+                menu_clicked=True
+                try:
+                    menu_handle.Press()
+                    self.wait(1)
+                except atomac._a11y.ErrorCannotComplete:
+                    pass
+                if not menu_handle.AXChildren:
+                    raise LdtpServerException(u"Unable to find children under menu %s" % \
+                                                  label)
+            children=menu_handle.AXChildren[0]
+            sub_menus=[]
+            for current_menu in children.AXChildren:
+                role, label=self._ldtpize_accessible(current_menu)
+                if not label:
+                    # All splitters have empty label
+                    continue
+                sub_menus.append(u"%s%s" % (role, label))
+        finally:
+            if menu_clicked:
+                menu_handle.Cancel()
         return sub_menus
 
     def verifymenucheck(self, window_name, object_name):

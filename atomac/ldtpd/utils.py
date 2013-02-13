@@ -152,6 +152,7 @@ class Utils(object):
         self._windows={}
         self._obj_timeout=5
         self._window_timeout=30
+        self._app_under_test=None
         self._custom_logger=_custom_logger
         # Current opened applications list will be updated
         self._running_apps=atomac.NativeUIElement._getRunningApps()
@@ -177,7 +178,7 @@ class Utils(object):
             return getattr(self, method)(*args)
         except:
             if self._ldtp_debug:
-                print traceback.format_exc()
+                print(traceback.format_exc())
             raise
 
     def _get_front_most_window(self):
@@ -213,8 +214,35 @@ class Utils(object):
             label=re.sub(strip, u"", label)
         role=abbreviated_roles.get(actual_role, "ukn")
         if self._ldtp_debug and role == "ukn":
-            print actual_role
+            print(actual_role, acc)
         return role, label
+
+    def _glob_match(self, pattern, string):
+        """
+        Match given string, by escaping regex characters
+        """
+        # regex flags Multi-line, Unicode, Locale
+        return bool(re.match(fnmatch.translate(pattern), string,
+                             re.M | re.U | re.L))
+ 
+    def _match_name_to_appmap(self, name, acc):
+        if not name:
+            return 0
+        if self._glob_match(name, acc['obj_index']):
+            return 1
+        if self._glob_match(name, acc['label']):
+            return 1
+        role = acc['class']
+        if role == 'frame' or role == 'dialog' or role == 'window':
+            strip = '( |\n)'
+        else:
+            strip = '( |:|\.|_|\n)'
+        obj_name = re.sub(strip, '', name)
+        if acc['label']:
+            _tmp_name = re.sub(strip, '', acc['label'])
+            if self._glob_match(obj_name, _tmp_name):
+                return 1
+        return 0
 
     def _insert_obj(self, obj_dict, obj, parent, child_index):
         ldtpized_name=self._ldtpize_accessible(obj)
@@ -223,10 +251,10 @@ class Utils(object):
         else:
             self._ldtpized_obj_index[ldtpized_name[0]]=0
         try:
-            key=u"%s%s" % (ldtpized_name[0], ldtpized_name[1])
+            key="%s%s" % (ldtpized_name[0], ldtpized_name[1])
         except UnicodeEncodeError:
-            key=u"%s%s" % (ldtpized_name[0],
-                           ldtpized_name[1].decode("utf-8"))
+            key="%s%s" % (ldtpized_name[0],
+                          ldtpized_name[1].decode("utf-8"))
         if not ldtpized_name[1]:
             index=0
             # Object doesn't have any associated label
@@ -237,11 +265,11 @@ class Utils(object):
             # If the same object type with matching label exist
             # add index to it
             try:
-                key=u"%s%s%d" % (ldtpized_name[0],
-                                 ldtpized_name[1], index)
+                key="%s%s%d" % (ldtpized_name[0],
+                                ldtpized_name[1], index)
             except UnicodeEncodeError:
-                key=u"%s%s%d" % (ldtpized_name[0],
-                                 ldtpized_name[1].decode("utf-8"), index)
+                key="%s%s%d" % (ldtpized_name[0],
+                                ldtpized_name[1].decode("utf-8"), index)
             index += 1
         if ldtpized_name[0] == "frm":
             # Window
@@ -255,7 +283,7 @@ class Utils(object):
         if parent in obj_dict:
             _current_children=obj_dict[parent]["children"]
             if _current_children:
-                _current_children=u"%s %s" % (_current_children, key)
+                _current_children="%s %s" % (_current_children, key)
             else:
                 _current_children=key
             obj_dict[parent]["children"]=_current_children
@@ -281,6 +309,11 @@ class Utils(object):
         windows={}
         self._ldtpized_obj_index={}
         for gui in set(self._running_apps):
+            if self._app_under_test and \
+                    self._app_under_test != gui.bundleIdentifier() and \
+                    self._app_under_test != gui.localizedName():
+                # Not the app under test, search next application
+                continue
             # Get process id
             pid=gui.processIdentifier()
             # Get app id
@@ -310,8 +343,19 @@ class Utils(object):
 
     def _get_title(self, obj):
         title=""
+        role=""
         try:
-            checkBox=re.match("AXCheckBox", obj.AXRole, re.M | re.U | re.L)
+            role=obj.AXRole
+            desc=obj.AXRoleDescription
+            if re.match("(AXStaticText|AXRadioButton|AXButton)",
+                        role, re.M | re.U | re.L) and \
+                    (desc == "text" or desc == "radio button" or \
+                         desc == "button") and obj.AXValue:
+                return obj.AXValue
+        except:
+            pass
+        try:
+            checkBox=re.match("AXCheckBox", role, re.M | re.U | re.L)
             if checkBox:
                 # Instruments doesn't have AXTitle, AXValue for AXCheckBox
                 try:
@@ -322,16 +366,16 @@ class Utils(object):
                 title=obj.AXTitle
         except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
             try:
-                text=re.match("(AXTextField|AXTextArea)", obj.AXRole,
+                text=re.match("(AXTextField|AXTextArea)", role,
                                 re.M | re.U | re.L)
                 if text:
                     title=obj.AXFilename
                 else:
-                    if not re.match("(AXTabGroup)", obj.AXRole,
+                    if not re.match("(AXTabGroup)", role,
                                     re.M | re.U | re.L):
                         # Tab group has AXRadioButton as AXValue
                         # So skip it
-                        if re.match("(AXScrollBar)", obj.AXRole,
+                        if re.match("(AXScrollBar)", role,
                                     re.M | re.U | re.L):
                             # ScrollBar value is between 0 to 1
                             # which is used to get the current location
@@ -343,8 +387,16 @@ class Utils(object):
                         else:
                             title=obj.AXValue
             except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
+                if re.match("AXButton", role,
+                            re.M | re.U | re.L):
+                    try:
+                        title=obj.AXDescription
+                        if title:
+                            return title
+                    except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
+                        pass
                 try:
-                    if not re.match("(AXList|AXTable)", obj.AXRole,
+                    if not re.match("(AXList|AXTable)", role,
                                     re.M | re.U | re.L):
                         # List have description as list
                         # So skip it
@@ -352,6 +404,22 @@ class Utils(object):
                 except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
                     pass
         if not title:
+            if re.match("(AXButton|AXCheckBox)", role,
+                        re.M | re.U | re.L):
+                try:
+                    title=obj.AXRoleDescription
+                    if title:
+                       return title
+                except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
+                    pass
+            elif re.match("(AXStaticText)", role,
+                          re.M | re.U | re.L):
+                try:
+                    title=obj.AXValue
+                    if title:
+                       return title
+                except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
+                    pass
             # Noticed that some of the above one assigns title as None
             # in that case return empty string
             return ""
@@ -369,10 +437,27 @@ class Utils(object):
         # Current opened applications list will be updated
         self._running_apps=atomac.NativeUIElement._getRunningApps()
 
+    def _singleclick(self, window_name, object_name):
+        object_handle=self._get_object_handle(window_name, object_name)
+        if not object_handle.AXEnabled:
+            raise LdtpServerException(u"Object %s state disabled" % object_name)
+        size=self._getobjectsize(object_handle)
+        self._grabfocus(object_handle)
+        self.wait(0.5)
+        self.generatemouseevent(size[0] + size[2]/2, size[1] + size[3]/2, "b1c")
+        return 1
+
     def _grabfocus(self, handle):
         if not handle:
             raise LdtpServerException("Invalid handle")
-        handle.activate()
+        if handle.AXRole == "AXWindow":
+            # Raise window
+            handle.Raise()
+        else:
+            # First bring the window to front
+            handle.AXWindow.Raise()
+            # Focus object
+            handle.activate()
         return 1
 
     def _getobjectsize(self, handle):
@@ -384,7 +469,7 @@ class Utils(object):
 
     def _get_window_handle(self, window_name, wait_for_window=True):
         if not window_name:
-            raise LdtpServerException(u"Invalid argument passed to window_name")
+            raise LdtpServerException("Invalid argument passed to window_name")
         # Will be used to raise the exception with user passed window name
         orig_window_name=window_name
         window_obj=(None, None, None)
@@ -431,27 +516,56 @@ class Utils(object):
             time.sleep(1)
             windows=self._get_windows(True)
         if not window_obj[0]:
-            raise LdtpServerException(u"Unable to find window %s" % \
+            raise LdtpServerException('Unable to find window "%s"' % \
                                           orig_window_name)
         return window_obj
 
     def _get_object_handle(self, window_name, obj_name, obj_type=None,
                            wait_for_object=True):
-        obj=self._get_object_map(window_name, obj_name, obj_type,
-                                 wait_for_object)
+        try:
+            return self._internal_get_object_handle(window_name, obj_name,
+                                                    obj_type, wait_for_object)
+        except atomac._a11y.ErrorInvalidUIElement:
+            # During the test, when the window closed and reopened
+            # ErrorInvalidUIElement exception will be thrown
+            self._windows={}
+            # Call the method again, after updating apps
+            return self._internal_get_object_handle(window_name, obj_name,
+                                                    obj_type, wait_for_object)
+
+    def _internal_get_object_handle(self, window_name, obj_name, obj_type=None,
+                                    wait_for_object=True):
+        try:
+            obj=self._get_object_map(window_name, obj_name, obj_type,
+                                     wait_for_object)
+            # Object might not exist, just check whether it exist
+            object_handle=obj["obj"]
+            # Look for Window's role, on stale windows this will
+            # throw AttributeError exception, if so relookup windows
+            # and search for the object
+            object_handle.AXWindow.AXRole
+        except (atomac._a11y.ErrorCannotComplete,
+                atomac._a11y.ErrorUnsupported,
+                atomac._a11y.ErrorInvalidUIElement, AttributeError):
+            # During the test, when the window closed and reopened
+            # ErrorCannotComplete exception will be thrown
+            self._windows={}
+            # Call the method again, after updating apps
+            obj=self._get_object_map(window_name, obj_name, obj_type,
+                                     wait_for_object, True)
         # Return object handle
         # FIXME: Check object validity before returning
         # if object state is invalid, then remap
         return obj["obj"]
 
     def _get_object_map(self, window_name, obj_name, obj_type=None,
-                           wait_for_object=True):
+                           wait_for_object=True, force_remap=False):
         if not window_name:
-            raise LdtpServerException(u"Unable to find window %s" % window_name)
+            raise LdtpServerException("Unable to find window %s" % window_name)
         window_handle, ldtp_window_name, app=self._get_window_handle(window_name,
                                                                      wait_for_object)
         if not window_handle:
-            raise LdtpServerException(u"Unable to find window %s" % window_name)
+            raise LdtpServerException("Unable to find window %s" % window_name)
         strip=r"( |:|\.|_|\n)"
         if not isinstance(obj_name, unicode):
             # Convert to unicode string
@@ -459,7 +573,7 @@ class Utils(object):
         stripped_obj_name=re.sub(strip, u"", obj_name)
         obj_name=fnmatch.translate(obj_name)
         stripped_obj_name=fnmatch.translate(stripped_obj_name)
-        object_list=self._get_appmap(window_handle, ldtp_window_name)
+        object_list=self._get_appmap(window_handle, ldtp_window_name, force_remap)
         def _internal_get_object_handle(object_list):
             # To handle retry this function has been introduced
             for obj in object_list:
@@ -499,15 +613,18 @@ class Utils(object):
             # Force remap
             object_list=self._get_appmap(window_handle,
                                          ldtp_window_name, True)
-            # print object_list
-        raise LdtpServerException(u"Unable to find object %s" % obj_name)
+            # print(object_list)
+        raise LdtpServerException("Unable to find object %s" % obj_name)
 
     def _populate_appmap(self, obj_dict, obj, parent, child_index):
         index=-1
         if obj:
             if child_index != -1:
                 parent=self._insert_obj(obj_dict, obj, parent, child_index)
-            if not obj.AXChildren:
+            try:
+                if not obj.AXChildren:
+                    return
+            except atomac._a11y.Error:
                 return
             for child in obj.AXChildren:
                 index += 1
@@ -536,9 +653,13 @@ class Utils(object):
         window_handle, name, app=self._get_window_handle(window_name,
                                                          wait_for_window)
         if not window_handle:
-            raise LdtpServerException(u"Unable to find window %s" % window_name)
+            raise LdtpServerException("Unable to find window %s" % window_name)
         # pyatom doesn't understand LDTP convention mnu, strip it off
-        menu_handle=app.menuItem(re.sub("mnu", "", object_name))
+        menu=re.sub("mnu", "", object_name)
+        if re.match("^\d", menu):
+            obj_dict=self._get_appmap(window_handle, name)
+            return obj_dict[object_name]["obj"]
+        menu_handle=app.menuItem(menu)
         if  menu_handle:
             return menu_handle
         # Above one looks for menubar item
@@ -548,7 +669,7 @@ class Utils(object):
             sub_menu_handle=self._get_sub_menu_handle(menu_handle, object_name)
             if sub_menu_handle:
                 return sub_menu_handle
-        raise LdtpServerException(u"Unable to find menu %s" % object_name)
+        raise LdtpServerException("Unable to find menu %s" % object_name)
 
     def _get_sub_menu_handle(self, children, menu):
         strip=r"( |:|\.|_|\n)"
@@ -561,29 +682,36 @@ class Utils(object):
                     re.match(stripped_menu, label) or \
                     re.match(stripped_menu, u"%s%s" % (role, label)):
                 return current_menu
-        raise LdtpServerException(u"Unable to find menu %s" % menu)
+        raise LdtpServerException("Unable to find menu %s" % menu)
 
     def _internal_menu_handler(self, menu_handle, menu_list,
                                perform_action = False):
         if not menu_handle or not menu_list:
-            raise LdtpServerException(u"Unable to find menu %s" % [0])
+            raise LdtpServerException("Unable to find menu %s" % [0])
         for menu in menu_list:
             # Get AXMenu
+            if not menu_handle.AXChildren:
+                try:
+                    # Noticed this issue, on clicking Skype
+                    # menu in notification area
+                    menu_handle.Press()
+                except atomac._a11y.ErrorCannotComplete:
+                    pass
             children=menu_handle.AXChildren[0]
             if not children:
-                raise LdtpServerException(u"Unable to find menu %s" % menu)
+                raise LdtpServerException("Unable to find menu %s" % menu)
             menu_handle=self._get_sub_menu_handle(children, menu)
             # Don't perform action on last item
             if perform_action and menu_list[-1] != menu:
                 if not menu_handle.AXEnabled:
                     # click back on combo box
                     menu_handle.Cancel()
-                    raise LdtpServerException(u"Object %s state disabled" % \
+                    raise LdtpServerException("Object %s state disabled" % \
                                               menu)
                     # Click current menuitem, required for combo box
                     menu_handle.Press()
                     # Required for menuitem to appear in accessibility list
                     self.wait(1) 
             if not menu_handle:
-                raise LdtpServerException(u"Unable to find menu %s" % menu)
+                raise LdtpServerException("Unable to find menu %s" % menu)
         return menu_handle

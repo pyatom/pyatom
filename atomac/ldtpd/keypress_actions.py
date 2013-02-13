@@ -46,6 +46,26 @@ class KeyboardOp:
       keyval="control_l"
     elif keyval == "shift":
       keyval="shift_l"
+    elif keyval == "left":
+      keyval="cursor_left"
+    elif keyval == "right":
+      keyval="cursor_right"
+    elif keyval == "up":
+      keyval="cursor_up"
+    elif keyval == "down":
+      keyval="cursor_down"
+    elif keyval == "bksp":
+      keyval="backspace"
+    elif keyval == "enter":
+      keyval="return"
+    elif keyval == "pgdown":
+      keyval="page_down"
+    elif keyval == "pagedown":
+      keyval="page_down"
+    elif keyval == "pgup":
+      keyval="page_up"
+    elif keyval == "pageup":
+      keyval="page_up"
     key="<%s>" % keyval
     # This will identify Modifiers
     if key in ["<command_l>", "<command_r>",
@@ -56,7 +76,7 @@ class KeyboardOp:
         return_val.modVal=[key]
         return return_val
     # This will identify all US_keyboard characters
-    if keyval in US_keyboard:
+    if keyval.lower() in US_keyboard:
         return_val.value=keyval
         return return_val
     # This will identify all specialKeys
