@@ -1,5 +1,5 @@
-Version 1.0.2
-??-???-????
+Version 1.1.0
+13-Feb-2013
 Core ATOMac changes:
 
 * [Nagappan Alagappan] Resolved a bug in getFrontmostApp that occurs when
