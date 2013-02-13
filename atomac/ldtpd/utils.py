@@ -343,8 +343,19 @@ class Utils(object):
 
     def _get_title(self, obj):
         title=""
+        role=""
         try:
-            checkBox=re.match("AXCheckBox", obj.AXRole, re.M | re.U | re.L)
+            role=obj.AXRole
+            desc=obj.AXRoleDescription
+            if re.match("(AXStaticText|AXRadioButton|AXButton)",
+                        role, re.M | re.U | re.L) and \
+                    (desc == "text" or desc == "radio button" or \
+                         desc == "button") and obj.AXValue:
+                return obj.AXValue
+        except:
+            pass
+        try:
+            checkBox=re.match("AXCheckBox", role, re.M | re.U | re.L)
             if checkBox:
                 # Instruments doesn't have AXTitle, AXValue for AXCheckBox
                 try:
@@ -355,16 +366,16 @@ class Utils(object):
                 title=obj.AXTitle
         except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
             try:
-                text=re.match("(AXTextField|AXTextArea)", obj.AXRole,
+                text=re.match("(AXTextField|AXTextArea)", role,
                                 re.M | re.U | re.L)
                 if text:
                     title=obj.AXFilename
                 else:
-                    if not re.match("(AXTabGroup)", obj.AXRole,
+                    if not re.match("(AXTabGroup)", role,
                                     re.M | re.U | re.L):
                         # Tab group has AXRadioButton as AXValue
                         # So skip it
-                        if re.match("(AXScrollBar)", obj.AXRole,
+                        if re.match("(AXScrollBar)", role,
                                     re.M | re.U | re.L):
                             # ScrollBar value is between 0 to 1
                             # which is used to get the current location
@@ -376,8 +387,16 @@ class Utils(object):
                         else:
                             title=obj.AXValue
             except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
+                if re.match("AXButton", role,
+                            re.M | re.U | re.L):
+                    try:
+                        title=obj.AXDescription
+                        if title:
+                            return title
+                    except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
+                        pass
                 try:
-                    if not re.match("(AXList|AXTable)", obj.AXRole,
+                    if not re.match("(AXList|AXTable)", role,
                                     re.M | re.U | re.L):
                         # List have description as list
                         # So skip it
@@ -385,12 +404,20 @@ class Utils(object):
                 except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
                     pass
         if not title:
-            if re.match("(AXButton|AXCheckBox)", obj.AXRole,
+            if re.match("(AXButton|AXCheckBox)", role,
                         re.M | re.U | re.L):
                 try:
                     title=obj.AXRoleDescription
                     if title:
-                       return title 
+                       return title
+                except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
+                    pass
+            elif re.match("(AXStaticText)", role,
+                          re.M | re.U | re.L):
+                try:
+                    title=obj.AXValue
+                    if title:
+                       return title
                 except (atomac._a11y.ErrorUnsupported, atomac._a11y.Error):
                     pass
             # Noticed that some of the above one assigns title as None
