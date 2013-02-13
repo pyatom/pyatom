@@ -231,9 +231,6 @@ class BaseAXUIElement(_a11y.AXUIElement):
          self._sendKeyWithModifiers(keychr.lower(), [AXKeyCodeConstants.SHIFT])
          return
 
-      # To direct output to the correct application need the PSN:
-      appPsn = self._getPsnForPid(self._getPid())
-
       if (keychr not in self.keyboard):
           self._clearEventQueue()
           raise ValueError('Key %s not found in keyboard layout' % keychr)
@@ -253,6 +250,8 @@ class BaseAXUIElement(_a11y.AXUIElement):
 
       # Post the event to the given app
       if not globally:
+          # To direct output to the correct application need the PSN:
+          appPsn = self._getPsnForPid(self._getPid())
           self._queueEvent(Quartz.CGEventPostToPSN, (appPsn, keyDown))
           self._queueEvent(Quartz.CGEventPostToPSN, (appPsn, keyUp))
       else:
@@ -303,9 +302,6 @@ class BaseAXUIElement(_a11y.AXUIElement):
 
       modFlags = 0
 
-      # To direct output to the correct application need the PSN:
-      appPsn = self._getPsnForPid(self._getPid())
-
       # Press given modifiers
       for nextMod in modifiers:
          if (nextMod not in self.keyboard):
@@ -321,6 +317,8 @@ class BaseAXUIElement(_a11y.AXUIElement):
          if globally:
              self._queueEvent(Quartz.CGEventPost, (0, modEvent))
          else:
+             # To direct output to the correct application need the PSN:
+             appPsn = self._getPsnForPid(self._getPid())
              self._queueEvent(Quartz.CGEventPostToPSN, (appPsn, modEvent))
          # Add the modifier flags
          modFlags += AXKeyboard.modKeyFlagConstants[nextMod]
@@ -406,9 +404,6 @@ class BaseAXUIElement(_a11y.AXUIElement):
                                 'kCGEvent%sDown' % mouseButtons[mouseButton])
       eventButtonUp = getattr(Quartz,
                               'kCGEvent%sUp' % mouseButtons[mouseButton])
-
-      # To direct output to the correct application need the PSN:
-      appPsn = self._getPsnForPid(self._getPid())
 
       # Press the button
       buttonDown = Quartz.CGEventCreateMouseEvent(None,
