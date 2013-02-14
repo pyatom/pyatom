@@ -1,9 +1,11 @@
-Version 1.0.2
-??-???-????
+Version 1.1.0
+13-Feb-2013
 Core ATOMac changes:
 
 * [Nagappan Alagappan] Resolved a bug in getFrontmostApp that occurs when
   Google Chrome is running
+* [James Tatum] Calls to global keyboard events no longer try to get app PSN
+  (issue 48)
 
 LDTP related changes:
 
@@ -22,6 +24,34 @@ LDTP related changes:
 * [Nagappan Alagappan] Can now manipulate menus in applications that have
   no open window (by using appApplicationName as the window name)
 * [Nagappan Alagappan] Fixed doubleclick()
+* [Nagappan Alagappan] Resolved some issues with click() on 10.7
+* [Nagappan Alagappan] gettextvalue() arguments updated for compatibility
+* [Nagappan Alagappan] AXColumn, AXHeading and AXGenericElement objects now
+  supported in LDTP as col, tch and gen, respectively
+* [Nagappan Alagappan] Automatically click on menus when trying to access
+  contents
+* [Nagappan Alagappan] Applications that also have a menu in the notification
+  area can now be automated
+* [Nagappan Alagappan] Some applications with certain common UI elements that
+  have poor accessibility implementations were throwing exceptions in
+  _populate_appmap
+* [Satpal Chander] enterstring() now supports strings
+* [Satpal Chander] keyboard functions didn't work with uppercase characters
+* [Nagappan Alagappan] Python 3 support for LDTP client
+* [Nagappan Alagappan] closewindow(), minimizewindow(), maximizewindow(), and
+  activatewindow() now supported
+* [Nagappan Alagappan] selectitem() and selectindex() now works with popup
+  buttons
+* [Nagappan Alagappan] Windows that are closed and reopened now work properly
+* [Nagappan Alagappan] click() changed to use mouse events rather than
+  accessibility
+* [Nagappan Alagappan] Added appundertest() which narrows down the search
+  scope for UI elements to the specified application
+* ["John" Yingjun Li] Added getchild() which allows you to search the
+  accessibility hierarchy for children of the specified element
+* [Nagappan Alagappan] Updated keyboard controls for parity with Linux LDTP
+* [Nagappan Alagappan] getaccesskey() added
+* [Nagappan Alagappan] Implemented verifyselect() and getcombovalue()
 
 Version 1.0.1
 12-Oct-2012
