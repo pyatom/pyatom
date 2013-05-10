@@ -696,7 +696,27 @@ class Utils(object):
                     # menu in notification area
                     menu_handle.Press()
                 except atomac._a11y.ErrorCannotComplete:
+                    if self._ldtp_debug:
+                        print traceback.format_exc()
                     pass
+            abc = None
+            # For some reason, on accessing the lenght first
+            # doesn't crash, else
+            """
+            Traceback (most recent call last):
+              File "build/bdist.macosx-10.8-intel/egg/atomac/ldtpd/utils.py", line 178, in _dispatch
+                return getattr(self, method)(*args)
+              File "build/bdist.macosx-10.8-intel/egg/atomac/ldtpd/menu.py", line 63, in selectmenuitem
+                menu_handle=self._get_menu_handle(window_name, object_name)
+              File "build/bdist.macosx-10.8-intel/egg/atomac/ldtpd/menu.py", line 47, in _get_menu_handle
+                return self._internal_menu_handler(menu_handle, menu_list[1:])
+              File "build/bdist.macosx-10.8-intel/egg/atomac/ldtpd/utils.py", line 703, in _internal_menu_handler
+                children=menu_handle.AXChildren[0]
+            IndexError: list index out of range
+            """
+            len(menu_handle.AXChildren)
+            # Now with above line, everything works fine
+            # on doing selectmenuitem('appSystemUIServer', 'mnu0;Open Display*')
             children=menu_handle.AXChildren[0]
             if not children:
                 raise LdtpServerException("Unable to find menu %s" % menu)
