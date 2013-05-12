@@ -152,6 +152,7 @@ class Utils(object):
         self._windows={}
         self._obj_timeout=5
         self._window_timeout=30
+        self._callback_event=[]
         self._app_under_test=None
         self._custom_logger=_custom_logger
         # Current opened applications list will be updated
