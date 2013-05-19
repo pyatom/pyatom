@@ -51,7 +51,7 @@ setup (
    license = 'GPLv2',
    long_description = read('README.rst'),
    ext_modules = [_a11y],
-   packages = ['atomac', 'atomac.ldtpd', 'atomac.ldtp'],
+   packages = ['atomac', 'atomac.ldtpd', 'atomac.ldtp', 'atomac.ooldtp'],
    classifiers = [
       'Development Status :: 5 - Production/Stable',
       'Environment :: MacOS X :: Cocoa',
@@ -59,7 +59,8 @@ setup (
       'Topic :: Software Development :: Quality Assurance',
       'Topic :: Software Development :: Testing',
    ],
-   entry_points={
-       'console_scripts' : ['ldtp = atomac.ldtpd:main'],
-   },
+   scripts=["atomac/scripts/ldtp"],
+   #entry_points={
+   #    'console_scripts' : ['ldtp = atomac.ldtpd:main'],
+   #},
 )
