@@ -1,9 +1,9 @@
-# Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2013 Nagappan Alagappan All Rights Reserved.
 
 # This file is part of ATOMac.
 
 #@author: Nagappan Alagappan <nagappan@gmail.com>                                                                                                      
-#@copyright: Copyright (c) 2009-12 Nagappan Alagappan                                                                                                  
+#@copyright: Copyright (c) 2009-13 Nagappan Alagappan                                                                                                  
 
 #http://ldtp.freedesktop.org                                                                                                                           
 
@@ -221,7 +221,6 @@ class PollLogs:
 def logFailures(*args):
     # Do nothing. For backward compatability
     warnings.warn('Use Mago framework - http://mago.ubuntu.com', DeprecationWarning)
-    pass
 
 def _populateNamespace(d):
     for method in client._client.system.listMethods():
