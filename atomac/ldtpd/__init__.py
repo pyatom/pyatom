@@ -28,6 +28,7 @@ import time
 import signal
 import socket
 import thread
+import traceback
 import SimpleXMLRPCServer
 from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
 
@@ -66,3 +67,6 @@ def main(port = 4118, parentpid=None):
         server.serve_forever()
     except KeyboardInterrupt:
         pass
+    except:
+        if _ldtp_debug:
+            print traceback.format_exc()
