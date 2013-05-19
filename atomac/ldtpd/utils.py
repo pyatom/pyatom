@@ -699,8 +699,6 @@ class Utils(object):
                 except atomac._a11y.ErrorCannotComplete:
                     if self._ldtp_debug:
                         print traceback.format_exc()
-                    pass
-            abc = None
             # For some reason, on accessing the lenght first
             # doesn't crash, else
             """
