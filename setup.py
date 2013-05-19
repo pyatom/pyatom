@@ -59,8 +59,7 @@ setup (
       'Topic :: Software Development :: Quality Assurance',
       'Topic :: Software Development :: Testing',
    ],
-   scripts=["atomac/scripts/ldtp"],
-   #entry_points={
-   #    'console_scripts' : ['ldtp = atomac.ldtpd:main'],
-   #},
+   entry_points={
+       'console_scripts' : ['ldtp = atomac.ldtpd:main'],
+   },
 )
