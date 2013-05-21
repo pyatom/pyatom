@@ -307,7 +307,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
          if (nextMod not in self.keyboard):
             errStr = 'Key %s not found in keyboard layout'
             self._clearEventQueue()
-            raise ValueError(errStr % self.keyboar[nextMod])
+            raise ValueError(errStr % self.keyboard[nextMod])
          modEvent = Quartz.CGEventCreateKeyboardEvent(Quartz.CGEventSourceCreate(0),
                                                       self.keyboard[nextMod],
                                                       pressed)
