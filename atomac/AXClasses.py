@@ -223,11 +223,11 @@ class BaseAXUIElement(_a11y.AXUIElement):
       if (not hasattr(self, 'keyboard')):
          self.keyboard = AXKeyboard.loadKeyboard()
 
-      if (keychr in self.keyboard['upperSymbols']):
-         self._sendKeyWithModifiers(keychr, [AXKeyCodeConstants.SHIFT]);
+      if (keychr in self.keyboard['upperSymbols'] and not modFlags):
+         self._sendKeyWithModifiers(keychr, [AXKeyCodeConstants.SHIFT])
          return
 
-      if (keychr.isupper()):
+      if (keychr.isupper() and not modFlags):
          self._sendKeyWithModifiers(keychr.lower(), [AXKeyCodeConstants.SHIFT])
          return
 
