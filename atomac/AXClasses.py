@@ -853,15 +853,19 @@ class NativeUIElement(BaseAXUIElement):
       '''
       return self._sendKeyWithModifiers(keychr, modifiers, True)
 
-   def clickMouseButtonLeft(self, coord):
+   def clickMouseButtonLeft(self, coord, interval=None):
       ''' Click the left mouse button without modifiers pressed
 
           Parameters: coordinates to click on screen (tuple (x, y))
           Returns: None
       '''
+          
       modFlags = 0
       self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags)
-      self._postQueuedEvents()
+      if interval:
+          self._postQueuedEvents(interval=interval)
+      else:
+          self._postQueuedEvents()
 
    def clickMouseButtonRight(self, coord):
       ''' Click the right mouse button without modifiers pressed
@@ -873,7 +877,7 @@ class NativeUIElement(BaseAXUIElement):
       self._queueMouseButton(coord, Quartz.kCGMouseButtonRight, modFlags)
       self._postQueuedEvents()
 
-   def clickMouseButtonLeftWithMods(self, coord, modifiers):
+   def clickMouseButtonLeftWithMods(self, coord, modifiers, interval = None):
       ''' Click the left mouse button with modifiers pressed
 
           Parameters: coordinates to click; modifiers (list) (e.g. [SHIFT] or
@@ -884,7 +888,10 @@ class NativeUIElement(BaseAXUIElement):
       modFlags = self._pressModifiers(modifiers)
       self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags)
       self._releaseModifiers(modifiers)
-      self._postQueuedEvents()
+      if interval:
+          self._postQueuedEvents(interval=interval)
+      else:
+          self._postQueuedEvents())
 
    def clickMouseButtonRightWithMods(self, coord, modifiers):
       ''' Click the right mouse button with modifiers pressed
