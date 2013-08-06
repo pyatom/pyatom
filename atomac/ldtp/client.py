@@ -195,7 +195,11 @@ class Transport(xmlrpclib.Transport):
                     raise e
 
     def __del__(self):
-        self.kill_daemon()
+        try:
+            self.kill_daemon()
+        except:
+            # To fix https://github.com/pyatom/pyatom/issues/61
+            pass
 
     def kill_daemon(self):
         try:
