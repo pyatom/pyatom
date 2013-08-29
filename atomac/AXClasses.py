@@ -223,11 +223,11 @@ class BaseAXUIElement(_a11y.AXUIElement):
       if (not hasattr(self, 'keyboard')):
          self.keyboard = AXKeyboard.loadKeyboard()
 
-      if (keychr in self.keyboard['upperSymbols']):
-         self._sendKeyWithModifiers(keychr, [AXKeyCodeConstants.SHIFT]);
+      if (keychr in self.keyboard['upperSymbols'] and not modFlags):
+         self._sendKeyWithModifiers(keychr, [AXKeyCodeConstants.SHIFT])
          return
 
-      if (keychr.isupper()):
+      if (keychr.isupper() and not modFlags):
          self._sendKeyWithModifiers(keychr.lower(), [AXKeyCodeConstants.SHIFT])
          return
 
@@ -307,7 +307,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
          if (nextMod not in self.keyboard):
             errStr = 'Key %s not found in keyboard layout'
             self._clearEventQueue()
-            raise ValueError(errStr % self.keyboar[nextMod])
+            raise ValueError(errStr % self.keyboard[nextMod])
          modEvent = Quartz.CGEventCreateKeyboardEvent(Quartz.CGEventSourceCreate(0),
                                                       self.keyboard[nextMod],
                                                       pressed)
