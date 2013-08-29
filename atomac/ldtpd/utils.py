@@ -162,6 +162,10 @@ class Utils(object):
             self._custom_logger.setLevel(logging.DEBUG)
         else:
             self._ldtp_debug=False
+        if os.environ.has_key("LDTP_DEBUG_FILE"):
+            self._ldtp_debug_file=os.environ["LDTP_DEBUG_FILE"]
+        else:
+            self._ldtp_debug_file=None
 
     def _listMethods(self):
         _methods=[]
@@ -180,6 +184,11 @@ class Utils(object):
         except:
             if self._ldtp_debug:
                 print(traceback.format_exc())
+            if self._ldtp_debug_file:
+                fp=open(self._ldtp_debug_file, "a"):
+                if fp:
+                    fp.write(traceback.format_exc())
+                    fp.close()
             raise
 
     def _get_front_most_window(self):
@@ -699,6 +708,11 @@ class Utils(object):
                 except atomac._a11y.ErrorCannotComplete:
                     if self._ldtp_debug:
                         print traceback.format_exc()
+                    if self._ldtp_debug_file:
+                        fp=open(self._ldtp_debug_file, "a"):
+                        if fp:
+                            fp.write(traceback.format_exc())
+                            fp.close()
             # For some reason, on accessing the lenght first
             # doesn't crash, else
             """
