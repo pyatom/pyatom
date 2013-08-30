@@ -185,10 +185,8 @@ class Utils(object):
             if self._ldtp_debug:
                 print(traceback.format_exc())
             if self._ldtp_debug_file:
-                fp=open(self._ldtp_debug_file, "a"):
-                if fp:
+                with open(self._ldtp_debug_file, "a") as fp:
                     fp.write(traceback.format_exc())
-                    fp.close()
             raise
 
     def _get_front_most_window(self):
@@ -711,10 +709,8 @@ class Utils(object):
                     if self._ldtp_debug:
                         print traceback.format_exc()
                     if self._ldtp_debug_file:
-                        fp=open(self._ldtp_debug_file, "a"):
-                        if fp:
+                        with open(self._ldtp_debug_file, "a") as fp:
                             fp.write(traceback.format_exc())
-                            fp.close()
             # For some reason, on accessing the lenght first
             # doesn't crash, else
             """
