@@ -339,7 +339,9 @@ class Utils(object):
                     key=self._insert_obj(windows, app, "", -1)
                     windows[key]["app"]=app
                     continue
-            except (atomac._a11y.ErrorAPIDisabled, atomac._a11y.ErrorCannotComplete):
+            except (atomac._a11y.ErrorAPIDisabled, \
+                        atomac._a11y.ErrorCannotComplete, \
+                        atomac._a11y.ErrorInvalidUIElement):
                 pass
             # Navigate all the windows
             for window in app_windows:
