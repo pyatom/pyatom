@@ -193,6 +193,10 @@ class PollLogs:
             log(t)
             # Connection to server might be failed
             return False
+        except:
+            t = traceback.format_exc()
+            log(t)
+            pass
 
         if not message:
             # No log in queue, sleep a second
@@ -384,6 +388,10 @@ def hasstate(window_name, object_name, state, guiTimeOut = 0):
     return _remote_hasstate(window_name, object_name, state, guiTimeOut)
 def selectrow(window_name, object_name, row_text):
     return _remote_selectrow(window_name, object_name, row_text, False)
+def multiselect(window_name, object_name, row_text):
+    return _remote_multiselect(window_name, object_name, row_text, False)
+def multiremove(window_name, object_name, row_text):
+    return _remote_multiremove(window_name, object_name, row_text, False)
 def doesrowexist(window_name, object_name, row_text, partial_match = False):
     return _remote_doesrowexist(window_name, object_name, row_text, partial_match)
 def getchild(window_name, child_name = '', role = '', parent = ''):
