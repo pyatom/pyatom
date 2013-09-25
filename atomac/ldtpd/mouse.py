@@ -66,8 +66,7 @@ class Mouse(Utils):
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         self._grabfocus(object_handle)
         x, y, width, height = self._getobjectsize(object_handle)
-        # Mouse left click on the object
-        # Note: x + width/2, y + height / 2 doesn't work
+        # Mouse right click on the object
         object_handle.clickMouseButtonRight((x + width / 2, y + height / 2))
         return 1
 
@@ -135,7 +134,7 @@ class Mouse(Utils):
         self._grabfocus(object_handle)
         x, y, width, height = self._getobjectsize(object_handle)
         window=self._get_front_most_window()
-        # Mouse left click on the object
+        # Mouse double click on the object
         #object_handle.doubleClick()
         window.doubleClickMouse((x + width / 2, y + height / 2))
         return 1
