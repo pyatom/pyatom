@@ -746,3 +746,16 @@ class Utils(object):
             if not menu_handle:
                 raise LdtpServerException("Unable to find menu %s" % menu)
         return menu_handle
+
+    def _getfirstmatchingchild(self, obj, role):
+        if not obj or not role:
+            return
+        if re.match(role, obj.AXRole):
+            return obj
+        if  not obj.AXChildren:
+            return
+        for child in obj.AXChildren:
+            matching_child = self._getfirstmatchingchild(child, role)
+            if matching_child:
+                return matching_child
+        return
