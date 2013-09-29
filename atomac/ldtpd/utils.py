@@ -162,10 +162,7 @@ class Utils(object):
             self._custom_logger.setLevel(logging.DEBUG)
         else:
             self._ldtp_debug=False
-        if os.environ.has_key("LDTP_DEBUG_FILE"):
-            self._ldtp_debug_file=os.environ["LDTP_DEBUG_FILE"]
-        else:
-            self._ldtp_debug_file=None
+        self._ldtp_debug_file = os.environ.get('LDTP_DEBUG_FILE', None)
 
     def _listMethods(self):
         _methods=[]
