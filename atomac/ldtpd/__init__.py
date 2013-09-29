@@ -55,6 +55,7 @@ def main(port = 4118, parentpid=None):
         _ldtp_debug=True
     else:
         _ldtp_debug=False
+    _ldtp_debug_file = os.environ.get('LDTP_DEBUG_FILE', None)
     server = LDTPServer(('', port), allow_none=True, logRequests=_ldtp_debug,
                         requestHandler=RequestHandler)
     server.register_introspection_functions()
@@ -70,3 +71,6 @@ def main(port = 4118, parentpid=None):
     except:
         if _ldtp_debug:
             print traceback.format_exc()
+        if _ldtp_debug_file:
+            with open(_ldtp_debug_file, "a") as fp:
+                fp.write(traceback.format_exc())
