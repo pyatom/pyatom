@@ -336,6 +336,7 @@ class Utils(object):
                     continue
             except (atomac._a11y.ErrorAPIDisabled, \
                         atomac._a11y.ErrorCannotComplete, \
+                        atomac._a11y.Error, \
                         atomac._a11y.ErrorInvalidUIElement):
                 pass
             # Navigate all the windows
