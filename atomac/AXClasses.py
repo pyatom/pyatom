@@ -504,8 +504,9 @@ class BaseAXUIElement(_a11y.AXUIElement):
          children = self.AXChildren
       except _a11y.Error:
          return
-      for child in children:
-         yield child
+      if children:
+        for child in children:
+           yield child
 
    def _generateChildrenR(self, target=None):
       '''_generateChildrenR - generator which recursively yields all AXChildren
