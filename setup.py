@@ -51,7 +51,7 @@ setup (
    license = 'GPLv2',
    long_description = read('README.rst'),
    ext_modules = [_a11y],
-   packages = ['atomac', 'atomac.ldtpd', 'atomac.ldtp'],
+   packages = ['atomac', 'atomac.ldtpd', 'atomac.ldtp', 'atomac.ooldtp'],
    classifiers = [
       'Development Status :: 5 - Production/Stable',
       'Environment :: MacOS X :: Cocoa',

@@ -152,6 +152,7 @@ class Utils(object):
         self._windows={}
         self._obj_timeout=5
         self._window_timeout=30
+        self._callback_event=[]
         self._app_under_test=None
         self._custom_logger=_custom_logger
         # Current opened applications list will be updated
@@ -161,6 +162,7 @@ class Utils(object):
             self._custom_logger.setLevel(logging.DEBUG)
         else:
             self._ldtp_debug=False
+        self._ldtp_debug_file = os.environ.get('LDTP_DEBUG_FILE', None)
 
     def _listMethods(self):
         _methods=[]
@@ -179,6 +181,9 @@ class Utils(object):
         except:
             if self._ldtp_debug:
                 print(traceback.format_exc())
+            if self._ldtp_debug_file:
+                with open(self._ldtp_debug_file, "a") as fp:
+                    fp.write(traceback.format_exc())
             raise
 
     def _get_front_most_window(self):
@@ -329,7 +334,10 @@ class Utils(object):
                     key=self._insert_obj(windows, app, "", -1)
                     windows[key]["app"]=app
                     continue
-            except (atomac._a11y.ErrorAPIDisabled, atomac._a11y.ErrorCannotComplete):
+            except (atomac._a11y.ErrorAPIDisabled, \
+                        atomac._a11y.ErrorCannotComplete, \
+                        atomac._a11y.Error, \
+                        atomac._a11y.ErrorInvalidUIElement):
                 pass
             # Navigate all the windows
             for window in app_windows:
@@ -696,7 +704,28 @@ class Utils(object):
                     # menu in notification area
                     menu_handle.Press()
                 except atomac._a11y.ErrorCannotComplete:
-                    pass
+                    if self._ldtp_debug:
+                        print traceback.format_exc()
+                    if self._ldtp_debug_file:
+                        with open(self._ldtp_debug_file, "a") as fp:
+                            fp.write(traceback.format_exc())
+            # For some reason, on accessing the lenght first
+            # doesn't crash, else
+            """
+            Traceback (most recent call last):
+              File "build/bdist.macosx-10.8-intel/egg/atomac/ldtpd/utils.py", line 178, in _dispatch
+                return getattr(self, method)(*args)
+              File "build/bdist.macosx-10.8-intel/egg/atomac/ldtpd/menu.py", line 63, in selectmenuitem
+                menu_handle=self._get_menu_handle(window_name, object_name)
+              File "build/bdist.macosx-10.8-intel/egg/atomac/ldtpd/menu.py", line 47, in _get_menu_handle
+                return self._internal_menu_handler(menu_handle, menu_list[1:])
+              File "build/bdist.macosx-10.8-intel/egg/atomac/ldtpd/utils.py", line 703, in _internal_menu_handler
+                children=menu_handle.AXChildren[0]
+            IndexError: list index out of range
+            """
+            len(menu_handle.AXChildren)
+            # Now with above line, everything works fine
+            # on doing selectmenuitem('appSystemUIServer', 'mnu0;Open Display*')
             children=menu_handle.AXChildren[0]
             if not children:
                 raise LdtpServerException("Unable to find menu %s" % menu)
@@ -715,3 +744,16 @@ class Utils(object):
             if not menu_handle:
                 raise LdtpServerException("Unable to find menu %s" % menu)
         return menu_handle
+
+    def _getfirstmatchingchild(self, obj, role):
+        if not obj or not role:
+            return
+        if re.match(role, obj.AXRole):
+            return obj
+        if  not obj.AXChildren:
+            return
+        for child in obj.AXChildren:
+            matching_child = self._getfirstmatchingchild(child, role)
+            if matching_child:
+                return matching_child
+        return

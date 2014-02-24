@@ -1,11 +1,11 @@
-# Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2013 Nagappan Alagappan All Rights Reserved.
 
 # This file is part of ATOMac.
 
 #@author: Eitan Isaacson <eitan@ascender.com>
 #@author: Nagappan Alagappan <nagappan@gmail.com>
 #@copyright: Copyright (c) 2009 Eitan Isaacson
-#@copyright: Copyright (c) 2009-12 Nagappan Alagappan
+#@copyright: Copyright (c) 2009-13 Nagappan Alagappan
 
 #http://ldtp.freedesktop.org
 

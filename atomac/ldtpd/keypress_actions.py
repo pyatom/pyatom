@@ -156,12 +156,12 @@ class KeyPressAction:
         self._doPress()
 
     def _doPress(self):
-        for key_val in self._keyvalId:
-            if key_val.modifiers:
-              self._window.sendKeyWithModifiers(key_val.value, key_val.modVal)
-            else:
-              raise LdtpServerException("Unsupported modifiers")
-            time.sleep(0.01)
+       for key_val in self._keyvalId:
+          if key_val.modifiers:
+             self._window.pressModifiers(key_val.modVal)
+          else:
+             raise LdtpServerException("Unsupported modifiers")
+          time.sleep(0.01)
 
 class KeyReleaseAction:
     def __init__(self, window, data):
@@ -174,9 +174,9 @@ class KeyReleaseAction:
         self._doRelease()
 
     def _doRelease(self):
-        for key_val in self._keyvalId:
-            if key_val.modifiers:
-              self._window.sendKeyWithModifiers(key_val.value, key_val.modVal)
-            else:
-              raise LdtpServerException("Unsupported modifiers")
-            time.sleep(0.01)
+       for key_val in self._keyvalId:
+          if key_val.modifiers:
+             self._window.releaseModifiers(key_val.modVal)
+          else:
+             raise LdtpServerException("Unsupported modifiers")
+          time.sleep(0.01)

@@ -1,11 +1,11 @@
-# Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2013 Nagappan Alagappan All Rights Reserved.
 
 # This file is part of ATOMac.
 
 #@author: Eitan Isaacson <eitan@ascender.com>
 #@author: Nagappan Alagappan <nagappan@gmail.com>
 #@copyright: Copyright (c) 2009 Eitan Isaacson
-#@copyright: Copyright (c) 2009-12 Nagappan Alagappan
+#@copyright: Copyright (c) 2009-13 Nagappan Alagappan
 
 #http://ldtp.freedesktop.org
 
@@ -30,15 +30,21 @@ import time
 import signal
 import platform
 import traceback
-import xmlrpclib
 import subprocess
 from socket import error as SocketError
-from client_exception import LdtpExecutionError, ERROR_CODE
-from log import logger
+from atomac.ldtp.log import logger
+from atomac.ldtp.client_exception import LdtpExecutionError, ERROR_CODE
 
+try:
+    import xmlrpclib
+except ImportError:
+    import xmlrpc.client as xmlrpclib
+_python3 = False
 _python26 = False
 if sys.version_info[:2] <= (2, 6):
     _python26 = True
+if sys.version_info[:2] >= (3, 0):
+    _python3 = True
 _ldtp_windows_env = False
 if 'LDTP_DEBUG' in os.environ:
     _ldtp_debug = os.environ['LDTP_DEBUG']
@@ -107,7 +113,7 @@ class Transport(xmlrpclib.Transport):
     # @param host Target host.
     # @return A connection handle.
 
-    if not _python26:
+    if not _python26 and not _python3:
         # Add to the class, only if > python 2.5
         def make_connection(self, host):
             # create a HTTP connection object from a host descriptor
@@ -133,15 +139,18 @@ class Transport(xmlrpclib.Transport):
                     # Activestate python 2.5, use the old method
                     return xmlrpclib.Transport.request(
                         self, host, handler, request_body, verbose=verbose)
-                # Follwing implementation not supported in Python <= 2.6
-                h = self.make_connection(host)
-                if verbose:
-                    h.set_debuglevel(1)
+                if not _python3:
+  		    # Follwing implementation not supported in Python <= 2.6
+                    h = self.make_connection(host)
+                    if verbose:
+                        h.set_debuglevel(1)
 
-                self.send_request(h, handler, request_body)
-                self.send_host(h, host)
-                self.send_user_agent(h)
-                self.send_content(h, request_body)
+                    self.send_request(h, handler, request_body)
+                    self.send_host(h, host)
+                    self.send_user_agent(h)
+                    self.send_content(h, request_body)
+                else:
+                    h=self.send_request(host, handler, request_body, bool(verbose))
 
                 response = h.getresponse()
 
@@ -157,9 +166,9 @@ class Transport(xmlrpclib.Transport):
                 return unmarshaller.close()
             except SocketError as e:
                 if ((_ldtp_windows_env and e[0] == 10061) or \
-                        (not _ldtp_windows_env and (e.errno == 111 or \
-                                                        e.errno == 61 or \
-                                                        e.errno == 146))) \
+                        (hasattr(e, 'errno') and (e.errno == 111 or \
+                                                      e.errno == 61 or \
+                                                      e.errno == 146))) \
                         and 'localhost' in host:
                     if hasattr(self, 'close'):
                         # On Windows XP SP3 / Python 2.5, close doesn't exist
@@ -195,7 +204,11 @@ class Transport(xmlrpclib.Transport):
                     raise e
 
     def __del__(self):
-        self.kill_daemon()
+        try:
+            self.kill_daemon()
+        except:
+            # To fix https://github.com/pyatom/pyatom/issues/61
+            pass
 
     def kill_daemon(self):
         try:

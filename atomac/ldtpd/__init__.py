@@ -28,6 +28,7 @@ import time
 import signal
 import socket
 import thread
+import traceback
 import SimpleXMLRPCServer
 from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
 
@@ -54,6 +55,7 @@ def main(port = 4118, parentpid=None):
         _ldtp_debug=True
     else:
         _ldtp_debug=False
+    _ldtp_debug_file = os.environ.get('LDTP_DEBUG_FILE', None)
     server = LDTPServer(('', port), allow_none=True, logRequests=_ldtp_debug,
                         requestHandler=RequestHandler)
     server.register_introspection_functions()
@@ -66,3 +68,9 @@ def main(port = 4118, parentpid=None):
         server.serve_forever()
     except KeyboardInterrupt:
         pass
+    except:
+        if _ldtp_debug:
+            print traceback.format_exc()
+        if _ldtp_debug_file:
+            with open(_ldtp_debug_file, "a") as fp:
+                fp.write(traceback.format_exc())

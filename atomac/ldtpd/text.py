@@ -42,6 +42,7 @@ class Text(Utils):
         """
         window=self._get_front_most_window()
         key_combo_action = KeyComboAction(window, data)
+        return 1
 
     def keypress(self, data):
         """
@@ -55,6 +56,7 @@ class Text(Utils):
         """
         window=self._get_front_most_window()
         key_press_action = KeyPressAction(window, data)
+        return 1
 
     def keyrelease(self, data):
         """
@@ -68,6 +70,7 @@ class Text(Utils):
         """
         window=self._get_front_most_window()
         key_release_action = KeyReleaseAction(window, data)
+        return 1
 
     def enterstring(self, window_name, object_name='', data=''):
         """
@@ -86,13 +89,14 @@ class Text(Utils):
         @rtype: integer
         """
         if not object_name and not data:
-            raise LdtpServerException("Not implemented")
+            return self.generatekeyevent(window_name)
         else:
             object_handle=self._get_object_handle(window_name, object_name)
             if not object_handle.AXEnabled:
                 raise LdtpServerException(u"Object %s state disabled" % object_name)
             self._grabfocus(object_handle)
             object_handle.sendKeys(data)
+            return 1
 
     def settextvalue(self, window_name, object_name, data):
         """

@@ -1,9 +1,9 @@
-# Copyright (c) 2012 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2013 Nagappan Alagappan All Rights Reserved.
 
 # This file is part of ATOMac.
 
 #@author: Nagappan Alagappan <nagappan@gmail.com>                                                                                                      
-#@copyright: Copyright (c) 2009-12 Nagappan Alagappan                                                                                                  
+#@copyright: Copyright (c) 2009-13 Nagappan Alagappan                                                                                                  
 
 #http://ldtp.freedesktop.org                                                                                                                           
 
@@ -24,20 +24,22 @@
 import os
 import re
 import time
-import state
-import client
 import atexit
 import socket
-import thread
 import logging
 import datetime
 import tempfile
 import warnings
+import threading
 import traceback
 from base64 import b64decode
 from fnmatch import translate as glob_trans
-from client_exception import LdtpExecutionError
 
+from atomac.ldtp import state
+from atomac.ldtp import client
+from atomac.ldtp.client_exception import LdtpExecutionError
+
+_t = None
 _pollEvents = None
 _file_logger = None
 _ldtp_debug = client._ldtp_debug
@@ -155,29 +157,43 @@ def stoplog():
         _file_logger = None
     return 1
 
-class PollLogs:
+class PollLogs(threading.Thread):
     """
     Class to poll logs, NOTE: *NOT* for external use
     """
     global _file_logger
     def __init__(self):
-        self._stop = False
+        super(PollLogs, self).__init__()
+        self.alive = True
 
     def __del__(self):
         """
         Stop polling when destroying this class
         """
-        self._stop = True
+        try:
+            self.alive = False
+        except:
+            pass
+
+    def stop(self):
+       """                                                                                                                                                                                                  
+       Stop the thread                                                                                                                                                                                      
+       """
+       try:
+          self.alive = False
+          self.join()
+       except:
+          pass
 
     def run(self):
-        while not self._stop:
+        while self.alive:
             try:
                 if not self.poll_server():
                     # Socket error
                     break
             except:
                 log(traceback.format_exc())
-                self._stop = False
+                self.alive = False
                 break
 
     def poll_server(self):
@@ -193,6 +209,10 @@ class PollLogs:
             log(t)
             # Connection to server might be failed
             return False
+        except:
+            t = traceback.format_exc()
+            log(t)
+            pass
 
         if not message:
             # No log in queue, sleep a second
@@ -221,7 +241,6 @@ class PollLogs:
 def logFailures(*args):
     # Do nothing. For backward compatability
     warnings.warn('Use Mago framework - http://mago.ubuntu.com', DeprecationWarning)
-    pass
 
 def _populateNamespace(d):
     for method in client._client.system.listMethods():
@@ -234,12 +253,13 @@ def _populateNamespace(d):
         d[local_name] = getattr(client._client, method)
         d[local_name].__doc__ = client._client.system.methodHelp(method)
 
-class PollEvents:
+class PollEvents(threading.Thread):
     """
     Class to poll callback events, NOTE: *NOT* for external use
     """
     def __init__(self):
-        self._stop = False
+        super(PollEvents, self).__init__()
+        self.alive = True
         # Initialize callback dictionary
         self._callback = {}
 
@@ -247,17 +267,30 @@ class PollEvents:
         """
         Stop callback when destroying this class
         """
-        self._stop = True
+        try:
+            self.alive = False
+        except:
+            pass
+
+    def stop(self):
+        """
+        Stop the thread
+        """
+        try:
+            self.alive = False
+            self.join()
+        except:
+            pass
 
     def run(self):
-        while not self._stop:
+        while self.alive:
             try:
                 if not self.poll_server():
                     # Socket error
                     break
             except:
                 log(traceback.format_exc())
-                self._stop = False
+                self.alive = False
                 break
 
     def poll_server(self):
@@ -311,11 +344,12 @@ class PollEvents:
                     if len(args) and args[0]:
                         # Spawn a new thread, for each event
                         # If one or more arguments to the callback function
-                        thread.start_new_thread(callback, args)
+                        _t = threading.Thread(target=callback, args=args)
                     else:
                         # Spawn a new thread, for each event
                         # No arguments to the callback function
-                        thread.start_new_thread(callback, ())
+                        _t = threading.Thread(target=callback, args=())
+                    _t.start()
                 except:
                     # Log trace incase of exception
                     log(traceback.format_exc())
@@ -385,6 +419,10 @@ def hasstate(window_name, object_name, state, guiTimeOut = 0):
     return _remote_hasstate(window_name, object_name, state, guiTimeOut)
 def selectrow(window_name, object_name, row_text):
     return _remote_selectrow(window_name, object_name, row_text, False)
+def multiselect(window_name, object_name, row_text):
+    return _remote_multiselect(window_name, object_name, row_text, False)
+def multiremove(window_name, object_name, row_text):
+    return _remote_multiremove(window_name, object_name, row_text, False)
 def doesrowexist(window_name, object_name, row_text, partial_match = False):
     return _remote_doesrowexist(window_name, object_name, row_text, partial_match)
 def getchild(window_name, child_name = '', role = '', parent = ''):
@@ -549,8 +587,18 @@ def windowuptime(window_name):
 
 _populateNamespace(globals())
 _pollEvents = PollEvents()
-thread.start_new_thread(_pollEvents.run, ())
+_pollEvents.daemon = True
+_pollEvents.start()
 _pollLogs = PollLogs()
-thread.start_new_thread(_pollLogs.run, ())
+_pollLogs.daemon = True
+_pollLogs.start()
+
+@atexit.register
+def _stop_thread():
+   try:
+      _pollLogs.stop()
+      _pollEvents.stop()
+   except:
+      pass
 
 atexit.register(client._client.kill_daemon)
