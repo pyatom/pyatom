@@ -107,13 +107,22 @@ class KeyboardOp:
       else:
         token=input_str[index]
         index += 1
-  
+
       key_val=self._get_key_value(token)
+      # Deal with modifier and undefined keys.
+      # Modifiers: if we got modifier in previous
+      # step, extend the previous KeyCombo object instead
+      # of creating a new one.
       if lastModifiers and key_val.value != self._undefined_key:
-        last_item=key_vals.pop()
-        last_item.value=key_val.value
-        key_val=last_item
-        lastModifiers=None
+        last_item = key_vals.pop()
+        if key_val.modifiers:
+          lastModifiers = key_val
+          last_item.modVal.extend(key_val.modVal)
+          key_val = last_item
+        else:
+          last_item.value = key_val.value
+          key_val = last_item
+          lastModifiers=None
       elif key_val.modifiers:
         if not lastModifiers:
           lastModifiers=key_val
