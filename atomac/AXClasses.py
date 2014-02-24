@@ -383,7 +383,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
       # Post the queued keypresses:
       self._postQueuedEvents()
 
-   def _queueMouseButton(self, coord, mouseButton, modFlags, clickCount=1):
+   def _queueMouseButton(self, coord, mouseButton, modFlags, clickCount=1, dest_coord = None):
       ''' Private method to handle generic mouse button clicking
 
           Parameters: coord (x, y) to click, mouseButton (e.g.,
@@ -404,6 +404,8 @@ class BaseAXUIElement(_a11y.AXUIElement):
                                 'kCGEvent%sDown' % mouseButtons[mouseButton])
       eventButtonUp = getattr(Quartz,
                               'kCGEvent%sUp' % mouseButtons[mouseButton])
+      eventButtonDragged = getattr(Quartz,
+                              'kCGEvent%sDragged' % mouseButtons[mouseButton])   
 
       # Press the button
       buttonDown = Quartz.CGEventCreateMouseEvent(None,
@@ -418,8 +420,24 @@ class BaseAXUIElement(_a11y.AXUIElement):
                                          Quartz.kCGMouseEventClickState,
                                          int(clickCount))
 
-      # Release the button
-      buttonUp = Quartz.CGEventCreateMouseEvent(None,
+      if dest_coord:
+         #Drag and release the button
+         buttonDragged = Quartz.CGEventCreateMouseEvent(None,
+                                                eventButtonDragged,
+                                                dest_coord,
+                                                mouseButton)
+         # Set modflags on the button dragged:
+         Quartz.CGEventSetFlags(buttonDragged, modFlags)
+    
+        
+          
+         buttonUp = Quartz.CGEventCreateMouseEvent(None,
+                                                eventButtonUp,
+                                                dest_coord,
+                                                mouseButton)
+      else:
+          # Release the button
+         buttonUp = Quartz.CGEventCreateMouseEvent(None,
                                                 eventButtonUp,
                                                 coord,
                                                 mouseButton)
@@ -433,6 +451,9 @@ class BaseAXUIElement(_a11y.AXUIElement):
       # Queue the events
       self._queueEvent(Quartz.CGEventPost,
                        (Quartz.kCGSessionEventTap, buttonDown))
+      if dest_coord:
+          self._queueEvent(Quartz.CGEventPost,
+                           (Quartz.kCGHIDEventTap, buttonDragged))
       self._queueEvent(Quartz.CGEventPost,
                        (Quartz.kCGSessionEventTap, buttonUp))
 
@@ -854,15 +875,32 @@ class NativeUIElement(BaseAXUIElement):
       '''
       return self._sendKeyWithModifiers(keychr, modifiers, True)
 
-   def clickMouseButtonLeft(self, coord):
+   def dragMouseButtonLeft(self, coord, dest_coord, interval = 0.5):
+      ''' Drag the left mouse button without modifiers pressed
+
+          Parameters: coordinates to click on screen (tuple (x, y))
+                      dest coordinates to drag to (tuple (x, y))
+                      interval to send event of btn down, drag and up
+          Returns: None
+      '''
+          
+      modFlags = 0
+      self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags, dest_coord = dest_coord)
+      self._postQueuedEvents(interval = interval)
+          
+   def clickMouseButtonLeft(self, coord, interval=None):
       ''' Click the left mouse button without modifiers pressed
 
           Parameters: coordinates to click on screen (tuple (x, y))
           Returns: None
       '''
+          
       modFlags = 0
       self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags)
-      self._postQueuedEvents()
+      if interval:
+          self._postQueuedEvents(interval=interval)
+      else:
+          self._postQueuedEvents()
 
    def clickMouseButtonRight(self, coord):
       ''' Click the right mouse button without modifiers pressed
@@ -874,7 +912,7 @@ class NativeUIElement(BaseAXUIElement):
       self._queueMouseButton(coord, Quartz.kCGMouseButtonRight, modFlags)
       self._postQueuedEvents()
 
-   def clickMouseButtonLeftWithMods(self, coord, modifiers):
+   def clickMouseButtonLeftWithMods(self, coord, modifiers, interval = None):
       ''' Click the left mouse button with modifiers pressed
 
           Parameters: coordinates to click; modifiers (list) (e.g. [SHIFT] or
@@ -885,7 +923,10 @@ class NativeUIElement(BaseAXUIElement):
       modFlags = self._pressModifiers(modifiers)
       self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags)
       self._releaseModifiers(modifiers)
-      self._postQueuedEvents()
+      if interval:
+         self._postQueuedEvents(interval=interval)
+      else:
+         self._postQueuedEvents()
 
    def clickMouseButtonRightWithMods(self, coord, modifiers):
       ''' Click the right mouse button with modifiers pressed
@@ -1129,4 +1170,3 @@ class NativeUIElement(BaseAXUIElement):
    def slidersR(self, match=None):
       '''Return a list of sliders with an optional match parameter'''
       return self._convenienceMatchR('AXSlider', 'AXValue', match)
-
