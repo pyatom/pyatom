@@ -16,7 +16,7 @@
 # St, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from _a11y import Error, ErrorAPIDisabled, ErrorInvalidUIElement
-from _a11y import ErrorCannotComplete
+from _a11y import ErrorCannotComplete, ErrorUnsupported
 from AXClasses import NativeUIElement
 from Clipboard import Clipboard
 from version import __version__
