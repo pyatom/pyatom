@@ -40,7 +40,10 @@ class Text(Utils):
         @return: 1 on success.
         @rtype: integer
         """
-        window=self._get_front_most_window()
+        try:
+            window=self._get_front_most_window()
+        except (IndexError, ):
+            window=self._get_any_window()
         key_combo_action = KeyComboAction(window, data)
         return 1
 

@@ -187,7 +187,11 @@ class Utils(object):
             raise
 
     def _get_front_most_window(self):
-        front_app=atomac.NativeUIElement.getFrontmostApp()
+        app=atomac.NativeUIElement.getFrontmostApp()
+        return app.windows()[0]
+
+    def _get_any_window(self):
+        front_app=atomac.NativeUIElement.getAnyAppWithWindow()
         return front_app.windows()[0]
 
     def _ldtpize_accessible(self, acc):
@@ -458,14 +462,20 @@ class Utils(object):
     def _grabfocus(self, handle):
         if not handle:
             raise LdtpServerException("Invalid handle")
-        if handle.AXRole == "AXWindow":
-            # Raise window
-            handle.Raise()
-        else:
-            # First bring the window to front
-            handle.AXWindow.Raise()
-            # Focus object
-            handle.activate()
+        
+        try:
+            if handle.AXRole == "AXWindow":
+                # Raise window
+                handle.Raise()
+        except (AttributeError,):
+            try:
+                if handle[0].AXRole == "AXWindow":
+                    handle[0].Raise()
+            except (IndexError, AttributeError):
+                # First bring the window to front
+                handle.AXWindow.Raise()
+                # Focus object
+                handle.activate()
         return 1
 
     def _getobjectsize(self, handle):

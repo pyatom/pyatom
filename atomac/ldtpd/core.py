@@ -108,6 +108,25 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @rtype: list
         """
         return self._get_windows(True).keys()
+    
+    def getwindowpos(self, window_name):
+        """
+        Get window top-left position
+            
+        @param window_name: Window name to look for, either full name,
+        LDTP's name convention, or a Unix glob.
+        @type window_name: string
+            
+        @return: top-left position of the window or (-1, -1) on error occured
+        @rtype: tuple
+        """
+        try:
+            handle=self._get_window_handle(window_name, False)[0]
+            return handle.AXPosition
+        except LdtpServerException:
+            pass
+                
+        return (-1, -1)
 
     def isalive(self):
         """
