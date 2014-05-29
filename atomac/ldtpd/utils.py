@@ -331,7 +331,7 @@ class Utils(object):
             app_windows=app.windows()
             try:
                 # Tested with
-                # selectmenuitem('appChickenoftheVNC', 'Connection;Open Connection…')
+                # selectmenuitem('appChickenoftheVNC', 'Connection;Open Connection...')
                 if not app_windows and app.AXRole == "AXApplication":
                     # If app doesn't have any windows and its role is AXApplication
                     # add to window list
