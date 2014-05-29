@@ -112,6 +112,21 @@ class BaseAXUIElement(_a11y.AXUIElement):
             # ErrorAPIDisabled for some reason - opened radar bug 12837995
             pass
       raise ValueError('No GUI application found.')
+    
+   @classmethod
+   def getAnyAppWithWindow(cls):
+      '''getAnyAppWithApp - Get a randow app that has windows.
+        
+         Raise a ValueError exception if no GUI applications are found.
+      '''
+      # Refresh the runningApplications list
+      apps = cls._getRunningApps()
+      for app in apps:
+         pid = app.processIdentifier()
+         ref = cls.getAppRefByPid(pid)
+         if hasattr(ref, 'windows') and len(ref.windows()) > 0:
+            return ref
+      raise ValueError('No GUI application found.')
 
    @classmethod
    def getSystemObject(cls):

@@ -85,15 +85,24 @@ class Mouse(Utils):
         @rtype: integer
         """
         if eventType == "b1c":
-            window=self._get_front_most_window()
+            try:
+                window=self._get_front_most_window()
+            except (IndexError, ):
+                window=self._get_any_window()
             window.clickMouseButtonLeft((x, y))
             return 1
         elif eventType == "b3c":
-            window=self._get_front_most_window()
+            try:
+                window=self._get_front_most_window()
+            except (IndexError, ):
+                window=self._get_any_window()
             window.clickMouseButtonRight((x, y))
             return 1
         elif eventType == "b1d":
-            window=self._get_front_most_window()
+            try:
+                window=self._get_front_most_window()
+            except (IndexError, ):
+                window=self._get_any_window()
             window.doubleClickMouse((x, y))
             return 1
         raise LdtpServerException("Not implemented")

@@ -108,7 +108,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @rtype: list
         """
         return self._get_windows(True).keys()
-
+    
     def isalive(self):
         """
         Client will use this to verify whether the server instance is alive or not.
