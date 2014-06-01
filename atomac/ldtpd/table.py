@@ -100,7 +100,10 @@ class Table(Utils):
 
         object_handle.activate()
         selected = False
-        window=self._get_front_most_window()
+        try:
+            window=self._get_front_most_window()
+        except (IndexError, ):
+            window=self._get_any_window()for row_text in row_text_list:
         for row_text in row_text_list:
             selected = False
             for cell in object_handle.AXRows:
@@ -150,7 +153,10 @@ class Table(Utils):
 
         object_handle.activate()
         unselected = False
-        window=self._get_front_most_window()
+        try:
+            window=self._get_front_most_window()
+        except (IndexError, ):
+            window=self._get_any_window()for row_text in row_text_list:
         for row_text in row_text_list:
             selected = False
             for cell in object_handle.AXRows:
