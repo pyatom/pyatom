@@ -103,12 +103,12 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def getwindowlist(self):
         """
         Get all accessibility window that are currently open
-        
+
         @return: list of window names in LDTP format of string type on success.
         @rtype: list
         """
         return self._get_windows(True).keys()
-    
+
     def isalive(self):
         """
         Client will use this to verify whether the server instance is alive or not.
@@ -140,7 +140,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
 
         if not self._custom_logger.log_events:
             return ''
-        
+
         return self._custom_logger.log_events.pop()
 
     def startprocessmonitor(self, process_name, interval=2):
@@ -232,7 +232,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def getobjectlist(self, window_name):
         """
         Get list of items in given GUI.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -255,12 +255,12 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def getobjectinfo(self, window_name, object_name):
         """
         Get object properties.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
         @param object_name: Object name to look for, either full name,
-        LDTP's name convention, or a Unix glob. 
+        LDTP's name convention, or a Unix glob.
         @type object_name: string
 
         @return: list of properties
@@ -288,12 +288,12 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def getobjectproperty(self, window_name, object_name, prop):
         """
         Get object property value.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
         @param object_name: Object name to look for, either full name,
-        LDTP's name convention, or a Unix glob. 
+        LDTP's name convention, or a Unix glob.
         @type object_name: string
         @param prop: property name.
         @type prop: string
@@ -326,7 +326,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         """
         Gets the list of object available in the window, which matches
         component name or role name or both.
-       
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -364,7 +364,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
                     return _get_all_children_under_obj( \
                         appmap[child],
                         child_list)
-           
+
             matches = _get_all_children_under_obj(obj, [])
             if not matches:
                 if child_name:
@@ -375,9 +375,9 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
                     _parent = 'parent "%s"' % parent
                 exception = 'Could not find a child %s%s%s' % (_name, _role, _parent)
                 raise LdtpServerException(exception)
- 
+
             return matches
- 
+
         _window_handle, _window_name = \
             self._get_window_handle(window_name)[0:2]
         if not _window_handle:
@@ -402,7 +402,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
             if role and child_name and obj['class'] == role and \
                     self._match_name_to_appmap(child_name, obj):
                 matches.append(name)
- 
+
         if not matches:
             _name = ''
             _role = ''
@@ -415,7 +415,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
                 _parent = 'parent "%s"' % parent
             exception = 'Could not find a child %s%s%s' % (_name, _role, _parent)
             raise LdtpServerException(exception)
- 
+
         return matches
 
     def launchapp(self, cmd, args = [], delay = 0, env = 1, lang = "C"):
@@ -442,7 +442,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
             atomac.NativeUIElement.launchAppByBundleId(cmd)
             return 1
         except RuntimeError:
-            if atomac.NativeUIElement.launchAppByBundlePath(cmd):
+            if atomac.NativeUIElement.launchAppByBundlePath(cmd, args):
                 # Let us wait so that the application launches
                 try:
                     time.sleep(int(delay))
@@ -468,7 +468,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def closewindow(self, window_name):
         """
         Close window.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -481,7 +481,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def minimizewindow(self, window_name):
         """
         Minimize window.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -494,7 +494,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def maximizewindow(self, window_name):
         """
         Maximize window.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -507,7 +507,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def activatewindow(self, window_name):
         """
         Activate window.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -522,12 +522,12 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def click(self, window_name, object_name):
         """
         Click item.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
         @param object_name: Object name to look for, either full name,
-        LDTP's name convention, or a Unix glob. 
+        LDTP's name convention, or a Unix glob.
         @type object_name: string
 
         @return: 1 on success.
@@ -550,12 +550,12 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def getallstates(self, window_name, object_name):
         """
         Get all states of given object
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
         @param object_name: Object name to look for, either full name,
-        LDTP's name convention, or a Unix glob. 
+        LDTP's name convention, or a Unix glob.
         @type object_name: string
 
         @return: list of string on success.
@@ -583,12 +583,12 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def hasstate(self, window_name, object_name, state, guiTimeOut = 0):
         """
         has state
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
         @param object_name: Object name to look for, either full name,
-        LDTP's name convention, or a Unix glob. 
+        LDTP's name convention, or a Unix glob.
         @type object_name: string
         @type window_name: string
         @param state: State of the current object.
@@ -621,7 +621,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def getobjectsize(self, window_name, object_name=None):
         """
         Get object size
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -632,7 +632,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         @return: x, y, width, height on success.
         @rtype: list
         """
-        if not object_name: 
+        if not object_name:
             handle, name, app=self._get_window_handle(window_name)
         else:
             handle=self._get_object_handle(window_name, object_name)
@@ -641,7 +641,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def getwindowsize(self, window_name):
         """
         Get window size.
-        
+
         @param window_name: Window name to get size of.
         @type window_name: string
 
@@ -653,12 +653,12 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def grabfocus(self, window_name, object_name=None):
         """
         Grab focus.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
         @param object_name: Object name to look for, either full name,
-        LDTP's name convention, or a Unix glob. 
+        LDTP's name convention, or a Unix glob.
         @type object_name: string
 
         @return: 1 on success.
@@ -673,12 +673,12 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def guiexist(self, window_name, object_name=None):
         """
         Checks whether a window or component exists.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
         @param object_name: Object name to look for, either full name,
-        LDTP's name convention, or a Unix glob. 
+        LDTP's name convention, or a Unix glob.
         @type object_name: string
 
         @return: 1 on success.
@@ -728,7 +728,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
                          guiTimeOut = 30, state = ''):
         """
         Wait till a window or component exists.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -756,7 +756,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def waittillguinotexist(self, window_name, object_name = '', guiTimeOut = 30):
         """
         Wait till a window does not exist.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -782,7 +782,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def objectexist(self, window_name, object_name):
         """
         Checks whether a window or component exists.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
@@ -802,12 +802,12 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def stateenabled(self, window_name, object_name):
         """
         Check whether an object state is enabled or not
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
         @param object_name: Object name to look for, either full name,
-        LDTP's name convention, or a Unix glob. 
+        LDTP's name convention, or a Unix glob.
         @type object_name: string
 
         @return: 1 on success 0 on failure.
@@ -824,12 +824,12 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def check(self, window_name, object_name):
         """
         Check item.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
         @param object_name: Object name to look for, either full name,
-        LDTP's name convention, or a Unix glob. 
+        LDTP's name convention, or a Unix glob.
         @type object_name: string
 
         @return: 1 on success.
@@ -854,12 +854,12 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def uncheck(self, window_name, object_name):
         """
         Uncheck item.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
         @param object_name: Object name to look for, either full name,
-        LDTP's name convention, or a Unix glob. 
+        LDTP's name convention, or a Unix glob.
         @type object_name: string
 
         @return: 1 on success.
@@ -883,12 +883,12 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def verifycheck(self, window_name, object_name):
         """
         Verify check item.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
         @param object_name: Object name to look for, either full name,
-        LDTP's name convention, or a Unix glob. 
+        LDTP's name convention, or a Unix glob.
         @type object_name: string
 
         @return: 1 on success 0 on failure.
@@ -906,12 +906,12 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
     def verifyuncheck(self, window_name, object_name):
         """
         Verify uncheck item.
-        
+
         @param window_name: Window name to look for, either full name,
         LDTP's name convention, or a Unix glob.
         @type window_name: string
         @param object_name: Object name to look for, either full name,
-        LDTP's name convention, or a Unix glob. 
+        LDTP's name convention, or a Unix glob.
         @type object_name: string
 
         @return: 1 on success 0 on failure.
@@ -999,7 +999,7 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
         # modifiers==12 virtual_key==48 glpyh==2
         # * Terminal Menu Edit->Start Dictation
         # fn fn - glpyh==148 modifiers==24
-        # * Menu Chrome->Clear Browsing Data in Google Chrome 
+        # * Menu Chrome->Clear Browsing Data in Google Chrome
         # virtual_key==51 glpyh==23 [Delete Left (like Backspace on a PC)]
         if not key:
             raise LdtpServerException("No access key associated")
