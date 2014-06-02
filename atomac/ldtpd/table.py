@@ -103,7 +103,7 @@ class Table(Utils):
         try:
             window=self._get_front_most_window()
         except (IndexError, ):
-            window=self._get_any_window()for row_text in row_text_list:
+            window=self._get_any_window()
         for row_text in row_text_list:
             selected = False
             for cell in object_handle.AXRows:
@@ -156,7 +156,7 @@ class Table(Utils):
         try:
             window=self._get_front_most_window()
         except (IndexError, ):
-            window=self._get_any_window()for row_text in row_text_list:
+            window=self._get_any_window()
         for row_text in row_text_list:
             selected = False
             for cell in object_handle.AXRows:
