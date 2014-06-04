@@ -865,7 +865,7 @@ AXUIElement_getAttribute(atomac_AXUIElement *self,  // IN: Python self object
       if (kAXErrorNotImplemented == err) {
          _setError(err, "Attribute not implemented");   
       } else {
-        _setError(err, "Error retrieving attribute motherfucker");
+        _setError(err, "Error retrieving attribute");
       }
       CFRelease(attr);
       return NULL;
