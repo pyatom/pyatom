@@ -538,7 +538,8 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
             raise LdtpServerException(u"Object %s state disabled" % object_name)
         size=self._getobjectsize(object_handle)
         self._grabfocus(object_handle)
-        self.wait(0.5)
+        self.wait(0.5) 
+        
         # If object doesn't support Press, trying clicking with the object
         # coordinates, where size=(x, y, width, height)
         # click on center of the widget

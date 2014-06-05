@@ -106,7 +106,8 @@ class BaseAXUIElement(_a11y.AXUIElement):
                return ref
          except (_a11y.ErrorUnsupported,
                  _a11y.ErrorCannotComplete,
-                 _a11y.ErrorAPIDisabled):
+                 _a11y.ErrorAPIDisabled,
+                 _a11y.ErrorNotImplemented):
             # Some applications do not have an explicit GUI
             # and so will not have an AXFrontmost attribute
             # Trying to read attributes from Google Chrome Helper returns

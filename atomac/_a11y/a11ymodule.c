@@ -63,6 +63,7 @@ PyObject * atomacErrorAPIDisabled;
 PyObject * atomacErrorInvalidUIElement;
 PyObject * atomacErrorUnsupported;
 PyObject * atomacErrorCannotComplete;
+PyObject * atomacErrorNotImplemented;
 
 /*
  * Local functions
@@ -184,6 +185,10 @@ _setError(AXError e,    // IN: Apple AXError
    }
    if (kAXErrorCannotComplete == e) {
       PyErr_SetString(atomacErrorCannotComplete, err_str);
+      return;
+   }
+   if (kAXErrorNotImplemented == e) {
+      PyErr_SetString(atomacErrorNotImplemented, err_str);
       return;
    }
    PyErr_SetString(atomacError, err_str);
@@ -857,7 +862,11 @@ AXUIElement_getAttribute(atomac_AXUIElement *self,  // IN: Python self object
    }
 
    if (kAXErrorSuccess != err) {
-      _setError(err, "Error retrieving attribute");
+      if (kAXErrorNotImplemented == err) {
+         _setError(err, "Attribute not implemented");   
+      } else {
+        _setError(err, "Error retrieving attribute");
+      }
       CFRelease(attr);
       return NULL;
    }
@@ -2073,4 +2082,10 @@ init_a11y(void)
                                                 atomacError, NULL);
    Py_INCREF(atomacErrorCannotComplete);
    PyModule_AddObject(m, "ErrorCannotComplete", atomacErrorCannotComplete);
+
+   atomacErrorNotImplemented = PyErr_NewException("atomac._a11y."
+                                                "ErrorNotImplemented",
+                                                atomacError, NULL);
+   Py_INCREF(atomacErrorNotImplemented);
+   PyModule_AddObject(m, "ErrorNotImplemented", atomacErrorNotImplemented);
 }
