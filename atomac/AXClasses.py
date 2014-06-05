@@ -20,6 +20,7 @@ import AppKit
 import Quartz
 import time
 
+from AppKit import NSURL, NSString, NSDictionary, NSArray
 from PyObjCTools import AppHelper
 from collections import deque
 
@@ -105,12 +106,28 @@ class BaseAXUIElement(_a11y.AXUIElement):
                return ref
          except (_a11y.ErrorUnsupported,
                  _a11y.ErrorCannotComplete,
-                 _a11y.ErrorAPIDisabled):
+                 _a11y.ErrorAPIDisabled,
+                 _a11y.ErrorNotImplemented):
             # Some applications do not have an explicit GUI
             # and so will not have an AXFrontmost attribute
             # Trying to read attributes from Google Chrome Helper returns
             # ErrorAPIDisabled for some reason - opened radar bug 12837995
             pass
+      raise ValueError('No GUI application found.')
+
+   @classmethod
+   def getAnyAppWithWindow(cls):
+      '''getAnyAppWithApp - Get a randow app that has windows.
+
+         Raise a ValueError exception if no GUI applications are found.
+      '''
+      # Refresh the runningApplications list
+      apps = cls._getRunningApps()
+      for app in apps:
+         pid = app.processIdentifier()
+         ref = cls.getAppRefByPid(pid)
+         if hasattr(ref, 'windows') and len(ref.windows()) > 0:
+            return ref
       raise ValueError('No GUI application found.')
 
    @classmethod
@@ -133,15 +150,14 @@ class BaseAXUIElement(_a11y.AXUIElement):
       '''launchByBundleId - launch the application with the specified bundle
          ID
       '''
-      # This constant does nothing on any modern system that doesn't have
+      # NSWorkspaceLaunchAllowingClassicStartup does nothing on any modern system that doesn't have
       # the classic environment installed. Encountered a bug when passing 0
       # for no options on 10.6 PyObjC.
-      NSWorkspaceLaunchAllowingClassicStartup = 0x00020000
       ws = AppKit.NSWorkspace.sharedWorkspace()
       # Sorry about the length of the following line
       r=ws.launchAppWithBundleIdentifier_options_additionalEventParamDescriptor_launchIdentifier_(
          bundleID,
-         NSWorkspaceLaunchAllowingClassicStartup,
+         AppKit.NSWorkspaceLaunchAllowingClassicStartup,
          AppKit.NSAppleEventDescriptor.nullDescriptor(),
          None)
       # On 10.6, this returns a tuple - first element bool result, second is
@@ -150,12 +166,22 @@ class BaseAXUIElement(_a11y.AXUIElement):
          raise RuntimeError('Error launching specified application.')
 
    @staticmethod
-   def launchAppByBundlePath(bundlePath):
+   def launchAppByBundlePath(bundlePath, arguments=[]):
         ''' launchAppByBundlePath - Launch app with a given bundle path
             Return True if succeed
         '''
-        ws = AppKit.NSWorkspace.sharedWorkspace()
-        return ws.launchApplication_(bundlePath)
+        bundleUrl = NSURL.URLWithString_(bundlePath)
+        workspace = AppKit.NSWorkspace.sharedWorkspace()
+        arguments_strings = map(lambda a: NSString.stringWithString_(str(a)), arguments)
+        arguments = NSDictionary.dictionaryWithDictionary_({
+            AppKit.NSWorkspaceLaunchConfigurationArguments: NSArray.arrayWithArray_(arguments_strings)
+          })
+
+        return workspace.launchApplicationAtURL_options_configuration_error_(
+          bundleUrl,
+          AppKit.NSWorkspaceLaunchAllowingClassicStartup,
+          arguments,
+          None)
 
    @staticmethod
    def terminateAppByBundleId(bundleID):
@@ -405,7 +431,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
       eventButtonUp = getattr(Quartz,
                               'kCGEvent%sUp' % mouseButtons[mouseButton])
       eventButtonDragged = getattr(Quartz,
-                              'kCGEvent%sDragged' % mouseButtons[mouseButton])   
+                              'kCGEvent%sDragged' % mouseButtons[mouseButton])
 
       # Press the button
       buttonDown = Quartz.CGEventCreateMouseEvent(None,
@@ -428,9 +454,9 @@ class BaseAXUIElement(_a11y.AXUIElement):
                                                 mouseButton)
          # Set modflags on the button dragged:
          Quartz.CGEventSetFlags(buttonDragged, modFlags)
-    
-        
-          
+
+
+
          buttonUp = Quartz.CGEventCreateMouseEvent(None,
                                                 eventButtonUp,
                                                 dest_coord,
@@ -883,18 +909,18 @@ class NativeUIElement(BaseAXUIElement):
                       interval to send event of btn down, drag and up
           Returns: None
       '''
-          
+
       modFlags = 0
       self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags, dest_coord = dest_coord)
       self._postQueuedEvents(interval = interval)
-          
+
    def clickMouseButtonLeft(self, coord, interval=None):
       ''' Click the left mouse button without modifiers pressed
 
           Parameters: coordinates to click on screen (tuple (x, y))
           Returns: None
       '''
-          
+
       modFlags = 0
       self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags)
       if interval:

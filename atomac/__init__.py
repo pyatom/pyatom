@@ -15,8 +15,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # St, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from _a11y import Error, ErrorAPIDisabled, ErrorInvalidUIElement
-from _a11y import ErrorCannotComplete, ErrorUnsupported
+from _a11y import Error, ErrorAPIDisabled, ErrorInvalidUIElement, ErrorCannotComplete, ErrorUnsupported, ErrorNotImplemented
 from AXClasses import NativeUIElement
 from Clipboard import Clipboard
 from version import __version__
