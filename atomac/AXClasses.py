@@ -386,13 +386,28 @@ class BaseAXUIElement(_a11y.AXUIElement):
       self._postQueuedEvents()
       return modFlags
 
+   def _isSingleCharacter(self, keychr):
+      ''' Checks whether given keyboard character is a single character.
+
+          Parameters: key character which will be checked.
+          Returns: True when given key character is a single character.
+      '''
+      if not keychr:
+         return False
+      # Regular character case.
+      if len(keychr) == 1:
+         return True
+      # Tagged character case.
+      return keychr.count('<') == 1 and keychr.count('>') == 1 and \
+             keychr[0] == '<' and keychr[-1] == '>'
+
    def _sendKeyWithModifiers(self, keychr, modifiers, globally=False):
       ''' Send one character with the given modifiers pressed
 
           Parameters: key character, list of modifiers, global or app specific
           Returns: None or raise ValueError exception
       '''
-      if (len(keychr) > 1):
+      if (not self._isSingleCharacter(keychr)):
          raise ValueError('Please provide only one character to send')
 
       if (not hasattr(self, 'keyboard')):
