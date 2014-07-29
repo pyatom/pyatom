@@ -40,8 +40,10 @@ class KeyboardOp:
     return_val=KeyCombo()
     if keyval == "command":
       keyval="command_l"
-    elif keyval == "option":
+    elif keyval == "option" or keyval == "alt" or keyval == "alt_l":
       keyval="option_l"
+    elif keyval == "alt_r":
+      keyval="option_r"
     elif keyval == "control":
       keyval="control_l"
     elif keyval == "shift":
