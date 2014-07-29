@@ -66,6 +66,8 @@ class KeyboardOp:
       keyval="page_up"
     elif keyval == "pageup":
       keyval="page_up"
+    elif keyval == "esc":
+      keyval="escape"
     key="<%s>" % keyval
     # This will identify Modifiers
     if key in ["<command_l>", "<command_r>",

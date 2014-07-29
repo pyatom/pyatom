@@ -18,6 +18,7 @@
 # Special keys
 TAB            = '<tab>'
 RETURN         = '<return>'
+SPACE          = '<space>'
 ESCAPE         = '<escape>'
 CAPS_LOCK      = '<capslock>'
 DELETE         = '<delete>'
@@ -167,6 +168,7 @@ US_keyboard = {
                  '\\': 42,
                  '|':  42,        # Pipe
                  TAB:  48,        # Tab: Shift-Tab sent for Tab
+                 SPACE: 49,
                  ' ':  49,        # Space
 
                  # Characters that on the US keyboard require use with Shift
@@ -202,6 +204,7 @@ specialKeys = {
                  RETURN:           36,
                  DELETE:           117,
                  TAB:              48,
+                 SPACE:            49,
                  ESCAPE:           53,
                  CAPS_LOCK:        57,
                  NUM_LOCK:         71,
