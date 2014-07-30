@@ -386,13 +386,28 @@ class BaseAXUIElement(_a11y.AXUIElement):
       self._postQueuedEvents()
       return modFlags
 
+   def _isSingleCharacter(self, keychr):
+      ''' Checks whether given keyboard character is a single character.
+
+          Parameters: key character which will be checked.
+          Returns: True when given key character is a single character.
+      '''
+      if not keychr:
+         return False
+      # Regular character case.
+      if len(keychr) == 1:
+         return True
+      # Tagged character case.
+      return keychr.count('<') == 1 and keychr.count('>') == 1 and \
+             keychr[0] == '<' and keychr[-1] == '>'
+
    def _sendKeyWithModifiers(self, keychr, modifiers, globally=False):
       ''' Send one character with the given modifiers pressed
 
           Parameters: key character, list of modifiers, global or app specific
           Returns: None or raise ValueError exception
       '''
-      if (len(keychr) > 1):
+      if (not self._isSingleCharacter(keychr)):
          raise ValueError('Please provide only one character to send')
 
       if (not hasattr(self, 'keyboard')):
@@ -914,6 +929,20 @@ class NativeUIElement(BaseAXUIElement):
       self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags, dest_coord = dest_coord)
       self._postQueuedEvents(interval = interval)
 
+   def doubleClickDragMouseButtonLeft(self, coord, dest_coord, interval = 0.5):
+      ''' Double-click and drag the left mouse button without modifiers pressed
+
+          Parameters: coordinates to double-click on screen (tuple (x, y))
+                      dest coordinates to drag to (tuple (x, y))
+                      interval to send event of btn down, drag and up
+          Returns: None
+      '''
+      modFlags = 0
+      self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags, dest_coord = dest_coord)
+      self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags, dest_coord = dest_coord,
+                             clickCount=2)
+      self._postQueuedEvents(interval = interval)
+
    def clickMouseButtonLeft(self, coord, interval=None):
       ''' Click the left mouse button without modifiers pressed
 
@@ -981,6 +1010,19 @@ class NativeUIElement(BaseAXUIElement):
       # click
       self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags,
                              clickCount=2)
+      self._postQueuedEvents()
+
+   def doubleMouseButtonLeftWithMods(self, coord, modifiers):
+      ''' Click the left mouse button with modifiers pressed
+
+          Parameters: coordinates to click; modifiers (list)
+          Returns: None
+      '''
+      modFlags = self._pressModifiers(modifiers)
+      self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags)
+      self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags,
+                             clickCount=2)
+      self._releaseModifiers(modifiers)
       self._postQueuedEvents()
 
    def tripleClickMouse(self, coord):
@@ -1156,6 +1198,14 @@ class NativeUIElement(BaseAXUIElement):
    def staticTextsR(self, match=None):
       '''Return a list of statictexts with an optional match parameter'''
       return self._convenienceMatchR('AXStaticText', 'AXValue', match)
+
+   def genericElements(self, match=None):
+      '''Return a list of genericelements with an optional match parameter'''
+      return self._convenienceMatch('AXGenericElement', 'AXValue', match)
+
+   def genericElementsR(self, match=None):
+      '''Return a list of genericelements with an optional match parameter'''
+      return self._convenienceMatchR('AXGenericElement', 'AXValue', match)
 
    def groups(self, match=None):
       '''Return a list of groups with an optional match parameter'''
