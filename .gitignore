@@ -18,3 +18,5 @@ doc/_build/
 .DS_Store
 pip-log.txt
 *~
+.idea
+atomac/scripts
