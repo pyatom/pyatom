@@ -3,7 +3,9 @@
 # This file is part of ATOMac.
 
 #@author: Nagappan Alagappan <nagappan@gmail.com>
-#@copyright: Copyright (c) 2009-12 Nagappan Alagappan
+#@copyright: Copyright (c) 2009-14 Nagappan Alagappan
+#@author: Sigbjørn Vik <sigbjorn@opera.com>
+#@Copyright (C) 2013-14 Opera Software ASA (generatemouseevent API).
 #http://ldtp.freedesktop.org
 
 # ATOMac is free software; you can redistribute it and/or modify
@@ -20,8 +22,49 @@
 # St, Fifth Floor, Boston, MA 02110-1301 USA.
 """Mouse class."""
 
+import time
+from Quartz import CGEventCreateMouseEvent,\
+                  CGEventPost,\
+                  kCGHIDEventTap,\
+                  CGEventSetIntegerValueField,\
+                  kCGMouseEventClickState,\
+                  CGEventGetLocation,\
+                  CGEventCreate
+from Quartz import kCGEventMouseMoved as move
+from Quartz import kCGEventLeftMouseDown as press_left
+from Quartz import kCGEventLeftMouseUp as release_left
+from Quartz import kCGEventLeftMouseDragged as drag_left
+from Quartz import kCGEventRightMouseDown as press_right
+from Quartz import kCGEventRightMouseUp as release_right
+from Quartz import kCGEventRightMouseDragged as drag_right
+from Quartz import kCGEventOtherMouseDown as press_other
+from Quartz import kCGEventOtherMouseUp as release_other
+from Quartz import kCGEventOtherMouseDragged as drag_other
+
+from Quartz import kCGMouseButtonLeft as left
+from Quartz import kCGMouseButtonRight as right
+from Quartz import kCGMouseButtonCenter as centre
+
 from utils import Utils
 from server_exception import LdtpServerException
+
+single_click = 1
+double_click = 2
+triple_click = 3
+
+drag_default_button = 100
+
+# Global value to remember if any button should be down during moves
+drag_button_remembered = None
+
+mouse_click_override = {'single_click': single_click, 'double_click': double_click,
+                        'triple_click': triple_click, 'move': move,
+                        'press_left': press_left, 'release_left': release_left,
+                        'drag_left': drag_left, 'press_right': press_right,
+                        'release_right': release_right, 'drag_right': drag_right,
+                        'press_other': press_other, 'release_other': release_other,
+                        'drag_other': drag_other, 'left': left, 'right': right,
+                        'centre': centre, 'drag_default_button': drag_default_button}
 
 class Mouse(Utils):
     def mouseleftclick(self, window_name, object_name):
@@ -70,7 +113,8 @@ class Mouse(Utils):
         object_handle.clickMouseButtonRight((x + width / 2, y + height / 2))
         return 1
 
-    def generatemouseevent(self, x, y, eventType = "b1c"):
+    def generatemouseevent(self, x, y, eventType="b1c",
+                           drag_button_override='drag_default_button'):
         """
         Generate mouse event on x, y co-ordinates.
         
@@ -79,33 +123,81 @@ class Mouse(Utils):
         @param y: Y co-ordinate
         @type y: int
         @param eventType: Mouse click type
-        @type eventType: string
+        @type eventType: str
+        @param drag_button_override: Any drag_xxx value
+                Only relevant for movements, i.e. |type| = "abs" or "rel"
+                Quartz is not fully compatible with windows, so for drags
+                the drag button must be explicitly defined. generatemouseevent
+                will remember the last button pressed by default, and drag
+                that button, use this argument to override that.
+        @type drag_button_override: str
 
         @return: 1 on success.
         @rtype: integer
         """
-        if eventType == "b1c":
-            try:
-                window=self._get_front_most_window()
-            except (IndexError, ):
-                window=self._get_any_window()
-            window.clickMouseButtonLeft((x, y))
-            return 1
-        elif eventType == "b3c":
-            try:
-                window=self._get_front_most_window()
-            except (IndexError, ):
-                window=self._get_any_window()
-            window.clickMouseButtonRight((x, y))
-            return 1
+        if drag_button_override not in mouse_click_override:
+            raise ValueError('Unsupported drag_button_override type: %s' % \
+                             drag_button_override)
+        global drag_button_remembered
+        point = (x, y)
+        button = centre  # Only matters for "other" buttons
+        click_type = None
+        if eventType == "abs" or eventType == "rel":
+            if drag_button_override is not 'drag_default_button':
+                events = [mouse_click_override[drag_button_override]]
+            elif drag_button_remembered:
+                events = [drag_button_remembered]
+            else:
+                events = [move]
+            if eventType == "rel":
+                point = CGEventGetLocation(CGEventCreate(None))
+                point.x += x
+                point.y += y
+        elif eventType == "b1p":
+            events = [press_left]
+            drag_button_remembered = drag_left
+        elif eventType == "b1r":
+            events = [release_left]
+            drag_button_remembered = None
+        elif eventType == "b1c":
+            events = [press_left, release_left]
         elif eventType == "b1d":
-            try:
-                window=self._get_front_most_window()
-            except (IndexError, ):
-                window=self._get_any_window()
-            window.doubleClickMouse((x, y))
-            return 1
-        raise LdtpServerException("Not implemented")
+            events = [press_left, release_left]
+            click_type = double_click
+        elif eventType == "b2p":
+            events = [press_other]
+            drag_button_remembered = drag_other
+        elif eventType == "b2r":
+            events = [release_other]
+            drag_button_remembered = None
+        elif eventType == "b2c":
+            events = [press_other, release_other]
+        elif eventType == "b2d":
+            events = [press_other, release_other]
+            click_type = double_click
+        elif eventType == "b3p":
+            events = [press_right]
+            drag_button_remembered = drag_right
+        elif eventType == "b3r":
+            events = [release_right]
+            drag_button_remembered = None
+        elif eventType == "b3c":
+            events = [press_right, release_right]
+        elif eventType == "b3d":
+            events = [press_right, release_right]
+            click_type = double_click
+        else:
+            raise LdtpServerException(u"Mouse event '%s' not implemented" % eventType)
+
+        for event in events:
+            CG_event = CGEventCreateMouseEvent(None, event, point, button)
+            if click_type:
+                CGEventSetIntegerValueField(
+                    CG_event, kCGMouseEventClickState, click_type)
+            CGEventPost(kCGHIDEventTap, CG_event)
+            # Give the event time to happen
+            time.sleep(0.01)
+        return 1
 
     def mousemove(self, window_name, object_name):
         """

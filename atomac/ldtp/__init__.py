@@ -3,7 +3,7 @@
 # This file is part of ATOMac.
 
 #@author: Nagappan Alagappan <nagappan@gmail.com>                                                                                                      
-#@copyright: Copyright (c) 2009-13 Nagappan Alagappan                                                                                                  
+#@copyright: Copyright (c) 2009-14 Nagappan Alagappan
 
 #http://ldtp.freedesktop.org                                                                                                                           
 
@@ -452,6 +452,9 @@ def getcellsize(window_name, object_name, row_index, column = 0):
 def getobjectnameatcoords(waitTime = 0):
     # FIXME: Yet to implement in Mac, works on Windows/Linux
     return _remote_getobjectnameatcoords(waitTime)
+def generatemouseevent(x, y, event_type="b1c",
+                       drag_button_override='drag_default_button'):
+    return _remote_generatemouseevent(x, y, event_type, drag_button_override)
 
 def onwindowcreate(window_name, fn_name, *args):
     """
