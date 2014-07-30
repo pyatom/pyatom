@@ -3,7 +3,7 @@
 # This file is part of ATOMac.
 
 #@author: Nagappan Alagappan <nagappan@gmail.com>                                                                                                      
-#@copyright: Copyright (c) 2009-13 Nagappan Alagappan                                                                                                  
+#@copyright: Copyright (c) 2009-14 Nagappan Alagappan
 
 #http://ldtp.freedesktop.org                                                                                                                           
 
@@ -447,6 +447,10 @@ class ooldtp:
     def getobjectnameatcoords(self, waitTime = 0):
         # FIXME: Yet to implement in Mac, works on Windows/Linux
         return self._remote_getobjectnameatcoords(waitTime)
+    def generatemouseevent(self, x, y, event_type="b1c",
+                           drag_button_override='drag_default_button'):
+        return self._remote_generatemouseevent(x, y, event_type,
+                                               drag_button_override)
 
     def onwindowcreate(self, window_name, fn_name, *args):
         """
