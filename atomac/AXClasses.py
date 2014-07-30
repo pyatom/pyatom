@@ -1199,6 +1199,14 @@ class NativeUIElement(BaseAXUIElement):
       '''Return a list of statictexts with an optional match parameter'''
       return self._convenienceMatchR('AXStaticText', 'AXValue', match)
 
+   def genericElements(self, match=None):
+      '''Return a list of genericelements with an optional match parameter'''
+      return self._convenienceMatch('AXGenericElement', 'AXValue', match)
+
+   def genericElementsR(self, match=None):
+      '''Return a list of genericelements with an optional match parameter'''
+      return self._convenienceMatchR('AXGenericElement', 'AXValue', match)
+
    def groups(self, match=None):
       '''Return a list of groups with an optional match parameter'''
       return self._convenienceMatch('AXGroup', 'AXRoleDescription', match)
