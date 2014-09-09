@@ -44,8 +44,10 @@ class KeyboardOp:
       keyval="option_l"
     elif keyval == "alt_r":
       keyval="option_r"
-    elif keyval == "control":
+    elif keyval == "control" or keyval == "ctrl" or keyval == "ctrl_l":
       keyval="control_l"
+    elif keyval == "ctrl_r":
+      keyval="control_r"
     elif keyval == "shift":
       keyval="shift_l"
     elif keyval == "left":
