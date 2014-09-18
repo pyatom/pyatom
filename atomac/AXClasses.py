@@ -250,11 +250,15 @@ class BaseAXUIElement(_a11y.AXUIElement):
          self.keyboard = AXKeyboard.loadKeyboard()
 
       if (keychr in self.keyboard['upperSymbols'] and not modFlags):
-         self._sendKeyWithModifiers(keychr, [AXKeyCodeConstants.SHIFT])
+         self._sendKeyWithModifiers(keychr,
+                                    [AXKeyCodeConstants.SHIFT],
+                                    globally)
          return
 
       if (keychr.isupper() and not modFlags):
-         self._sendKeyWithModifiers(keychr.lower(), [AXKeyCodeConstants.SHIFT])
+         self._sendKeyWithModifiers(keychr.lower(),
+                                    [AXKeyCodeConstants.SHIFT],
+                                    globally)
          return
 
       if (keychr not in self.keyboard):
@@ -888,6 +892,16 @@ class NativeUIElement(BaseAXUIElement):
    def sendKey(self, keychr):
       '''sendKey - send one character with no modifiers'''
       return self._sendKey(keychr)
+
+   def sendGlobalKey(self, keychr):
+      '''Sends one character without modifiers to the system.
+
+         It will not send an event directly to the application, system will
+         dispatch it to the window which has keyboard focus.
+
+         Parameters: keychr - Single keyboard character which will be sent.
+      '''
+      return self._sendKey(keychr, globally=True)
 
    def sendKeys(self, keystr):
       '''sendKeys - send a series of characters with no modifiers'''

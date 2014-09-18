@@ -21,6 +21,7 @@
 """KeyboardOp class."""
 
 import time
+from atomac.AXClasses import NativeUIElement
 from atomac.AXKeyCodeConstants import *
 from server_exception import LdtpServerException
 
@@ -143,9 +144,18 @@ class KeyboardOp:
     return key_vals
 
 class KeyComboAction:
-    def __init__(self, window, data):
+    """Used for sending keyboard events to the system."""
+
+    def __init__(self, data):
+        """
+        @param data: data to type
+        @type data: string
+        """
         self._data=data
-        self._window=window
+        # Create dummy window, it has code for creating and queuing events.
+        # We will send events 'globally' to the system so dummy window will
+        # not receive the event.
+        self._dummy_window=NativeUIElement()
         _keyOp=KeyboardOp()
         self._keyvalId=_keyOp.get_keyval_id(data)
         if not self._keyvalId:
@@ -155,9 +165,10 @@ class KeyComboAction:
     def _doCombo(self):
         for key_val in self._keyvalId:
             if key_val.modifiers:
-              self._window.sendKeyWithModifiers(key_val.value, key_val.modVal)
+              self._dummy_window.sendGlobalKeyWithModifiers(key_val.value,
+                                                            key_val.modVal)
             else:
-              self._window.sendKey(key_val.value)
+              self._dummy_window.sendGlobalKey(key_val.value)
             time.sleep(0.01)
 
 class KeyPressAction:
