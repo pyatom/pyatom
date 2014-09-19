@@ -36,8 +36,12 @@ class Text(Utils):
         
         @param data: data to type.
         @type data: string
+
+        @return: 1 on success.
+        @rtype: integer
         """
         KeyComboAction(data)
+        return 1
 
     def keypress(self, data):
         """
