@@ -691,7 +691,8 @@ class Core(ComboBox, Menu, Mouse, PageTabList, Text, Table, Value, Generic):
                 handle, name, app=self._get_window_handle(window_name, False)
             else:
                 handle=self._get_object_handle(window_name, object_name,
-                                               wait_for_object=False)
+                                               wait_for_object=False,
+                                               force_remap=True)
             # If window and/or object exist, exception will not be thrown
             # blindly return 1
             return 1

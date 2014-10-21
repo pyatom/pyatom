@@ -539,10 +539,11 @@ class Utils(object):
         return window_obj
 
     def _get_object_handle(self, window_name, obj_name, obj_type=None,
-                           wait_for_object=True):
+                           wait_for_object=True, force_remap=False):
         try:
             return self._internal_get_object_handle(window_name, obj_name,
-                                                    obj_type, wait_for_object)
+                                                    obj_type, wait_for_object,
+                                                    force_remap)
         except atomac._a11y.ErrorInvalidUIElement:
             # During the test, when the window closed and reopened
             # ErrorInvalidUIElement exception will be thrown
@@ -552,10 +553,10 @@ class Utils(object):
                                                     obj_type, wait_for_object)
 
     def _internal_get_object_handle(self, window_name, obj_name, obj_type=None,
-                                    wait_for_object=True):
+                                    wait_for_object=True, force_remap=False):
         try:
             obj=self._get_object_map(window_name, obj_name, obj_type,
-                                     wait_for_object)
+                                     wait_for_object, force_remap)
             # Object might not exist, just check whether it exist
             object_handle=obj["obj"]
             # Look for Window's role, on stale windows this will
