@@ -99,6 +99,8 @@ static PyObject *AXUIElement_setNotification(atomac_AXUIElement *self,
                                              PyObject *kwargs);
 static PyObject *AXUIElement_setTimeout(atomac_AXUIElement *self,
                                         PyObject *args);
+static PyObject *AXUIElement_getElementAtPosition(atomac_AXUIElement *self,
+                                                   PyObject *args);
 static PyMethodDef AXUIElement_methods[];
 static PyTypeObject atomac_AXUIElementType;
 static PyObject *atomac_axenabled(PyObject *self, PyObject *args);
@@ -1484,6 +1486,61 @@ static PyObject *AXUIElement_setTimeout(atomac_AXUIElement *self, // IN: Python
    Py_RETURN_NONE;
 }
 
+PyDoc_STRVAR(getelementatposition_doc,
+             "_getElementAtPosition(x (float), y (float))\n\n"
+             "Returns the AXUIElement at the given (x, y) coordinates.");
+
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * AXUIElement_getElementAtPosition --
+ *
+ *      Returns the AXUIElement at the given (x, y) coordinates.
+ *
+ * Parameters:
+ *      Two floats corresponding to x and y respectively.
+ *
+ * Result:
+ *      Python AXUIElement underneath given coordinates and NULL with an exception.
+ *-----------------------------------------------------------------------------
+ */
+
+ static PyObject *AXUIElement_getElementAtPosition(atomac_AXUIElement *self, //IN: Python
+                                                                           // self object
+                                                   PyObject *args)         // IN: Python
+                                                                           // arguments
+                                                                           // tuple
+{
+   AXUIElementRef res, element = NULL;
+   AXError err = kAXErrorSuccess;
+   float x, y;
+   
+   if (!PyArg_ParseTuple(args, "ff", &x, &y)) {
+      return NULL;
+   }
+
+   /* Extract the AXUIElementRef */
+   element = self->ref;
+
+   if (NULL == element) {
+      PyErr_SetString(atomacErrorUnsupported,
+                      "Operation not supported on null element references");
+      return NULL;
+   }
+
+   err = AXUIElementCopyElementAtPosition(element, x, y, &res);
+
+   // The only exception we really care about
+   if (kAXErrorIllegalArgument == err) {
+      PyErr_SetString(PyExc_ValueError,
+                      "Arguments must be two floats.");
+      return NULL;
+   }
+
+   Py_INCREF(self->ob_type);
+   return _newAXUIElementWithRef(res, self->ob_type);
+
+}
 
 /*
  *-----------------------------------------------------------------------------
@@ -1516,6 +1573,8 @@ AXUIElement_methods[] = {
       getpsnforpid_doc},
    {"_setTimeout", (PyCFunction)AXUIElement_setTimeout, METH_VARARGS,
       settimeout_doc},
+   {"_getElementAtPosition", (PyCFunction)AXUIElement_getElementAtPosition, METH_VARARGS,
+      getelementatposition_doc},
    {NULL} // Sentinel
 };
 

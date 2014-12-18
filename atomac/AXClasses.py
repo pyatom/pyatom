@@ -20,7 +20,6 @@ import AppKit
 import Quartz
 import time
 
-from AppKit import NSURL, NSString, NSDictionary, NSArray
 from PyObjCTools import AppHelper
 from collections import deque
 
@@ -106,28 +105,12 @@ class BaseAXUIElement(_a11y.AXUIElement):
                return ref
          except (_a11y.ErrorUnsupported,
                  _a11y.ErrorCannotComplete,
-                 _a11y.ErrorAPIDisabled,
-                 _a11y.ErrorNotImplemented):
+                 _a11y.ErrorAPIDisabled):
             # Some applications do not have an explicit GUI
             # and so will not have an AXFrontmost attribute
             # Trying to read attributes from Google Chrome Helper returns
             # ErrorAPIDisabled for some reason - opened radar bug 12837995
             pass
-      raise ValueError('No GUI application found.')
-
-   @classmethod
-   def getAnyAppWithWindow(cls):
-      '''getAnyAppWithApp - Get a randow app that has windows.
-
-         Raise a ValueError exception if no GUI applications are found.
-      '''
-      # Refresh the runningApplications list
-      apps = cls._getRunningApps()
-      for app in apps:
-         pid = app.processIdentifier()
-         ref = cls.getAppRefByPid(pid)
-         if hasattr(ref, 'windows') and len(ref.windows()) > 0:
-            return ref
       raise ValueError('No GUI application found.')
 
    @classmethod
@@ -150,14 +133,15 @@ class BaseAXUIElement(_a11y.AXUIElement):
       '''launchByBundleId - launch the application with the specified bundle
          ID
       '''
-      # NSWorkspaceLaunchAllowingClassicStartup does nothing on any modern system that doesn't have
+      # This constant does nothing on any modern system that doesn't have
       # the classic environment installed. Encountered a bug when passing 0
       # for no options on 10.6 PyObjC.
+      NSWorkspaceLaunchAllowingClassicStartup = 0x00020000
       ws = AppKit.NSWorkspace.sharedWorkspace()
       # Sorry about the length of the following line
       r=ws.launchAppWithBundleIdentifier_options_additionalEventParamDescriptor_launchIdentifier_(
          bundleID,
-         AppKit.NSWorkspaceLaunchAllowingClassicStartup,
+         NSWorkspaceLaunchAllowingClassicStartup,
          AppKit.NSAppleEventDescriptor.nullDescriptor(),
          None)
       # On 10.6, this returns a tuple - first element bool result, second is
@@ -166,22 +150,12 @@ class BaseAXUIElement(_a11y.AXUIElement):
          raise RuntimeError('Error launching specified application.')
 
    @staticmethod
-   def launchAppByBundlePath(bundlePath, arguments=[]):
+   def launchAppByBundlePath(bundlePath):
         ''' launchAppByBundlePath - Launch app with a given bundle path
             Return True if succeed
         '''
-        bundleUrl = NSURL.URLWithString_(bundlePath)
-        workspace = AppKit.NSWorkspace.sharedWorkspace()
-        arguments_strings = map(lambda a: NSString.stringWithString_(str(a)), arguments)
-        arguments = NSDictionary.dictionaryWithDictionary_({
-            AppKit.NSWorkspaceLaunchConfigurationArguments: NSArray.arrayWithArray_(arguments_strings)
-          })
-
-        return workspace.launchApplicationAtURL_options_configuration_error_(
-          bundleUrl,
-          AppKit.NSWorkspaceLaunchAllowingClassicStartup,
-          arguments,
-          None)
+        ws = AppKit.NSWorkspace.sharedWorkspace()
+        return ws.launchApplication_(bundlePath)
 
    @staticmethod
    def terminateAppByBundleId(bundleID):
@@ -249,16 +223,12 @@ class BaseAXUIElement(_a11y.AXUIElement):
       if (not hasattr(self, 'keyboard')):
          self.keyboard = AXKeyboard.loadKeyboard()
 
-      if (keychr in self.keyboard['upperSymbols'] and not modFlags):
-         self._sendKeyWithModifiers(keychr,
-                                    [AXKeyCodeConstants.SHIFT],
-                                    globally)
+      if (keychr in self.keyboard['upperSymbols']):
+         self._sendKeyWithModifiers(keychr, [AXKeyCodeConstants.SHIFT]);
          return
 
-      if (keychr.isupper() and not modFlags):
-         self._sendKeyWithModifiers(keychr.lower(),
-                                    [AXKeyCodeConstants.SHIFT],
-                                    globally)
+      if (keychr.isupper()):
+         self._sendKeyWithModifiers(keychr.lower(), [AXKeyCodeConstants.SHIFT])
          return
 
       if (keychr not in self.keyboard):
@@ -337,7 +307,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
          if (nextMod not in self.keyboard):
             errStr = 'Key %s not found in keyboard layout'
             self._clearEventQueue()
-            raise ValueError(errStr % self.keyboard[nextMod])
+            raise ValueError(errStr % self.keyboar[nextMod])
          modEvent = Quartz.CGEventCreateKeyboardEvent(Quartz.CGEventSourceCreate(0),
                                                       self.keyboard[nextMod],
                                                       pressed)
@@ -390,28 +360,13 @@ class BaseAXUIElement(_a11y.AXUIElement):
       self._postQueuedEvents()
       return modFlags
 
-   def _isSingleCharacter(self, keychr):
-      ''' Checks whether given keyboard character is a single character.
-
-          Parameters: key character which will be checked.
-          Returns: True when given key character is a single character.
-      '''
-      if not keychr:
-         return False
-      # Regular character case.
-      if len(keychr) == 1:
-         return True
-      # Tagged character case.
-      return keychr.count('<') == 1 and keychr.count('>') == 1 and \
-             keychr[0] == '<' and keychr[-1] == '>'
-
    def _sendKeyWithModifiers(self, keychr, modifiers, globally=False):
       ''' Send one character with the given modifiers pressed
 
           Parameters: key character, list of modifiers, global or app specific
           Returns: None or raise ValueError exception
       '''
-      if (not self._isSingleCharacter(keychr)):
+      if (len(keychr) > 1):
          raise ValueError('Please provide only one character to send')
 
       if (not hasattr(self, 'keyboard')):
@@ -428,7 +383,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
       # Post the queued keypresses:
       self._postQueuedEvents()
 
-   def _queueMouseButton(self, coord, mouseButton, modFlags, clickCount=1, dest_coord = None):
+   def _queueMouseButton(self, coord, mouseButton, modFlags, clickCount=1):
       ''' Private method to handle generic mouse button clicking
 
           Parameters: coord (x, y) to click, mouseButton (e.g.,
@@ -449,8 +404,6 @@ class BaseAXUIElement(_a11y.AXUIElement):
                                 'kCGEvent%sDown' % mouseButtons[mouseButton])
       eventButtonUp = getattr(Quartz,
                               'kCGEvent%sUp' % mouseButtons[mouseButton])
-      eventButtonDragged = getattr(Quartz,
-                              'kCGEvent%sDragged' % mouseButtons[mouseButton])
 
       # Press the button
       buttonDown = Quartz.CGEventCreateMouseEvent(None,
@@ -465,24 +418,8 @@ class BaseAXUIElement(_a11y.AXUIElement):
                                          Quartz.kCGMouseEventClickState,
                                          int(clickCount))
 
-      if dest_coord:
-         #Drag and release the button
-         buttonDragged = Quartz.CGEventCreateMouseEvent(None,
-                                                eventButtonDragged,
-                                                dest_coord,
-                                                mouseButton)
-         # Set modflags on the button dragged:
-         Quartz.CGEventSetFlags(buttonDragged, modFlags)
-
-
-
-         buttonUp = Quartz.CGEventCreateMouseEvent(None,
-                                                eventButtonUp,
-                                                dest_coord,
-                                                mouseButton)
-      else:
-          # Release the button
-         buttonUp = Quartz.CGEventCreateMouseEvent(None,
+      # Release the button
+      buttonUp = Quartz.CGEventCreateMouseEvent(None,
                                                 eventButtonUp,
                                                 coord,
                                                 mouseButton)
@@ -496,9 +433,6 @@ class BaseAXUIElement(_a11y.AXUIElement):
       # Queue the events
       self._queueEvent(Quartz.CGEventPost,
                        (Quartz.kCGSessionEventTap, buttonDown))
-      if dest_coord:
-          self._queueEvent(Quartz.CGEventPost,
-                           (Quartz.kCGHIDEventTap, buttonDragged))
       self._queueEvent(Quartz.CGEventPost,
                        (Quartz.kCGSessionEventTap, buttonUp))
 
@@ -570,9 +504,8 @@ class BaseAXUIElement(_a11y.AXUIElement):
          children = self.AXChildren
       except _a11y.Error:
          return
-      if children:
-        for child in children:
-           yield child
+      for child in children:
+         yield child
 
    def _generateChildrenR(self, target=None):
       '''_generateChildrenR - generator which recursively yields all AXChildren
@@ -841,6 +774,13 @@ class NativeUIElement(BaseAXUIElement):
       '''
       return self._findAllR(**kwargs)
 
+   def getElementAtPosition(self, coord):
+      '''Returns the AXUIElement at the given coordinates.
+
+         If self is behind other windows, this function will return self.
+      '''
+      return self._getElementAtPosition(float(coord[0]), float(coord[1]))
+
    def activate(self):
       '''activate - activate the application (bringing menus and windows
          forward)
@@ -893,16 +833,6 @@ class NativeUIElement(BaseAXUIElement):
       '''sendKey - send one character with no modifiers'''
       return self._sendKey(keychr)
 
-   def sendGlobalKey(self, keychr):
-      '''Sends one character without modifiers to the system.
-
-         It will not send an event directly to the application, system will
-         dispatch it to the window which has keyboard focus.
-
-         Parameters: keychr - Single keyboard character which will be sent.
-      '''
-      return self._sendKey(keychr, globally=True)
-
    def sendKeys(self, keystr):
       '''sendKeys - send a series of characters with no modifiers'''
       return self._sendKeys(keystr)
@@ -930,46 +860,15 @@ class NativeUIElement(BaseAXUIElement):
       '''
       return self._sendKeyWithModifiers(keychr, modifiers, True)
 
-   def dragMouseButtonLeft(self, coord, dest_coord, interval = 0.5):
-      ''' Drag the left mouse button without modifiers pressed
-
-          Parameters: coordinates to click on screen (tuple (x, y))
-                      dest coordinates to drag to (tuple (x, y))
-                      interval to send event of btn down, drag and up
-          Returns: None
-      '''
-
-      modFlags = 0
-      self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags, dest_coord = dest_coord)
-      self._postQueuedEvents(interval = interval)
-
-   def doubleClickDragMouseButtonLeft(self, coord, dest_coord, interval = 0.5):
-      ''' Double-click and drag the left mouse button without modifiers pressed
-
-          Parameters: coordinates to double-click on screen (tuple (x, y))
-                      dest coordinates to drag to (tuple (x, y))
-                      interval to send event of btn down, drag and up
-          Returns: None
-      '''
-      modFlags = 0
-      self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags, dest_coord = dest_coord)
-      self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags, dest_coord = dest_coord,
-                             clickCount=2)
-      self._postQueuedEvents(interval = interval)
-
-   def clickMouseButtonLeft(self, coord, interval=None):
+   def clickMouseButtonLeft(self, coord):
       ''' Click the left mouse button without modifiers pressed
 
           Parameters: coordinates to click on screen (tuple (x, y))
           Returns: None
       '''
-
       modFlags = 0
       self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags)
-      if interval:
-          self._postQueuedEvents(interval=interval)
-      else:
-          self._postQueuedEvents()
+      self._postQueuedEvents()
 
    def clickMouseButtonRight(self, coord):
       ''' Click the right mouse button without modifiers pressed
@@ -981,7 +880,7 @@ class NativeUIElement(BaseAXUIElement):
       self._queueMouseButton(coord, Quartz.kCGMouseButtonRight, modFlags)
       self._postQueuedEvents()
 
-   def clickMouseButtonLeftWithMods(self, coord, modifiers, interval = None):
+   def clickMouseButtonLeftWithMods(self, coord, modifiers):
       ''' Click the left mouse button with modifiers pressed
 
           Parameters: coordinates to click; modifiers (list) (e.g. [SHIFT] or
@@ -992,10 +891,7 @@ class NativeUIElement(BaseAXUIElement):
       modFlags = self._pressModifiers(modifiers)
       self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags)
       self._releaseModifiers(modifiers)
-      if interval:
-         self._postQueuedEvents(interval=interval)
-      else:
-         self._postQueuedEvents()
+      self._postQueuedEvents()
 
    def clickMouseButtonRightWithMods(self, coord, modifiers):
       ''' Click the right mouse button with modifiers pressed
@@ -1024,19 +920,6 @@ class NativeUIElement(BaseAXUIElement):
       # click
       self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags,
                              clickCount=2)
-      self._postQueuedEvents()
-
-   def doubleMouseButtonLeftWithMods(self, coord, modifiers):
-      ''' Click the left mouse button with modifiers pressed
-
-          Parameters: coordinates to click; modifiers (list)
-          Returns: None
-      '''
-      modFlags = self._pressModifiers(modifiers)
-      self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags)
-      self._queueMouseButton(coord, Quartz.kCGMouseButtonLeft, modFlags,
-                             clickCount=2)
-      self._releaseModifiers(modifiers)
       self._postQueuedEvents()
 
    def tripleClickMouse(self, coord):
@@ -1213,14 +1096,6 @@ class NativeUIElement(BaseAXUIElement):
       '''Return a list of statictexts with an optional match parameter'''
       return self._convenienceMatchR('AXStaticText', 'AXValue', match)
 
-   def genericElements(self, match=None):
-      '''Return a list of genericelements with an optional match parameter'''
-      return self._convenienceMatch('AXGenericElement', 'AXValue', match)
-
-   def genericElementsR(self, match=None):
-      '''Return a list of genericelements with an optional match parameter'''
-      return self._convenienceMatchR('AXGenericElement', 'AXValue', match)
-
    def groups(self, match=None):
       '''Return a list of groups with an optional match parameter'''
       return self._convenienceMatch('AXGroup', 'AXRoleDescription', match)
@@ -1260,3 +1135,4 @@ class NativeUIElement(BaseAXUIElement):
    def slidersR(self, match=None):
       '''Return a list of sliders with an optional match parameter'''
       return self._convenienceMatchR('AXSlider', 'AXValue', match)
+
