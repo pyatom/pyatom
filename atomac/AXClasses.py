@@ -841,6 +841,13 @@ class NativeUIElement(BaseAXUIElement):
       '''
       return self._findAllR(**kwargs)
 
+   def getElementAtPosition(self, coord):
+      '''Returns the AXUIElement at the given coordinates.
+
+         If self is behind other windows, this function will return self.
+      '''
+      return self._getElementAtPosition(float(coord[0]), float(coord[1]))
+
    def activate(self):
       '''activate - activate the application (bringing menus and windows
          forward)
