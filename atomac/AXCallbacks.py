@@ -15,19 +15,19 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # St, Fifth Floor, Boston, MA 02110-1301 USA.
 
-def elemDisappearedCallback(retelem, obj, **kwargs):
-   ''' Callback for checking if a UI element is no longer onscreen
 
-       kwargs should contains some unique set of identifier (e.g. title /
-       value, role)
-       Returns:  Boolean
-   '''
-   return (not obj.findFirstR(**kwargs))
+def elemDisappearedCallback(retelem, obj, **kwargs):
+    """Callback for checking if a UI element is no longer onscreen.
+
+    kwargs should contains some unique set of identifier (e.g. title/value, role)
+    Returns:  Boolean
+    """
+    return not obj.findFirstR(**kwargs)
 
 
 def returnElemCallback(retelem):
-   ''' Callback for when a sheet appears
+    """Callback for when a sheet appears.
 
-       Returns: element returned by observer callback
-   '''
-   return retelem
+    Returns: element returned by observer callback
+    """
+    return retelem

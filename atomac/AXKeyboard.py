@@ -25,24 +25,23 @@ from AXKeyCodeConstants import *
 # there are different virtual key codes offered between the two sets.
 # Thus for now we offer only a generic modifier key set w/o L-R distinction.
 modKeyFlagConstants = {
-                         COMMAND:    Quartz.kCGEventFlagMaskCommand,
-                         SHIFT:      Quartz.kCGEventFlagMaskShift,
-                         OPTION:     Quartz.kCGEventFlagMaskAlternate,
-                         CONTROL:    Quartz.kCGEventFlagMaskControl,
-                      }
+    COMMAND: Quartz.kCGEventFlagMaskCommand,
+    SHIFT: Quartz.kCGEventFlagMaskShift,
+    OPTION: Quartz.kCGEventFlagMaskAlternate,
+    CONTROL: Quartz.kCGEventFlagMaskControl,
+}
 
 
 def loadKeyboard():
-   ''' Load a given keyboard mapping (of characters to virtual key codes)
+    """Load a given keyboard mapping (of characters to virtual key codes).
 
-       Default is US keyboard
-       Parameters: None (relies on the internationalization settings)
-       Returns: A dictionary representing the current keyboard mapping (of
-                characters to keycodes)
-   '''
-   # Currently assumes US keyboard
-   keyboardLayout = {}
-   keyboardLayout = DEFAULT_KEYBOARD
-   keyboardLayout.update(specialKeys)
+    Default is US keyboard
+    Parameters: None (relies on the internationalization settings)
+    Returns: A dictionary representing the current keyboard mapping (of
+             characters to keycodes)
+    """
+    # Currently assumes US keyboard
+    keyboard_layout = DEFAULT_KEYBOARD
+    keyboard_layout.update(specialKeys)
 
-   return keyboardLayout
+    return keyboard_layout
