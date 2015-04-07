@@ -17,29 +17,32 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # St, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from AppKit import NSWorkspace, NSUserDefaults, NSDictionary, NSMutableDictionary
+from AppKit import NSWorkspace, NSUserDefaults, NSDictionary
 from UserDict import UserDict
 from os import path
 
 __all__ = ["Prefs"]
 
+
 class Prefs(UserDict):
-    ''' NSUserDefaults proxy to read/write application preferences.
-        It has been conceived to prepare the preferences before a test launch the app.
-        Once a Prefs instance is created, it doesn't detect prefs changed elsewhere,
-        so for now you need to create the instance right before reading/writing a pref.
-        Defaults.plist with default values is expected to exist on the app bundle.
+    """NSUserDefaults proxy to read/write application preferences.
+    It has been conceived to prepare the preferences before a test launch the
+    app. Once a Prefs instance is created, it doesn't detect prefs changed
+    elsewhere, so for now you need to create the instance right before
+    reading/writing a pref.
+    Defaults.plist with default values is expected to exist on the app bundle.
 
-        p = Prefs('com.example.App')
-        coolStuff = p['CoolStuff']
-        p['CoolStuff'] = newCoolStuff
+    p = Prefs('com.example.App')
+    coolStuff = p['CoolStuff']
+    p['CoolStuff'] = newCoolStuff
+    """
 
-    '''
     def __init__(self, bundleID, bundlePath=None, defaultsPlistName='Defaults'):
-        ''' bundleId: the application bundle identifier
-            bundlePath: the full bundle path (useful to test a Debug build)
-            defaultsPlistName: the name of the plist that contains default values
-        '''
+        """
+        bundleId: the application bundle identifier
+        bundlePath: the full bundle path (useful to test a Debug build)
+        defaultsPlistName: the name of the plist that contains default values
+        """
         self.__bundleID = bundleID
         self.__bundlePath = bundlePath
         UserDict.__init__(self)
@@ -84,4 +87,3 @@ class Prefs(UserDict):
         self.data = mutableData
         prefs = NSUserDefaults.standardUserDefaults()
         prefs.setPersistentDomain_forName_(self.data, self.__bundleID)
-

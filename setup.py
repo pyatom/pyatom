@@ -17,49 +17,53 @@
 
 from setuptools import setup, Extension
 import os
-execfile('atomac/version.py') # set __version__ variable
+
+execfile('atomac/version.py')  # set __version__ variable
+
 
 def read(fname):
-   '''Returns the contents of the specified file located in the same dir as
-      the script
-   '''
-   return open(os.path.join(os.path.dirname(__file__), fname)).read()
+    """
+    Returns the contents of the specified file located in the same dir as
+    the script
+    """
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 
 source_files = [
-   'atomac/_a11y/a11ymodule.c',
-   'atomac/_a11y/conversion.c',
-   'atomac/_a11y/axlib.c',
+    'atomac/_a11y/a11ymodule.c',
+    'atomac/_a11y/conversion.c',
+    'atomac/_a11y/axlib.c',
 ]
 
 _a11y = Extension(
-   'atomac._a11y',
-   sources = source_files,
-   extra_link_args = [
-      '-framework', 'ApplicationServices',
-      '-framework', 'Carbon',
-   ],
+    'atomac._a11y',
+    sources=source_files,
+    extra_link_args=[
+        '-framework', 'ApplicationServices',
+        '-framework', 'Carbon',
+    ],
 )
 
-setup (
-   name = 'atomac',
-   version = __version__,
-   author = 'The ATOMac Team',
-   author_email = 'pyatom-dev@lists.pyatom.com',
-   url = 'http://pyatom.com',
-   description = ("Automated Testing on Mac - test GUI applications "
-                  "written in Cocoa by using Apple's Accessibility API"),
-   license = 'GPLv2',
-   long_description = read('README.rst'),
-   ext_modules = [_a11y],
-   packages = ['atomac', 'atomac.ldtpd', 'atomac.ldtp', 'atomac.ooldtp'],
-   classifiers = [
-      'Development Status :: 5 - Production/Stable',
-      'Environment :: MacOS X :: Cocoa',
-      'License :: OSI Approved :: GNU General Public License (GPL)',
-      'Topic :: Software Development :: Quality Assurance',
-      'Topic :: Software Development :: Testing',
-   ],
-   entry_points={
-       'console_scripts' : ['ldtp = atomac.ldtpd:main'],
-   },
+setup(
+    name='atomac',
+    version=__version__,
+    author='The ATOMac Team',
+    author_email='pyatom-dev@lists.pyatom.com',
+    url='http://pyatom.com',
+    description=("Automated Testing on Mac - test GUI applications "
+                 "written in Cocoa by using Apple's Accessibility API"),
+    license='GPLv2',
+    long_description=read('README.rst'),
+    ext_modules=[_a11y],
+    packages=['atomac', 'atomac.ldtpd', 'atomac.ldtp', 'atomac.ooldtp'],
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: MacOS X :: Cocoa',
+        'License :: OSI Approved :: GNU General Public License (GPL)',
+        'Topic :: Software Development :: Quality Assurance',
+        'Topic :: Software Development :: Testing',
+    ],
+    entry_points={
+        'console_scripts': ['ldtp = atomac.ldtpd:main'],
+    },
 )
