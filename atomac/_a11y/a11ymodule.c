@@ -703,7 +703,9 @@ AXUIElement_getAttributes(atomac_AXUIElement *self)  // IN: Python self object
    err = AXUIElementCopyAttributeNames(self->ref, &attrs);
    if (kAXErrorSuccess != err) {
       _setError(err, "Error retrieving attribute list");
-      CFRelease(attrs);
+      if (NULL != attrs) {
+         CFRelease(attrs);
+      }
       return NULL;
    }
 
