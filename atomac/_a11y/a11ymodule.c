@@ -2000,6 +2000,8 @@ observerCallback(AXObserverRef observer,     // IN: Observer
             Py_XINCREF(tupleItem);
             PyTuple_SetItem(newCallbackArgs, i, tupleItem);
          }
+         /* Don't forget to increment references count for newCallbackArgs */
+         Py_INCREF(newCallbackArgs);
       } else {
          /* Assign callbackArgs to newCallbackArgs to consolidate the args
             passed to PyObject_Call() */
@@ -2009,6 +2011,7 @@ observerCallback(AXObserverRef observer,     // IN: Observer
          temp = newCallbackArgs;
          Py_INCREF(callbackArgs);
          newCallbackArgs = callbackArgs;
+         Py_INCREF(newCallbackArgs);
          Py_CLEAR(temp);
       }
 
