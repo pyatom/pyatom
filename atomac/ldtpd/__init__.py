@@ -46,7 +46,7 @@ class LDTPServer(SimpleXMLRPCServer.SimpleXMLRPCServer):
        SimpleXMLRPCServer.SimpleXMLRPCServer.server_bind(self, *args, **kwargs)
 
 def notifyclient(parentpid):
-    time.sleep(1)
+    time.sleep(0.1)
     os.kill(int(parentpid), signal.SIGUSR1)
 
 def main(port = 4118, parentpid=None):
