@@ -24,9 +24,8 @@
 import os
 import tempfile
 from base64 import b64encode
-from AppKit import *
-from Quartz.CoreGraphics import *
-
+from AppKit import NSPNGFileType, NSMakeRect
+from Quartz.CoreGraphics import CGWindowListCreateImage, CGRectInfinite, CIImage, NSBitmapImageRep
 from utils import Utils
 from server_exception import LdtpServerException
 

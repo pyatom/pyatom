@@ -147,6 +147,8 @@ class ProcessStats(threading.Thread):
         self.running = False
 
 class Utils(object):
+    _singleton_running_apps = None
+
     def __init__(self):
         self._appmap={}
         self._windows={}
@@ -155,14 +157,23 @@ class Utils(object):
         self._callback_event=[]
         self._app_under_test=None
         self._custom_logger=_custom_logger
-        # Current opened applications list will be updated
-        self._running_apps=atomac.NativeUIElement._getRunningApps()
         if os.environ.has_key("LDTP_DEBUG"):
             self._ldtp_debug=True
             self._custom_logger.setLevel(logging.DEBUG)
         else:
             self._ldtp_debug=False
         self._ldtp_debug_file = os.environ.get('LDTP_DEBUG_FILE', None)
+
+    @property
+    def _running_apps(self):
+        if not Utils._singleton_running_apps:
+            apps = atomac.NativeUIElement._getRunningApps()
+            Utils._singleton_running_apps=apps
+        return Utils._singleton_running_apps
+
+    @_running_apps.setter
+    def _running_apps(self, apps):
+       Utils._singleton_running_apps = apps
 
     def _listMethods(self):
         _methods=[]

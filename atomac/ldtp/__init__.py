@@ -161,6 +161,9 @@ class PollLogs(threading.Thread):
     """
     Class to poll logs, NOTE: *NOT* for external use
     """
+
+    sleep_time = 0.1
+
     global _file_logger
     def __init__(self):
         super(PollLogs, self).__init__()
@@ -181,7 +184,7 @@ class PollLogs(threading.Thread):
        """
        try:
           self.alive = False
-          self.join()
+          self.join(self.sleep_time)
        except:
           pass
 
@@ -200,7 +203,8 @@ class PollLogs(threading.Thread):
         if not logger.handlers:
             # If no handlers registered don't call the getlastlog
             # as it will flush out all the logs
-            time.sleep(1)
+
+            time.sleep(self.sleep_time)
             return True
         try:
             message = getlastlog()
@@ -216,7 +220,7 @@ class PollLogs(threading.Thread):
 
         if not message:
             # No log in queue, sleep a second
-            time.sleep(1)
+            time.sleep(self.sleep_time)
             return True
         # Split message type and message
         message_type, message = re.split('-', message, 1)
@@ -278,7 +282,7 @@ class PollEvents(threading.Thread):
         """
         try:
             self.alive = False
-            self.join()
+            self.join(self.sleep_time)
         except:
             pass
 
@@ -296,8 +300,8 @@ class PollEvents(threading.Thread):
     def poll_server(self):
         if not self._callback:
             # If callback not registered, don't proceed further
-            # Sleep a second and then return
-            time.sleep(1)
+            # Sleep a sleep_time and then return
+            time.sleep(self.sleep_time)
             return True
         try:
             event = poll_events()
@@ -307,8 +311,8 @@ class PollEvents(threading.Thread):
             return False
 
         if not event:
-            # No event in queue, sleep a second
-            time.sleep(1)
+            # No event in queue, sleep a sleep_time
+            time.sleep(self.sleep_time)
             return True
 
         # Event format:
