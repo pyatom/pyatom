@@ -636,6 +636,23 @@ class BaseAXUIElement(_a11y.AXUIElement):
                                      callbackArgs,
                                      callbackKwargs)
 
+    def waitForFocusToMatchCriteria(self, timeout=10, **kwargs):
+        """Convenience method to wait for focused element to change
+        (to element matching kwargs criteria).
+
+        Returns: Element or None
+
+        """
+        def _matchFocused(retelem, **kwargs):
+          return retelem if retelem._match(**kwargs) else None
+
+        retelem = None
+        return self._waitFor(timeout, 'AXFocusedUIElementChanged',
+                             callback=_matchFocused,
+                             args=(retelem, ),
+                             **kwargs)
+
+
     def _getActions(self):
         """Retrieve a list of actions supported by the object."""
         actions = _a11y.AXUIElement._getActions(self)
@@ -1232,21 +1249,6 @@ class NativeUIElement(BaseAXUIElement):
                             AXRole=newFocusedElem.AXRole,
                             AXPosition=newFocusedElem.AXPosition)
 
-    def waitForFocusToMatchCriteria(self, timeout=10, **kwargs):
-        """Convenience method to wait for focused element to change
-        (to element matching kwargs criteria).
-
-        Returns: Element or None
-
-        """
-        def _matchFocused(retelem, **kwargs):
-          return retelem if retelem._match(**kwargs) else None
-
-        retelem = None
-        return self.waitFor(timeout, 'AXFocusedUIElementChanged',
-                            callback=_matchFocused,
-                            args=(retelem, ),
-                            **kwargs)
 
     def waitForFocusedWindowToChange(self, nextWinName, timeout=10):
         """Convenience method to wait for focused window to change
