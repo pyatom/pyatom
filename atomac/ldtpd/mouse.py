@@ -1,3 +1,5 @@
+ # -*- coding: utf-8 -*-
+
 # Copyright (c) 2012 VMware, Inc. All Rights Reserved.
 
 # This file is part of ATOMac.
