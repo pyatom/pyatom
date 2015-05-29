@@ -172,7 +172,7 @@ class BaseAXUIElement(_a11y.AXUIElement):
         if arguments is None:
             arguments = []
 
-        bundleUrl = NSURL.URLWithString_(bundlePath)
+        bundleUrl = NSURL.fileURLWithPath_(bundlePath)
         workspace = AppKit.NSWorkspace.sharedWorkspace()
         arguments_strings = map(lambda a: NSString.stringWithString_(str(a)),
                                 arguments)
