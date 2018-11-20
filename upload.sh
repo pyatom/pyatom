@@ -9,5 +9,5 @@ sudo rm -rf $DIR/atomac.egg-info
 
 python setup.py register
 python setup.py sdist upload --sign
-python setup.py bdist_egg upload --sign
+python setup.py bdist_wheel upload --sign
 
