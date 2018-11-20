@@ -225,8 +225,7 @@ class Transport(xmlrpclib.Transport):
 
 class LdtpClient(xmlrpclib.ServerProxy):
     def __init__(self, uri, encoding=None, verbose=0, use_datetime=0):
-        xmlrpclib.ServerProxy.__init__(
-            self, uri, Transport(), encoding, verbose, 1, use_datetime)
+        super(LdtpClient, self).__init__(uri, Transport(), encoding, verbose, 1, use_datetime)
 
     def __getattr__(self, name):
         # magic method dispatcher

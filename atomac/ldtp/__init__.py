@@ -35,9 +35,9 @@ import traceback
 from base64 import b64decode
 from fnmatch import translate as glob_trans
 
-from atomac.ldtp import state
-from atomac.ldtp import client
-from atomac.ldtp.client_exception import LdtpExecutionError
+from . import state
+from . import client
+from .client_exception import LdtpExecutionError
 
 _t = None
 _pollEvents = None
