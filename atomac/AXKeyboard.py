@@ -17,7 +17,7 @@
 
 import Quartz
 
-from AXKeyCodeConstants import *
+from .AXKeyCodeConstants import *
 
 
 # Based on the flags provided in the Quartz documentation it does not seem

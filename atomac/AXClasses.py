@@ -16,18 +16,18 @@
 # St, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import fnmatch
-import AppKit
-import Quartz
 import time
-
-from AppKit import NSURL, NSString, NSDictionary, NSArray
-from PyObjCTools import AppHelper
 from collections import deque
 
+import AppKit
+import Quartz
+from AppKit import NSURL, NSString, NSDictionary, NSArray
+from PyObjCTools import AppHelper
+
 from . import _a11y
-import AXKeyboard
-import AXCallbacks
-import AXKeyCodeConstants
+from . import AXKeyboard
+from . import AXCallbacks
+from . import AXKeyCodeConstants
 
 
 class BaseAXUIElement(_a11y.AXUIElement):
@@ -174,17 +174,14 @@ class BaseAXUIElement(_a11y.AXUIElement):
 
         bundleUrl = NSURL.fileURLWithPath_(bundlePath)
         workspace = AppKit.NSWorkspace.sharedWorkspace()
-        arguments_strings = map(lambda a: NSString.stringWithString_(str(a)),
-                                arguments)
-        arguments = NSDictionary.dictionaryWithDictionary_({
-            AppKit.NSWorkspaceLaunchConfigurationArguments: NSArray.arrayWithArray_(
-                arguments_strings)
-        })
+        configuration = {
+            AppKit.NSWorkspaceLaunchConfigurationArguments: arguments
+        }
 
         return workspace.launchApplicationAtURL_options_configuration_error_(
             bundleUrl,
             AppKit.NSWorkspaceLaunchAllowingClassicStartup,
-            arguments,
+            configuration,
             None)
 
     @staticmethod
@@ -287,10 +284,8 @@ class BaseAXUIElement(_a11y.AXUIElement):
 
         # Post the event to the given app
         if not globally:
-            # To direct output to the correct application need the PSN:
-            appPsn = self._getPsnForPid(self._getPid())
-            self._queueEvent(Quartz.CGEventPostToPSN, (appPsn, keyDown))
-            self._queueEvent(Quartz.CGEventPostToPSN, (appPsn, keyUp))
+            self._queueEvent(Quartz.CGEventPostToPid, (self._getPid(), keyDown))
+            self._queueEvent(Quartz.CGEventPostToPid, (self._getPid(), keyUp))
         else:
             self._queueEvent(Quartz.CGEventPost, (0, keyDown))
             self._queueEvent(Quartz.CGEventPost, (0, keyUp))
@@ -356,9 +351,8 @@ class BaseAXUIElement(_a11y.AXUIElement):
             if globally:
                 self._queueEvent(Quartz.CGEventPost, (0, modEvent))
             else:
-                # To direct output to the correct application need the PSN:
-                appPsn = self._getPsnForPid(self._getPid())
-                self._queueEvent(Quartz.CGEventPostToPSN, (appPsn, modEvent))
+                self._queueEvent(Quartz.CGEventPostToPid, (self._getPid(), modEvent))
+
             # Add the modifier flags
             modFlags += AXKeyboard.modKeyFlagConstants[nextMod]
 
@@ -522,15 +516,10 @@ class BaseAXUIElement(_a11y.AXUIElement):
                   action from some special requirement
         Returns: None
         """
-        # To direct output to the correct application need the PSN:
-        appPsn = self._getPsnForPid(self._getPid())
         # Get current position as start point if strCoord not given
         if strCoord == (0, 0):
             loc = AppKit.NSEvent.mouseLocation()
             strCoord = (loc.x, Quartz.CGDisplayPixelsHigh(0) - loc.y)
-
-        # To direct output to the correct application need the PSN:
-        appPsn = self._getPsnForPid(self._getPid())
 
         # Press left button down
         pressLeftButton = Quartz.CGEventCreateMouseEvent(
@@ -703,8 +692,8 @@ class BaseAXUIElement(_a11y.AXUIElement):
             except _a11y.Error:
                 return False
             # Not all values may be strings (e.g. size, position)
-            if isinstance(val, basestring):
-                if not fnmatch.fnmatch(unicode(val), kwargs[k]):
+            if isinstance(val, str):
+                if not fnmatch.fnmatch(val, kwargs[k]):
                     return False
             else:
                 if val != kwargs[k]:
@@ -1248,7 +1237,6 @@ class NativeUIElement(BaseAXUIElement):
         return self.waitFor(timeout, 'AXFocusedUIElementChanged',
                             AXRole=newFocusedElem.AXRole,
                             AXPosition=newFocusedElem.AXPosition)
-
 
     def waitForFocusedWindowToChange(self, nextWinName, timeout=10):
         """Convenience method to wait for focused window to change
