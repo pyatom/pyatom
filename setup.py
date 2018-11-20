@@ -44,7 +44,13 @@ setup(
     license='GPLv2',
     long_description=read('README.rst'),
     packages=['atomac', 'atomac.ldtpd', 'atomac.ldtp', 'atomac.ooldtp'],
-    install_requires=['pyobjc-core>=2.3', 'pyobjc-framework-Cocoa>=2.3', 'pyobjc-framework-Quartz>=2.3'],
+    install_requires=[
+        'pyobjc-core>=2.3',
+        'pyobjc-framework-Cocoa>=2.3',
+        'pyobjc-framework-Quartz>=2.3',
+        'pyobjc-framework-ApplicationServices',
+        'pyobjc-framework-CoreText',
+    ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: MacOS X :: Cocoa',
