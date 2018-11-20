@@ -15,7 +15,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # St, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from setuptools import setup, Extension
+from setuptools import setup
 import os
 
 # set __version__ variable
@@ -33,21 +33,6 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 
-source_files = [
-    'atomac/_a11y/a11ymodule.c',
-    'atomac/_a11y/conversion.c',
-    'atomac/_a11y/axlib.c',
-]
-
-_a11y = Extension(
-    'atomac._a11y',
-    sources=source_files,
-    extra_link_args=[
-        '-framework', 'ApplicationServices',
-        '-framework', 'Carbon',
-    ],
-)
-
 setup(
     name='atomac',
     version=__version__,
@@ -58,7 +43,6 @@ setup(
                  "written in Cocoa by using Apple's Accessibility API"),
     license='GPLv2',
     long_description=read('README.rst'),
-    ext_modules=[_a11y],
     packages=['atomac', 'atomac.ldtpd', 'atomac.ldtp', 'atomac.ooldtp'],
     install_requires=['pyobjc-core>=2.3', 'pyobjc-framework-Cocoa>=2.3', 'pyobjc-framework-Quartz>=2.3'],
     classifiers=[
