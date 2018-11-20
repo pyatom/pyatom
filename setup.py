@@ -45,11 +45,11 @@ setup(
     long_description=read('README.rst'),
     packages=['atomac', 'atomac.ldtpd', 'atomac.ldtp', 'atomac.ooldtp'],
     install_requires=[
-        'pyobjc-core',
-        'pyobjc-framework-Cocoa',
-        'pyobjc-framework-Quartz',
-        'pyobjc-framework-ApplicationServices',
-        'pyobjc-framework-CoreText',
+        'pyobjc-core>=5.1.1',
+        'pyobjc-framework-Cocoa>=5.1.1',
+        'pyobjc-framework-Quartz>=5.1.1',
+        'pyobjc-framework-ApplicationServices>=5.1.1',
+        'pyobjc-framework-CoreText>=5.1.1',
         'future',
     ],
     classifiers=[
