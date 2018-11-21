@@ -200,8 +200,8 @@ class Clipboard(object):
             # data type from the pasteboard)
             its_empty = not bool(pb.canReadObjectForClasses_options_(datatype,
                                                                      opt_dict))
-        except ValueError, error:
-            logging.error(error)
+        except ValueError as error:
+            logging.exception(error)
             raise
 
         return bool(its_empty)

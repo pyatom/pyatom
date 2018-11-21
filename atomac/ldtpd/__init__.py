@@ -23,11 +23,11 @@
 
 import os
 import sys
-import core
+from . import core
 import time
 import signal
 import socket
-import thread
+import threading as thread
 import traceback
 import SimpleXMLRPCServer
 from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
@@ -70,7 +70,10 @@ def main(port = 4118, parentpid=None):
         pass
     except:
         if _ldtp_debug:
-            print traceback.format_exc()
+            print(traceback.format_exc())
         if _ldtp_debug_file:
             with open(_ldtp_debug_file, "a") as fp:
                 fp.write(traceback.format_exc())
+
+def __main__():
+    main()

@@ -727,7 +727,7 @@ class Utils(object):
                     menu_handle.Press()
                 except atomac._a11y.ErrorCannotComplete:
                     if self._ldtp_debug:
-                        print traceback.format_exc()
+                        print(traceback.format_exc())
                     if self._ldtp_debug_file:
                         with open(self._ldtp_debug_file, "a") as fp:
                             fp.write(traceback.format_exc())

@@ -16,13 +16,26 @@
 # St, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # noinspection PyUnresolvedReferences
-from _a11y import Error, ErrorAPIDisabled, ErrorInvalidUIElement, \
-    ErrorCannotComplete, ErrorUnsupported, ErrorNotImplemented
-from AXClasses import NativeUIElement
-from Clipboard import Clipboard
-from version import __version__
-from Prefs import Prefs
+from future import standard_library
+standard_library.install_aliases()
 
+from . import _a11y
+from .AXClasses import NativeUIElement
+from .Clipboard import Clipboard
+from .Prefs import Prefs
+from .version import __version__
+
+# Exceptions
+Error = _a11y.Error
+ErrorAPIDisabled = _a11y.ErrorAPIDisabled
+ErrorInvalidUIElement = _a11y.ErrorInvalidUIElement
+ErrorCannotComplete = _a11y.ErrorCannotComplete
+ErrorUnsupported = _a11y.ErrorUnsupported
+ErrorNotImplemented = _a11y.ErrorNotImplemented
+
+Prefs = Prefs
+__version__ = __version__
+Clipboard = Clipboard
 
 getAppRefByLocalizedName = NativeUIElement.getAppRefByLocalizedName
 terminateAppByBundleId = NativeUIElement.terminateAppByBundleId
