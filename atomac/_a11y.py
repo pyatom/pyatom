@@ -36,7 +36,7 @@ def _CFAttributeToPyObject(self, attrValue):
         CFBooleanGetTypeID(): bool,
         CFArrayGetTypeID(): list_helper,
         CFNumberGetTypeID(): number_helper,
-        AXUIElementGetTypeID(): axuielement_helper, #self.with_ref(attrValue)
+        AXUIElementGetTypeID(): axuielement_helper,
     }
     try:
         return cf_type_mapping[cf_attr_type](attrValue)
@@ -56,7 +56,6 @@ def _CFAttributeToPyObject(self, attrValue):
         raise ErrorUnsupported('Return value not supported yet: {}'.format(ax_attr_type))
 
 def _sigHandler(sig):
-    # CFRunLoopStop(CFRunLoopGetCurrent())
     AppHelper.stopEventLoop()
     raise KeyboardInterrupt('Keyboard interrupted Run Loop')
 
@@ -147,7 +146,6 @@ class AXUIElement(object):
         )
 
         # Set the signal handlers prior to running the run loop
-        # oldSigIntHandler = signal(SIGINT, _sigHandler)
         oldSigIntHandler = MachSignals.signal(signal.SIGINT, _sigHandler)
         # If an error occurs (return value is SIG_ERR), continue as it's not fatal
         AppHelper.runConsoleEventLoop(
@@ -372,13 +370,11 @@ def observerCallback(cls, element, contextData):
             raise RuntimeError('Python callback failed.')
 
         if callbackRes in (-1, 1):
-            # CFRunLoopStop(CFRunLoopGetCurrent())
             AppHelper.stopEventLoop()
 
         temp = axObj.observerRes
         axObj.observerRes = callbackRes
     else:
-        # CFRunLoopStop(CFRunLoopGetCurrent())
         AppHelper.stopEventLoop()
         temp = axObj.observerRes
         axObj.observerRes = True
