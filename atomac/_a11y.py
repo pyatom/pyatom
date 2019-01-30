@@ -1,62 +1,14 @@
 import objc
-import logging
 import re
 import signal
 import Cocoa
-from collections import namedtuple
 from CoreFoundation import *
 from ApplicationServices import *
 from PyObjCTools import AppHelper, MachSignals
 
-logger = logging.getLogger(__name__)
-
 """
 Library of Apple A11y functions
 """
-def axvalue_to_pytuple(axvalueref):
-    """
-    Original this project was using AXValueGetValue to get the value and
-    create a tuple representation of AXValue.
-
-    pyobjc: "AXValueGetValue is not yet supported"
-    (https://pythonhosted.org/pyobjc/apinotes/ApplicationServices.html)
-
-    Workaround by parsing the string representation of an AXValueRef object
-
-    :param axvalueref: the AXValueRef object from AXUIElementCopyAttributeValue
-    :return: python tuple representation of the axvalue
-    """
-    logger.debug('AXValueRef: %s' % axvalueref)
-    extracted_str = re.search('{(.*)}', str(axvalueref)).group(1)
-
-    # combine '=' with key to help identify a key when tokenizing
-    massaged_str = extracted_str.replace(' =', '=')
-    tokens = massaged_str.split(' ')
-
-    axvalue = dict()
-    current_key = None
-
-    for token in tokens:
-        if token[-1] == '=':
-            current_key = token[:-1]
-            axvalue[current_key] = dict()
-        else:
-            try:
-                key, value = token.split(':')
-                axvalue[current_key][key] = float(value)
-            except ValueError:
-                axvalue[current_key] = token
-
-    AXValueType = namedtuple(
-        typename=axvalue['type'].replace('kAXValue', ''),
-        field_names=axvalue['value'].keys()
-    )
-
-    result = AXValueType(**axvalue['value'])
-
-    logger.debug('AXValue: %s\nPyTuple: %s' % (axvalueref, result))
-    return result
-
 def _CFAttributeToPyObject(self, attrValue):
     def list_helper(list_value):
         list_builder = []
@@ -94,12 +46,13 @@ def _CFAttributeToPyObject(self, attrValue):
 
     ax_attr_type = AXValueGetType(attrValue)
     ax_type_map = {
-        kAXValueCGSizeType: axvalue_to_pytuple,
-        kAXValueCGPointType: axvalue_to_pytuple,
-        kAXValueCFRangeType: axvalue_to_pytuple,
+        kAXValueCGSizeType: NSSizeFromString,
+        kAXValueCGPointType: NSPointFromString,
+        kAXValueCFRangeType: NSRangeFromString,
     }
     try:
-        return ax_type_map[ax_attr_type](attrValue)
+        extracted_str = re.search('{.*}', attrValue.description()).group()
+        return tuple(ax_type_map[ax_attr_type](extracted_str))
     except KeyError:
         raise ErrorUnsupported('Return value not supported yet: {}'.format(ax_attr_type))
 
