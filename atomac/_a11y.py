@@ -1,4 +1,5 @@
 import objc
+import re
 import signal
 import Cocoa
 from CoreFoundation import *
@@ -8,7 +9,6 @@ from PyObjCTools import AppHelper, MachSignals
 """
 Library of Apple A11y functions
 """
-
 def _CFAttributeToPyObject(self, attrValue):
     def list_helper(list_value):
         list_builder = []
@@ -46,12 +46,13 @@ def _CFAttributeToPyObject(self, attrValue):
 
     ax_attr_type = AXValueGetType(attrValue)
     ax_type_map = {
-        kAXValueCGSizeType: tuple,
-        kAXValueCGPointType: tuple,
-        kAXValueCFRangeType: tuple,
+        kAXValueCGSizeType: NSSizeFromString,
+        kAXValueCGPointType: NSPointFromString,
+        kAXValueCFRangeType: NSRangeFromString,
     }
     try:
-        return ax_type_map[ax_attr_type](attrValue)
+        extracted_str = re.search('{.*}', attrValue.description()).group()
+        return tuple(ax_type_map[ax_attr_type](extracted_str))
     except KeyError:
         raise ErrorUnsupported('Return value not supported yet: {}'.format(ax_attr_type))
 
